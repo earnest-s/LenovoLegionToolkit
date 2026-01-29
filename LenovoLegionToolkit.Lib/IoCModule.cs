@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using LenovoLegionToolkit.Lib.AutoListeners;
 using LenovoLegionToolkit.Lib.Controllers;
+using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
 using LenovoLegionToolkit.Lib.Controllers.GodMode;
 using LenovoLegionToolkit.Lib.Controllers.Sensors;
 using LenovoLegionToolkit.Lib.Extensions;
@@ -115,6 +116,7 @@ public class IoCModule : Module
         builder.Register<GPUController>();
         builder.Register<GPUOverclockController>();
         builder.Register<RGBKeyboardBacklightController>();
+        builder.Register<CustomRGBEffectController>();
         builder.Register<SensorsController>();
         builder.Register<SensorsControllerV1>(true);
         builder.Register<SensorsControllerV2>(true);

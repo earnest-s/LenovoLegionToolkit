@@ -163,8 +163,8 @@ public partial class RGBKeyboardBacklightControl
 
         var preset = state.Presets.GetValueOrDefault(state.SelectedPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
-        var speedEnabled = preset.Effect is not RGBKeyboardBacklightEffect.Static;
-        var zonesEnabled = preset.Effect is RGBKeyboardBacklightEffect.Static or RGBKeyboardBacklightEffect.Breath;
+        var speedEnabled = preset.Effect.SupportsSpeed();
+        var zonesEnabled = preset.Effect.SupportsZoneColors();
 
         _brightnessControl.SetItems(Enum.GetValues<RGBKeyboardBacklightBrightness>(), preset.Brightness, v => v.GetDisplayName());
         _effectControl.SetItems(Enum.GetValues<RGBKeyboardBacklightEffect>(), preset.Effect, v => v.GetDisplayName());

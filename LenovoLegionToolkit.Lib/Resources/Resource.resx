@@ -279,6 +279,50 @@
   <data name="RGBKeyboardBacklightEffect_Smooth" xml:space="preserve">
     <value>Smooth</value>
   </data>
+  <data name="RGBKeyboardBacklightEffect_Disco" xml:space="preserve">
+    <value>Disco</value>
+    <comment>Random zone color cycling effect ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Swipe" xml:space="preserve">
+    <value>Swipe</value>
+    <comment>Color swipe across zones effect ported from L5P-Keyboard-RGB (Change mode)</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_SwipeFill" xml:space="preserve">
+    <value>Swipe Fill</value>
+    <comment>Color swipe with sequential zone fill ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_SwipeCleanWithBlack" xml:space="preserve">
+    <value>Swipe Clean</value>
+    <comment>Color swipe with zone fill and black clear ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Lightning" xml:space="preserve">
+    <value>Lightning</value>
+    <comment>Random lightning flashes effect ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Christmas" xml:space="preserve">
+    <value>Christmas</value>
+    <comment>Holiday-themed animation effect ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Temperature" xml:space="preserve">
+    <value>Temperature</value>
+    <comment>CPU temperature-based color effect ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_RainbowWave" xml:space="preserve">
+    <value>Rainbow Wave</value>
+    <comment>Rainbow color wave effect with smooth transitions</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Fade" xml:space="preserve">
+    <value>Fade</value>
+    <comment>Fade to black on keyboard inactivity effect ported from L5P-Keyboard-RGB</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Ripple" xml:space="preserve">
+    <value>Ripple</value>
+    <comment>Ripple effect on keypress ported from L5P-Keyboard-RGB (zone-based approximation)</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Ambient" xml:space="preserve">
+    <value>Ambient</value>
+    <comment>Ambient screen color sync effect ported from L5P-Keyboard-RGB</comment>
+  </data>
   <data name="RGBKeyboardBacklightEffect_Static" xml:space="preserve">
     <value>Static</value>
   </data>

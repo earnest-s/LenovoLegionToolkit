@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
+using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects.SignalProviders;
+using LenovoLegionToolkit.Lib.Controllers.Sensors;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
@@ -16,7 +19,11 @@ using Windows.Win32;
 
 namespace LenovoLegionToolkit.Lib.Controllers
 {
-    public class RGBKeyboardBacklightController(RGBKeyboardSettings settings, VantageDisabler vantageDisabler)
+    public class RGBKeyboardBacklightController(
+        RGBKeyboardSettings settings,
+        VantageDisabler vantageDisabler,
+        CustomRGBEffectController customEffectController,
+        ISensorsController sensorsController)
     {
         private static readonly AsyncLock IoLock = new();
 
@@ -121,24 +128,33 @@ namespace LenovoLegionToolkit.Lib.Controllers
                     Log.Instance.Trace($"Selected preset: {selectedPreset}");
 
                 LENOVO_RGB_KEYBOARD_STATE str;
+                RGBKeyboardBacklightBacklightPresetDescription presetDescription;
+
                 if (selectedPreset == RGBKeyboardBacklightPreset.Off)
                 {
                     if (Log.Instance.IsTraceEnabled)
                         Log.Instance.Trace($"Creating off state.");
 
                     str = CreateOffState();
-                }
-                else
-                {
-                    var presetDescription = state.Presets.GetValueOrDefault(selectedPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
-                    if (Log.Instance.IsTraceEnabled)
-                        Log.Instance.Trace($"Creating state: {presetDescription}");
+                    // Stop any custom effect when turning off
+                    await customEffectController.StopEffectAsync().ConfigureAwait(false);
 
-                    str = Convert(presetDescription);
+                    await SendToDevice(str).ConfigureAwait(false);
+                    return;
                 }
+
+                presetDescription = state.Presets.GetValueOrDefault(selectedPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"Creating state: {presetDescription}");
+
+                str = Convert(presetDescription);
 
                 await SendToDevice(str).ConfigureAwait(false);
+
+                // Start custom effect if applicable
+                await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
             }
         }
 
@@ -162,24 +178,33 @@ namespace LenovoLegionToolkit.Lib.Controllers
                     Log.Instance.Trace($"Preset is {preset}.");
 
                 LENOVO_RGB_KEYBOARD_STATE str;
+                RGBKeyboardBacklightBacklightPresetDescription presetDescription;
+
                 if (preset == RGBKeyboardBacklightPreset.Off)
                 {
                     if (Log.Instance.IsTraceEnabled)
                         Log.Instance.Trace($"Creating off state.");
 
                     str = CreateOffState();
-                }
-                else
-                {
-                    var presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
-                    if (Log.Instance.IsTraceEnabled)
-                        Log.Instance.Trace($"Creating state: {presetDescription}");
+                    // Stop any custom effect when turning off
+                    await customEffectController.StopEffectAsync().ConfigureAwait(false);
 
-                    str = Convert(presetDescription);
+                    await SendToDevice(str).ConfigureAwait(false);
+                    return;
                 }
+
+                presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"Creating state: {presetDescription}");
+
+                str = Convert(presetDescription);
 
                 await SendToDevice(str).ConfigureAwait(false);
+
+                // Start custom effect if applicable
+                await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
             }
         }
 
@@ -205,24 +230,33 @@ namespace LenovoLegionToolkit.Lib.Controllers
                     Log.Instance.Trace($"New preset is {newPreset}.");
 
                 LENOVO_RGB_KEYBOARD_STATE str;
+                RGBKeyboardBacklightBacklightPresetDescription presetDescription;
+
                 if (newPreset == RGBKeyboardBacklightPreset.Off)
                 {
                     if (Log.Instance.IsTraceEnabled)
                         Log.Instance.Trace($"Creating off state.");
 
                     str = CreateOffState();
-                }
-                else
-                {
-                    var presetDescription = state.Presets.GetValueOrDefault(newPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
-                    if (Log.Instance.IsTraceEnabled)
-                        Log.Instance.Trace($"Creating state: {presetDescription}");
+                    // Stop any custom effect when turning off
+                    await customEffectController.StopEffectAsync().ConfigureAwait(false);
 
-                    str = Convert(presetDescription);
+                    await SendToDevice(str).ConfigureAwait(false);
+                    return newPreset;
                 }
+
+                presetDescription = state.Presets.GetValueOrDefault(newPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"Creating state: {presetDescription}");
+
+                str = Convert(presetDescription);
 
                 await SendToDevice(str).ConfigureAwait(false);
+
+                // Start custom effect if applicable
+                await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
 
                 return newPreset;
             }
@@ -244,24 +278,33 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 Log.Instance.Trace($"Current preset is {preset}.");
 
             LENOVO_RGB_KEYBOARD_STATE str;
+            RGBKeyboardBacklightBacklightPresetDescription presetDescription;
+
             if (preset == RGBKeyboardBacklightPreset.Off)
             {
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Creating off state.");
 
                 str = CreateOffState();
-            }
-            else
-            {
-                var presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
-                if (Log.Instance.IsTraceEnabled)
-                    Log.Instance.Trace($"Creating state: {presetDescription}");
+                // Stop any custom effect when turning off
+                await customEffectController.StopEffectAsync().ConfigureAwait(false);
 
-                str = Convert(presetDescription);
+                await SendToDevice(str).ConfigureAwait(false);
+                return;
             }
+
+            presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"Creating state: {presetDescription}");
+
+            str = Convert(presetDescription);
 
             await SendToDevice(str).ConfigureAwait(false);
+
+            // Start custom effect if applicable
+            await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
         }
 
         private async Task ThrowIfVantageEnabled()
@@ -313,6 +356,9 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
         private static LENOVO_RGB_KEYBOARD_STATE Convert(RGBKeyboardBacklightBacklightPresetDescription preset)
         {
+            // For custom effects, use Static mode as base - the CustomRGBEffectController handles the animation
+            var effectForHardware = preset.Effect.IsCustomEffect() ? RGBKeyboardBacklightEffect.Static : preset.Effect;
+
             var result = new LENOVO_RGB_KEYBOARD_STATE
             {
                 Header = [0xCC, 0x16],
@@ -322,17 +368,17 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 Zone2Rgb = [0xFF, 0xFF, 0xFF],
                 Zone3Rgb = [0xFF, 0xFF, 0xFF],
                 Zone4Rgb = [0xFF, 0xFF, 0xFF],
-                Effect = preset.Effect switch
+                Effect = effectForHardware switch
                 {
                     RGBKeyboardBacklightEffect.Static => 1,
                     RGBKeyboardBacklightEffect.Breath => 3,
                     RGBKeyboardBacklightEffect.WaveRTL => 4,
                     RGBKeyboardBacklightEffect.WaveLTR => 4,
                     RGBKeyboardBacklightEffect.Smooth => 6,
-                    _ => 0
+                    _ => 1 // Default to static for custom effects
                 },
-                WaveRTL = (byte)(preset.Effect == RGBKeyboardBacklightEffect.WaveRTL ? 1 : 0),
-                WaveLTR = (byte)(preset.Effect == RGBKeyboardBacklightEffect.WaveLTR ? 1 : 0),
+                WaveRTL = (byte)(effectForHardware == RGBKeyboardBacklightEffect.WaveRTL ? 1 : 0),
+                WaveLTR = (byte)(effectForHardware == RGBKeyboardBacklightEffect.WaveLTR ? 1 : 0),
                 Brightness = preset.Brightness switch
                 {
                     RGBKeyboardBacklightBrightness.Low => 1,
@@ -342,7 +388,7 @@ namespace LenovoLegionToolkit.Lib.Controllers
             };
 
 
-            if (preset.Effect != RGBKeyboardBacklightEffect.Static)
+            if (effectForHardware != RGBKeyboardBacklightEffect.Static)
             {
                 result.Speed = preset.Speed switch
                 {
@@ -354,7 +400,7 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 };
             }
 
-            if (preset.Effect is RGBKeyboardBacklightEffect.Static or RGBKeyboardBacklightEffect.Breath)
+            if (effectForHardware is RGBKeyboardBacklightEffect.Static or RGBKeyboardBacklightEffect.Breath)
             {
                 result.Zone1Rgb = [preset.Zone1.R, preset.Zone1.G, preset.Zone1.B];
                 result.Zone2Rgb = [preset.Zone2.R, preset.Zone2.G, preset.Zone2.B];
@@ -363,6 +409,82 @@ namespace LenovoLegionToolkit.Lib.Controllers
             }
 
             return result;
+        }
+
+        private async Task HandleCustomEffectAsync(RGBKeyboardBacklightBacklightPresetDescription preset)
+        {
+            // Stop any running custom effect first
+            await customEffectController.StopEffectAsync().ConfigureAwait(false);
+
+            if (!preset.Effect.IsCustomEffect())
+                return;
+
+            var customEffectType = preset.Effect.ToCustomEffectType();
+            if (customEffectType is null)
+                return;
+
+            // Set brightness from preset (1=Low, 2=High) - must be set before starting effect
+            customEffectController.CurrentBrightness = preset.Brightness switch
+            {
+                RGBKeyboardBacklightBrightness.Low => 1,
+                RGBKeyboardBacklightBrightness.High => 2,
+                _ => 2
+            };
+
+            // Create zone colors from preset
+            var zoneColors = new ZoneColors
+            {
+                Zone1 = preset.Zone1,
+                Zone2 = preset.Zone2,
+                Zone3 = preset.Zone3,
+                Zone4 = preset.Zone4
+            };
+
+            // Map speed (1-4) from RGBKeyboardBacklightSpeed
+            var speed = preset.Speed switch
+            {
+                RGBKeyboardBacklightSpeed.Slowest => 1,
+                RGBKeyboardBacklightSpeed.Slow => 2,
+                RGBKeyboardBacklightSpeed.Fast => 3,
+                RGBKeyboardBacklightSpeed.Fastest => 4,
+                _ => 2
+            };
+
+            // Create input/screen providers for effects that need them
+            IInputSignalProvider? inputProvider = null;
+            IScreenColorProvider? screenProvider = null;
+
+            if (preset.Effect.RequiresInputProvider())
+                inputProvider = CustomRGBEffectFactory.CreateInputProvider();
+
+            if (preset.Effect.RequiresScreenProvider())
+                screenProvider = CustomRGBEffectFactory.CreateScreenProvider();
+
+            try
+            {
+                var effect = CustomRGBEffectFactory.CreateByType(
+                    customEffectType.Value,
+                    zoneColors,
+                    speed,
+                    EffectDirection.Right,
+                    sensorsController,
+                    inputProvider,
+                    screenProvider);
+
+                await customEffectController.StartEffectAsync(effect).ConfigureAwait(false);
+
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"Started custom effect: {customEffectType}");
+            }
+            catch (Exception ex)
+            {
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"Failed to start custom effect {customEffectType}", ex);
+
+                // Clean up providers on failure
+                inputProvider?.Dispose();
+                screenProvider?.Dispose();
+            }
         }
     }
 }

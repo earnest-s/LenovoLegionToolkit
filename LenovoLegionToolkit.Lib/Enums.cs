@@ -405,6 +405,7 @@ public enum RGBKeyboardBacklightBrightness
 
 public enum RGBKeyboardBacklightEffect
 {
+    // Hardware effects (firmware-driven)
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Static")]
     Static,
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Breath")]
@@ -414,7 +415,31 @@ public enum RGBKeyboardBacklightEffect
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_WaveRTL")]
     WaveRTL,
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_WaveLTR")]
-    WaveLTR
+    WaveLTR,
+
+    // Custom software effects (ported from L5P-Keyboard-RGB)
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Disco")]
+    Disco = 100,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Swipe")]
+    Swipe,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_SwipeFill")]
+    SwipeFill,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_SwipeCleanWithBlack")]
+    SwipeCleanWithBlack,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Lightning")]
+    Lightning,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Christmas")]
+    Christmas,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Temperature")]
+    Temperature,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_RainbowWave")]
+    RainbowWave,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Fade")]
+    Fade,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Ripple")]
+    Ripple,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Ambient")]
+    Ambient
 }
 
 public enum RGBKeyboardBacklightPreset
@@ -441,6 +466,62 @@ public enum RGBKeyboardBacklightSpeed
     Fast,
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightSpeed_Fastest")]
     Fastest
+}
+
+/// <summary>
+/// Custom RGB effect types.
+/// Ported from L5P-Keyboard-RGB (Rust) effects.
+/// </summary>
+public enum CustomRGBEffectType
+{
+    /// <summary>
+    /// Random zone color cycling (disco.rs)
+    /// </summary>
+    Disco,
+    /// <summary>
+    /// Color swipe across zones - Change mode (swipe.rs)
+    /// </summary>
+    Swipe,
+    /// <summary>
+    /// Color swipe across zones - Fill mode (swipe.rs)
+    /// </summary>
+    SwipeFill,
+    /// <summary>
+    /// Color swipe across zones - Fill with black clear (swipe.rs)
+    /// </summary>
+    SwipeCleanWithBlack,
+    /// <summary>
+    /// Random lightning flashes (lightning.rs)
+    /// </summary>
+    Lightning,
+    /// <summary>
+    /// Holiday-themed animation (christmas.rs)
+    /// </summary>
+    Christmas,
+    /// <summary>
+    /// CPU temperature-based color (temperature.rs)
+    /// </summary>
+    Temperature,
+    /// <summary>
+    /// Rainbow color wave - smooth transitions
+    /// </summary>
+    RainbowWave,
+    /// <summary>
+    /// Fade to black on keyboard inactivity (fade.rs)
+    /// Requires IInputSignalProvider - input-reactive effect
+    /// </summary>
+    Fade,
+    /// <summary>
+    /// Ripple effect on keypress (ripple.rs)
+    /// HARDWARE LIMITED: Zone-based approximation, not true per-key ripple
+    /// Requires IInputSignalProvider - input-reactive effect
+    /// </summary>
+    Ripple,
+    /// <summary>
+    /// Ambient screen color sync (ambient.rs)
+    /// Requires IScreenColorProvider - external signal effect
+    /// </summary>
+    Ambient
 }
 
 public enum SpeakerState
