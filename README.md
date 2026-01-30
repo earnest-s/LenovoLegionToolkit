@@ -40,6 +40,7 @@ _Join the Legion Series Discord: https://discord.com/invite/legionseries!_
   - [Features](#features)
   - [Donate](#donate)
   - [Credits](#credits)
+    - [Contributors](#contributors)
   - [FAQ](#faq)
   - [Arguments](#arguments)
   - [How to collect logs?](#how-to-collect-logs)
@@ -378,6 +379,23 @@ If you enjoy using the Lenovo Legion Toolkit, consider donating.
 <img src="LenovoLegionToolkit.WPF/Assets/Donate/paypal_qr.png" width="200" alt="PayPal QR code" />
 
 ## Credits
+
+### Contributors
+
+| Contributor | Commits |
+|-------------|---------|
+| [Bartosz Cichecki](https://github.com/BartoszCichecki) | 2644 |
+| [凌卡Karl](https://github.com/KarlLee830) | 28 |
+| [Mario Bălănică](https://github.com/mariobalanica) | 27 |
+| [Sichen Lyu](https://github.com/Ace-Radom) | 24 |
+| [Karl Lee](https://github.com/KarlLee830) | 17 |
+| [Stefan](https://github.com/Stefan) | 7 |
+| [Earnest S](https://github.com/earnest-s) | 7 |
+| [Lenus Walker](https://github.com/LenusWalker) | 6 |
+| [Sam Wilde](https://github.com/SamWilde) | 4 |
+| [Eric-lHHI](https://github.com/Eric-lHHI) | 3 |
+| [shockdude](https://github.com/shockdude) | 2 |
+| And many more amazing contributors! | |
 
 Special thanks to:
 
