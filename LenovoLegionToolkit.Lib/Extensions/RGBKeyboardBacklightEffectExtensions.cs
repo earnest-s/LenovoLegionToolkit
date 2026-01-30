@@ -24,6 +24,9 @@ public static class RGBKeyboardBacklightEffectExtensions
         RGBKeyboardBacklightEffect.Fade => true,
         RGBKeyboardBacklightEffect.Ripple => true,
         RGBKeyboardBacklightEffect.Ambient => true,
+        RGBKeyboardBacklightEffect.BreathingColorCycle => true,
+        RGBKeyboardBacklightEffect.Strobe => true,
+        RGBKeyboardBacklightEffect.AudioVisualizer => true,
         _ => false
     };
 
@@ -64,6 +67,8 @@ public static class RGBKeyboardBacklightEffectExtensions
         RGBKeyboardBacklightEffect.Lightning => true,
         RGBKeyboardBacklightEffect.Fade => true,
         RGBKeyboardBacklightEffect.Ripple => true,
+        RGBKeyboardBacklightEffect.Strobe => true,
+        RGBKeyboardBacklightEffect.AudioVisualizer => true,
         _ => false
     };
 
@@ -84,6 +89,9 @@ public static class RGBKeyboardBacklightEffectExtensions
         RGBKeyboardBacklightEffect.RainbowWave => true,
         RGBKeyboardBacklightEffect.Fade => true,
         RGBKeyboardBacklightEffect.Ripple => true,
+        RGBKeyboardBacklightEffect.BreathingColorCycle => true,
+        RGBKeyboardBacklightEffect.Strobe => true,
+        RGBKeyboardBacklightEffect.AudioVisualizer => true,
         _ => false
     };
 
@@ -104,6 +112,9 @@ public static class RGBKeyboardBacklightEffectExtensions
         RGBKeyboardBacklightEffect.Fade => CustomRGBEffectType.Fade,
         RGBKeyboardBacklightEffect.Ripple => CustomRGBEffectType.Ripple,
         RGBKeyboardBacklightEffect.Ambient => CustomRGBEffectType.Ambient,
+        RGBKeyboardBacklightEffect.BreathingColorCycle => CustomRGBEffectType.BreathingColorCycle,
+        RGBKeyboardBacklightEffect.Strobe => CustomRGBEffectType.Strobe,
+        RGBKeyboardBacklightEffect.AudioVisualizer => CustomRGBEffectType.AudioVisualizer,
         _ => null
     };
 }

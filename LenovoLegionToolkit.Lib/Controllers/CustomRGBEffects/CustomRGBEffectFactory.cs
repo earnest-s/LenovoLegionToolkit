@@ -133,6 +133,33 @@ public static class CustomRGBEffectFactory
         => new(screenProvider);
 
     /// <summary>
+    /// Creates a Breathing Color Cycle effect.
+    /// Colors change on each breath cycle.
+    /// </summary>
+    /// <param name="zoneColors">Base zone colors.</param>
+    /// <param name="speed">Speed 1-4.</param>
+    public static BreathingColorCycleEffect CreateBreathingColorCycle(ZoneColors? zoneColors = null, int speed = 2)
+        => new(zoneColors, speed);
+
+    /// <summary>
+    /// Creates a Strobe effect (ASUS ROG-style).
+    /// Rapid on/off flashing.
+    /// </summary>
+    /// <param name="zoneColors">Zone colors to flash.</param>
+    /// <param name="speed">Speed 1-4.</param>
+    public static StrobeEffect CreateStrobe(ZoneColors? zoneColors = null, int speed = 2)
+        => new(zoneColors, speed);
+
+    /// <summary>
+    /// Creates an Audio Visualizer effect.
+    /// Maps audio frequency bands to 4 zones.
+    /// </summary>
+    /// <param name="zoneColors">Base zone colors.</param>
+    /// <param name="speed">Speed 1-4 (affects sensitivity).</param>
+    public static AudioVisualizerEffect CreateAudioVisualizer(ZoneColors? zoneColors = null, int speed = 2)
+        => new(zoneColors, speed);
+
+    /// <summary>
     /// Creates the default input signal provider using low-level keyboard hooks.
     /// Uses WH_KEYBOARD_LL - does NOT poll keyboard state.
     /// Caller is responsible for disposal.
@@ -205,6 +232,9 @@ public static class CustomRGBEffectFactory
                 speed),
             CustomRGBEffectType.Ambient => CreateAmbient(
                 screenProvider ?? throw new global::System.ArgumentNullException(nameof(screenProvider), "Ambient effect requires IScreenColorProvider")),
+            CustomRGBEffectType.BreathingColorCycle => CreateBreathingColorCycle(effectColors, speed),
+            CustomRGBEffectType.Strobe => CreateStrobe(effectColors, speed),
+            CustomRGBEffectType.AudioVisualizer => CreateAudioVisualizer(effectColors, speed),
             _ => CreateDisco(speed)
         };
     }

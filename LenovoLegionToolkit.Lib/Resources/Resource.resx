@@ -332,6 +332,18 @@
   <data name="RGBKeyboardBacklightEffect_WaveRTL" xml:space="preserve">
     <value>Wave Right</value>
   </data>
+  <data name="RGBKeyboardBacklightEffect_BreathingColorCycle" xml:space="preserve">
+    <value>Breathing Color Cycle</value>
+    <comment>Breathing effect with color change on every breath cycle</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_Strobe" xml:space="preserve">
+    <value>Strobe</value>
+    <comment>ASUS ROG-style strobing/flashing effect</comment>
+  </data>
+  <data name="RGBKeyboardBacklightEffect_AudioVisualizer" xml:space="preserve">
+    <value>Audio Visualizer</value>
+    <comment>Audio-reactive effect for 4-zone keyboards</comment>
+  </data>
   <data name="RGBKeyboardBacklightPreset_Off" xml:space="preserve">
     <value>Off</value>
   </data>
