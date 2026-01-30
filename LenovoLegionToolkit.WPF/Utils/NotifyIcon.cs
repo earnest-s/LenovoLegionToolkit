@@ -93,25 +93,31 @@ public class NotifyIcon : NativeWindow, IDisposable
                     case PInvoke.NIN_POPUPOPEN:
                         if (Log.Instance.IsTraceEnabled)
                             Log.Instance.Trace($"NIN_POPUPOPEN");
-                        ShowToolTipAsync();
+                        _ = Task.Run(() => ShowToolTipAsync());
                         break;
                     case PInvoke.NIN_POPUPCLOSE:
                         if (Log.Instance.IsTraceEnabled)
                             Log.Instance.Trace($"NIN_POPUPCLOSE");
-                        HideToolTip();
+                        System.Windows.Application.Current.Dispatcher.BeginInvoke(HideToolTip);
                         break;
                     case PInvoke.WM_LBUTTONUP:
                         if (Log.Instance.IsTraceEnabled)
                             Log.Instance.Trace($"WM_LBUTTONUP");
-                        HideToolTip();
-                        HideContextMenu();
-                        OnClick?.Invoke(this, EventArgs.Empty);
+                        System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            HideToolTip();
+                            HideContextMenu();
+                            OnClick?.Invoke(this, EventArgs.Empty);
+                        });
                         break;
                     case PInvoke.WM_RBUTTONUP:
                         if (Log.Instance.IsTraceEnabled)
                             Log.Instance.Trace($"WM_RBUTTONUP");
-                        HideToolTip();
-                        ShowContextMenu();
+                        System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            HideToolTip();
+                            ShowContextMenu();
+                        });
                         break;
                 }
                 break;
@@ -145,28 +151,53 @@ public class NotifyIcon : NativeWindow, IDisposable
 
         try
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(500), token);
+            await Task.Delay(TimeSpan.FromMilliseconds(500), token).ConfigureAwait(false);
 
-            if (ContextMenu is not null && ContextMenu.IsOpen)
+            if (token.IsCancellationRequested)
                 return;
 
-            _currentToolTipWindow?.Close();
-            _currentToolTipWindow = await _toolTipWindow();
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+            {
+                if (token.IsCancellationRequested)
+                    return;
 
-            token.ThrowIfCancellationRequested();
+                if (ContextMenu is not null && ContextMenu.IsOpen)
+                    return;
 
-            _currentToolTipWindow?.Show();
+                try
+                {
+                    _currentToolTipWindow?.Close();
+                    _currentToolTipWindow = await _toolTipWindow();
+
+                    if (token.IsCancellationRequested)
+                    {
+                        _currentToolTipWindow?.Close();
+                        _currentToolTipWindow = null;
+                        return;
+                    }
+
+                    _currentToolTipWindow?.Show();
+                }
+                catch (Exception ex)
+                {
+                    _currentToolTipWindow?.Close();
+                    _currentToolTipWindow = null;
+
+                    if (Log.Instance.IsTraceEnabled)
+                        Log.Instance.Trace($"Failed to create tooltip window.", ex);
+                }
+            });
         }
         catch (OperationCanceledException)
         {
-            _currentToolTipWindow?.Close();
-            _currentToolTipWindow = null;
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                _currentToolTipWindow?.Close();
+                _currentToolTipWindow = null;
+            });
         }
         catch (Exception ex)
         {
-            _currentToolTipWindow?.Close();
-            _currentToolTipWindow = null;
-
             if (Log.Instance.IsTraceEnabled)
                 Log.Instance.Trace($"Failed to show tooltip.", ex);
         }
