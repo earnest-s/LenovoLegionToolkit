@@ -38,9 +38,8 @@ _Join the Legion Series Discord: https://discord.com/invite/legionseries!_
   - [Download](#download)
   - [Compatibility](#compatibility)
   - [Features](#features)
-  - [Donate](#donate)
   - [Credits](#credits)
-    - [Contributors](#contributors)
+  - [Contributors](#contributors)
   - [FAQ](#faq)
   - [Arguments](#arguments)
   - [How to collect logs?](#how-to-collect-logs)
@@ -369,14 +368,6 @@ CLI does not need to be ran as Administrator.
 * `llt rgb set <profile>` - set 4-zone RGB to `<preset>`
 
 </details>
-
-## Donate
-
-If you enjoy using the Lenovo Legion Toolkit, consider donating.
-
-[Donate with PayPal](https://www.paypal.com/donate/?hosted_button_id=22AZE2NBP3HTL)
-
-<img src="LenovoLegionToolkit.WPF/Assets/Donate/paypal_qr.png" width="200" alt="PayPal QR code" />
 
 ## Credits
 

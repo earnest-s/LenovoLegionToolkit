@@ -37,8 +37,6 @@ public partial class SettingsPage
     private readonly ThemeManager _themeManager = IoCContainer.Resolve<ThemeManager>();
     private readonly HWiNFOIntegration _hwinfoIntegration = IoCContainer.Resolve<HWiNFOIntegration>();
     private readonly IpcServer _ipcServer = IoCContainer.Resolve<IpcServer>();
-    private readonly UpdateChecker _updateChecker = IoCContainer.Resolve<UpdateChecker>();
-    private readonly UpdateCheckSettings _updateCheckSettings = IoCContainer.Resolve<UpdateCheckSettings>();
 
     private bool _isRefreshing;
 
@@ -122,18 +120,7 @@ public partial class SettingsPage
 
         _bootLogoCard.Visibility = await BootLogo.IsSupportedAsync() ? Visibility.Visible : Visibility.Collapsed;
 
-        if (_updateChecker.Disable)
-        {
-            _updateTextBlock.Visibility = Visibility.Collapsed;
-            _checkUpdatesCard.Visibility = Visibility.Collapsed;
-            _updateCheckFrequencyCard.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-            _checkUpdatesButton.Visibility = Visibility.Visible;
-            _updateCheckFrequencyComboBox.Visibility = Visibility.Visible;
-            _updateCheckFrequencyComboBox.SetItems(Enum.GetValues<UpdateCheckFrequency>(), _updateCheckSettings.Store.UpdateCheckFrequency, t => t.GetDisplayName());
-        }
+        _checkUpdatesButton.Visibility = Visibility.Visible;
 
         try
         {
@@ -571,29 +558,16 @@ public partial class SettingsPage
         window.ShowDialog();
     }
 
-    private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
+    private void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
         if (_isRefreshing)
             return;
 
-        if (App.Current.MainWindow is not MainWindow mainWindow)
-            return;
-
-        mainWindow.CheckForUpdates(true);
-        await SnackbarHelper.ShowAsync(Resource.SettingsPage_CheckUpdates_Started_Title, type: SnackbarType.Info);
-    }
-
-    private void UpdateCheckFrequencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isRefreshing)
-            return;
-
-        if (!_updateCheckFrequencyComboBox.TryGetSelectedItem(out UpdateCheckFrequency frequency))
-            return;
-
-        _updateCheckSettings.Store.UpdateCheckFrequency = frequency;
-        _updateCheckSettings.SynchronizeStore();
-        _updateChecker.UpdateMinimumTimeSpanForRefresh();
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://github.com/earnest-s/LenovoLegionToolkit/releases",
+            UseShellExecute = true
+        });
     }
 
     private async void GodModeFnQSwitchableToggle_Click(object sender, RoutedEventArgs e)

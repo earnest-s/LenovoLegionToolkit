@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
 
@@ -18,24 +17,22 @@ public partial class AboutPage
             var version = Assembly.GetEntryAssembly()?.GetName().Version;
             if (version is null)
                 return string.Empty;
-            if (version.IsBeta())
-                return "BETA";
             return version.ToString(3);
         }
     }
 
-    private static string BuildText => Assembly.GetEntryAssembly()?.GetBuildDateTimeString() ?? string.Empty;
-
-    private static string CopyrightText
+    private static string BuildText
     {
         get
         {
-            var location = Assembly.GetEntryAssembly()?.Location;
-            if (location is null)
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
+            if (version is null)
                 return string.Empty;
-            return FileVersionInfo.GetVersionInfo(location).LegalCopyright ?? string.Empty;
+            return version.Revision.ToString();
         }
     }
+
+    private static string CopyrightText => "© 2026 Earnest S";
 
     public AboutPage()
     {

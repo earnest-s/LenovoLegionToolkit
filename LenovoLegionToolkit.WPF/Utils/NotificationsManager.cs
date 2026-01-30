@@ -210,7 +210,6 @@ public class NotificationsManager
 
             Action? clickAction = notification.Type switch
             {
-                NotificationType.UpdateAvailable => UpdateAvailableAction,
                 _ => null
             };
 
@@ -302,14 +301,5 @@ public class NotificationsManager
                 _windows.Add(nw);
             }
         }
-    }
-
-    private static void UpdateAvailableAction()
-    {
-        if (App.Current.MainWindow is not MainWindow mainWindow)
-            return;
-
-        mainWindow.BringToForeground();
-        mainWindow.ShowUpdateWindow();
     }
 }

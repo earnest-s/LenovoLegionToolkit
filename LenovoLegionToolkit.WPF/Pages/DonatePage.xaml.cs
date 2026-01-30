@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using LenovoLegionToolkit.WPF.Extensions;
 
 namespace LenovoLegionToolkit.WPF.Pages;
 
@@ -12,7 +11,6 @@ public partial class DonatePage
 
     private void PayPalDonateButton_Click(object sender, RoutedEventArgs e)
     {
-        Constants.PayPalUri.Open();
         e.Handled = true;
     }
 }
