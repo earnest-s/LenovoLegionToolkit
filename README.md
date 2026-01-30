@@ -382,20 +382,19 @@ If you enjoy using the Lenovo Legion Toolkit, consider donating.
 
 ### Contributors
 
-| Contributor | Commits |
-|-------------|---------|
-| [Bartosz Cichecki](https://github.com/BartoszCichecki) | 2644 |
-| [凌卡Karl](https://github.com/KarlLee830) | 28 |
-| [Mario Bălănică](https://github.com/mariobalanica) | 27 |
-| [Sichen Lyu](https://github.com/Ace-Radom) | 24 |
-| [Karl Lee](https://github.com/KarlLee830) | 17 |
-| [Stefan](https://github.com/Stefan) | 7 |
-| [Earnest S](https://github.com/earnest-s) | 7 |
-| [Lenus Walker](https://github.com/LenusWalker) | 6 |
-| [Sam Wilde](https://github.com/SamWilde) | 4 |
-| [Eric-lHHI](https://github.com/Eric-lHHI) | 3 |
-| [shockdude](https://github.com/shockdude) | 2 |
-| And many more amazing contributors! | |
+| Contributor | Commits | Lines Changed |
+|-------------|---------|---------------|
+| [Bartosz Cichecki](https://github.com/BartoszCichecki) | 2,384 | +222,357 / -90,337 |
+| [Mario Bălănică](https://github.com/mariobalanica) | 26 | +3,879 / -432 |
+| [Sichen Lyu](https://github.com/Ace-Radom) | 24 | +2,734 / -447 |
+| [凌卡Karl](https://github.com/KarlLee830) | 18 | +220 / -137 |
+| [Karl Lee](https://github.com/KarlLee830) | 16 | +2,114 / -368 |
+| [Earnest S](https://github.com/earnest-s) | 8 | +3,431 / -38 |
+| [Stefan](https://github.com/Stefan) | 7 | +769 / -71 |
+| [Lenus Walker](https://github.com/LenusWalker) | 4 | +191 / -55 |
+| [Sam Wilde](https://github.com/SamWilde) | 4 | +12 / -0 |
+| [shockdude](https://github.com/shockdude) | 2 | +69 / -24 |
+| And many more amazing contributors! | | |
 
 Special thanks to:
 
