@@ -25,10 +25,19 @@ public partial class AboutPage
     {
         get
         {
-            var version = Assembly.GetEntryAssembly()?.GetName().Version;
-            if (version is null)
+            var assembly = Assembly.GetEntryAssembly();
+            if (assembly is null)
                 return string.Empty;
-            return version.Revision.ToString();
+            
+            var infoVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            if (!string.IsNullOrEmpty(infoVersion) && infoVersion.Contains('+'))
+            {
+                var buildPart = infoVersion.Split('+')[1];
+                return buildPart;
+            }
+            
+            var version = assembly.GetName().Version;
+            return version?.Revision.ToString() ?? string.Empty;
         }
     }
 

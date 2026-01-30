@@ -7,8 +7,10 @@
 		<ApplicationIcon>Assets/icon.ico</ApplicationIcon>
 		<AssemblyName>Lenovo Legion Toolkit</AssemblyName>
 		<Copyright>© 2026 Earnest S</Copyright>
-		<FileVersion>0.0.1</FileVersion>
-		<Version>0.0.1</Version>
+		<Version>2.3.0</Version>
+		<AssemblyVersion>2.3.0.$([System.DateTime]::UtcNow.ToString("MMdd"))</AssemblyVersion>
+		<FileVersion>2.3.0.$([System.DateTime]::UtcNow.ToString("HHmm"))</FileVersion>
+		<InformationalVersion>2.3.0+$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</InformationalVersion>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
