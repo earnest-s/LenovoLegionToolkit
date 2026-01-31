@@ -80,10 +80,11 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     // Integrates RMS² over time with decay, provides temporal mass
     // energy += rms² * dt * gain
     // energy -= energy * decay * dt
+    // TUNED: Higher gain + decay for faster wave oscillation
     // ========================================================================
     private readonly float[] _energy = new float[4];
-    private const float EnergyGain = 0.18f;          // Input gain (0.1-0.2 range)
-    private const float EnergyDecay = 2.0f;          // Decay rate per second (1.5-2.5 range)
+    private const float EnergyGain = 0.30f;          // Increased for faster response (was 0.18)
+    private const float EnergyDecay = 3.0f;          // Increased for quicker fade (was 2.0)
 
     // ========================================================================
     // STAGE 3: ADAPTIVE NORMALIZATION
@@ -100,19 +101,23 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     // tau = input > env ? attackTau : decayTau
     // alpha = 1 - exp(-dt / tau)
     // env += (input - env) * alpha
+    // TUNED: Tighter time constants for faster wave motion
     // ========================================================================
     private readonly float[] _envelope = new float[4];
-    private const float AttackTau = 0.15f;           // 150ms attack (physically correct)
-    private const float DecayTau = 0.45f;            // 450ms decay (graceful fade)
+    private const float AttackTau = 0.075f;          // 75ms attack (was 150ms) - snappier response
+    private const float DecayTau = 0.22f;            // 220ms decay (was 450ms) - quicker fade
 
     // ========================================================================
     // STAGE 6: SPATIAL BLEED (wave formation)
     // Applied AFTER envelope for proper wave propagation
-    // env[i] = env[i] * 0.7 + left * 0.15 + right * 0.15
+    // TUNED: Lighter retention prevents smearing while keeping motion
     // ========================================================================
     private readonly float[] _output = new float[4];
-    private const float SelfWeight = 0.70f;
-    private const float NeighborWeight = 0.15f;
+    private const float SelfWeight = 0.60f;          // Reduced from 0.70 for less retention
+    private const float NeighborWeight = 0.20f;      // Increased from 0.15 for more wave flow
+
+    // Per-zone gain boost: makes bass/mids more animated
+    private static readonly float[] ZoneGain = { 1.3f, 1.15f, 1.0f, 0.9f };
 
     // ========================================================================
     // STAGE 4: PERCEPTUAL CURVE
@@ -236,6 +241,9 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 {
                     // Normalize against rolling max (no hard clamp to 1.0)
                     var normalized = _energy[z] / _maxEnergy[z];
+
+                    // Per-zone gain boost: bass/mids more animated
+                    normalized *= ZoneGain[z];
 
                     // Perceptual curve: preserves low-level detail and wave motion
                     var perceptual = MathF.Pow(normalized, PerceptualExponent);
@@ -512,13 +520,14 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 }
             }
 
-            // STAGE 4+5: Perceptual + envelope
+            // STAGE 4+5: Perceptual + envelope (with zone gain boost)
             var attackAlpha = 1f - MathF.Exp(-dt / AttackTau);
             var decayAlpha = 1f - MathF.Exp(-dt / DecayTau);
 
             for (var z = 0; z < 4; z++)
             {
                 var normalized = _energy[z] / _maxEnergy[z];
+                normalized *= ZoneGain[z];  // Per-zone gain boost
                 var perceptual = MathF.Pow(normalized, PerceptualExponent);
                 var alpha = perceptual > _envelope[z] ? attackAlpha : decayAlpha;
                 _envelope[z] += (perceptual - _envelope[z]) * alpha;
