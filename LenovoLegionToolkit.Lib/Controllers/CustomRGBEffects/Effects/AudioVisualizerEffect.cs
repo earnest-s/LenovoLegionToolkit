@@ -1,16 +1,22 @@
 // ============================================================================
 // AudioVisualizerEffect.cs
 // 
-// FFT-based spectrum visualizer for 4-zone keyboards.
-// Each zone represents a fixed frequency band (Bass, Low-Mid, High-Mid, Treble).
+// Industry-standard 4-zone spectrum visualizer for keyboards.
+// Behaves like a real audio spectrum analyzer, not meters or swipe bars.
 // 
-// ARCHITECTURE (4-stage pipeline):
-// 1. FFT → Band RMS (instantaneous spectral energy per band)
-// 2. Energy Integrator (time-domain accumulator with decay)
-// 3. Envelope Follower (exponential smoothing, attack/decay)
-// 4. Spatial Bleed + Brightness (wave formation + final output)
+// PIPELINE (6-stage, all stages maintain persistent state):
+// 1. FFT → Band RMS (instantaneous spectral power per band)
+// 2. Short-Term Energy Integration (time-domain accumulator)
+// 3. Adaptive Normalization (rolling max reference)
+// 4. Perceptual Curve (wave-preserving compression)
+// 5. Envelope Follower (exponential attack/decay)
+// 6. Spatial Bleed → Output (wave formation + brightness)
 // 
-// Each stage maintains persistent state for continuous behavior.
+// FREQUENCY MAPPING (STANDARD):
+// Zone 0: 20-250 Hz (Bass)
+// Zone 1: 250-2000 Hz (Low-Mid)
+// Zone 2: 2000-6000 Hz (High-Mid)
+// Zone 3: 6000-20000 Hz (Treble)
 // ============================================================================
 
 using System;
@@ -23,9 +29,9 @@ using NAudio.Wave;
 namespace LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects.Effects;
 
 /// <summary>
-/// FFT-based audio spectrum visualizer with true analog meter behavior.
-/// Zone 0: Bass (20-150 Hz), Zone 1: Low-Mid (150-600 Hz),
-/// Zone 2: High-Mid (600-2500 Hz), Zone 3: Treble (2500-16000 Hz).
+/// FFT-based audio spectrum visualizer with true analog behavior.
+/// Bass rolls on the left, mids overlap naturally, highs shimmer on the right.
+/// Waves move and breathe like a real spectrum analyzer.
 /// </summary>
 public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 {
@@ -33,7 +39,9 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     private readonly ZoneColors _zoneColors;
     private bool _disposed;
 
-    // FFT configuration
+    // ========================================================================
+    // FFT CONFIGURATION
+    // ========================================================================
     private const int FftLength = 2048;
     private const int FftLengthLog2 = 11;
     private readonly float[] _fftBuffer = new float[FftLength];
@@ -41,7 +49,10 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     private int _fftBufferIndex;
     private readonly object _fftLock = new();
 
-    // Audio capture state
+    // ========================================================================
+    // AUDIO CAPTURE STATE
+    // Sample rate derived from device, never hardcoded
+    // ========================================================================
     private WasapiLoopbackCapture? _capture;
     private int _sampleRate = 48000;
     private WaveFormatEncoding _encoding = WaveFormatEncoding.IeeeFloat;
@@ -49,55 +60,65 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     private int _channels = 2;
 
     // ========================================================================
-    // STAGE 2: ENERGY INTEGRATOR (time-domain accumulator)
-    // Integrates magnitude² over time, decays slowly
-    // This provides temporal mass that prevents binary ON/OFF behavior
-    // TUNED: Low gain prevents overshoot, preserves micro-dynamics
+    // FREQUENCY BAND MAPPING (STANDARD 4-ZONE)
+    // Static mapping, no motion logic
     // ========================================================================
-    private readonly float[] _energyAccumulator = new float[4];
-    private const float EnergyDecayRate = 2.5f;      // Energy decay per second (slower = more mass)
-    private const float EnergyInputGain = 0.15f;     // REDUCED: prevents pinning at max during music
-    private const float MaxEnergy = 1.0f;            // Ceiling for accumulator (lower = more headroom)
-
-    // ========================================================================
-    // STAGE 3: ADAPTIVE NORMALIZATION
-    // Rolling max reference for auto-gain without clipping
-    // ========================================================================
-    private readonly float[] _rollingMax = new float[4];
-    private const float RollingMaxDecay = 0.9985f;   // Very slow decay for stable reference
-    private const float MinRollingMax = 0.001f;      // Prevent div-by-zero
-
-    // ========================================================================
-    // STAGE 4: ENVELOPE FOLLOWER (exponential smoothing)
-    // Converts normalized energy to smooth visual envelope
-    // TUNED: Slow attack preserves wave motion, prevents flattening
-    // ========================================================================
-    private readonly float[] _envelope = new float[4];
-    private const float AttackTau = 0.150f;          // 150ms attack (SLOW: preserves micro-dynamics)
-    private const float DecayTau = 0.450f;           // 450ms decay (graceful fade)
-
-    // ========================================================================
-    // STAGE 5: SPATIAL BLEED (wave formation)
-    // Applied AFTER envelope for proper wave propagation
-    // ========================================================================
-    private readonly float[] _displayEnvelope = new float[4];
-    private const float SelfWeight = 0.70f;          // Self contribution
-    private const float NeighborWeight = 0.15f;      // Neighbor contribution
-
-    // Compression exponent: pow(x, 0.6) expands low-level detail
-    private const float CompressionExponent = 0.6f;
-
-    // Frequency band boundaries (Hz)
     private static readonly (float Low, float High)[] FrequencyBands =
     {
-        (20f, 150f),      // Zone 0: Bass
-        (150f, 600f),     // Zone 1: Low-Mid
-        (600f, 2500f),    // Zone 2: High-Mid
-        (2500f, 16000f)   // Zone 3: Treble
+        (20f, 250f),       // Zone 0: Bass (far left)
+        (250f, 2000f),     // Zone 1: Low-Mid (mid-left)
+        (2000f, 6000f),    // Zone 2: High-Mid (mid-right)
+        (6000f, 20000f)    // Zone 3: Treble (far right)
     };
 
     // Per-band sensitivity (compensate for spectral energy distribution)
-    private static readonly float[] BandSensitivity = { 2.5f, 1.8f, 1.3f, 1.0f };
+    // Bass and low-mids typically have more energy, treble less
+    private static readonly float[] BandSensitivity = { 1.0f, 1.2f, 1.8f, 2.5f };
+
+    // ========================================================================
+    // STAGE 2: SHORT-TERM ENERGY INTEGRATION
+    // Integrates RMS² over time with decay, provides temporal mass
+    // energy += rms² * dt * gain
+    // energy -= energy * decay * dt
+    // ========================================================================
+    private readonly float[] _energy = new float[4];
+    private const float EnergyGain = 0.18f;          // Input gain (0.1-0.2 range)
+    private const float EnergyDecay = 2.0f;          // Decay rate per second (1.5-2.5 range)
+
+    // ========================================================================
+    // STAGE 3: ADAPTIVE NORMALIZATION
+    // Rolling max reference prevents saturation without hard clamps
+    // maxEnergy = max(maxEnergy * decay, energy)
+    // ========================================================================
+    private readonly float[] _maxEnergy = new float[4];
+    private const float MaxEnergyDecay = 0.995f;     // Very slow decay for stable reference
+    private const float MinMaxEnergy = 0.0001f;      // Prevent division by zero
+
+    // ========================================================================
+    // STAGE 5: ENVELOPE FOLLOWER
+    // Exponential smoothing with asymmetric attack/decay
+    // tau = input > env ? attackTau : decayTau
+    // alpha = 1 - exp(-dt / tau)
+    // env += (input - env) * alpha
+    // ========================================================================
+    private readonly float[] _envelope = new float[4];
+    private const float AttackTau = 0.15f;           // 150ms attack (physically correct)
+    private const float DecayTau = 0.45f;            // 450ms decay (graceful fade)
+
+    // ========================================================================
+    // STAGE 6: SPATIAL BLEED (wave formation)
+    // Applied AFTER envelope for proper wave propagation
+    // env[i] = env[i] * 0.7 + left * 0.15 + right * 0.15
+    // ========================================================================
+    private readonly float[] _output = new float[4];
+    private const float SelfWeight = 0.70f;
+    private const float NeighborWeight = 0.15f;
+
+    // ========================================================================
+    // STAGE 4: PERCEPTUAL CURVE
+    // pow(x, 0.6) expands low-level detail, preserves waves
+    // ========================================================================
+    private const float PerceptualExponent = 0.6f;
 
     public AudioVisualizerEffect(ZoneColors? zoneColors = null, int speed = 2)
     {
@@ -109,28 +130,28 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
             new RGBColor(0, 150, 255)   // Zone 3: Cyan-Blue (Treble)
         );
 
-        // Initialize all persistent state to zero/baseline
+        // Initialize all persistent state
         for (var i = 0; i < 4; i++)
         {
-            _energyAccumulator[i] = 0f;
-            _rollingMax[i] = MinRollingMax;
+            _energy[i] = 0f;
+            _maxEnergy[i] = MinMaxEnergy;
             _envelope[i] = 0f;
-            _displayEnvelope[i] = 0f;
+            _output[i] = 0f;
         }
     }
 
     public CustomRGBEffectType Type => CustomRGBEffectType.AudioVisualizer;
-    public string Description => "FFT-based spectrum visualizer with analog meter response";
+    public string Description => "FFT-based spectrum visualizer with wave-like motion";
     public bool RequiresInputMonitoring => false;
     public bool RequiresSystemAccess => true;
 
     public async Task RunAsync(CustomRGBEffectController controller, CancellationToken cancellationToken)
     {
-        // Initialize audio capture with proper format detection
+        // Initialize WASAPI loopback capture
         try
         {
             _capture = new WasapiLoopbackCapture();
-            _sampleRate = _capture.WaveFormat.SampleRate;
+            _sampleRate = _capture.WaveFormat.SampleRate;  // Derive from device
             _encoding = _capture.WaveFormat.Encoding;
             _bytesPerSample = _capture.WaveFormat.BitsPerSample / 8;
             _channels = _capture.WaveFormat.Channels;
@@ -147,8 +168,8 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
         var lastTicks = stopwatch.ElapsedTicks;
         var ticksPerSecond = (double)Stopwatch.Frequency;
 
-        // Speed multiplier: 1-4 maps to 0.6x - 1.5x
-        var speedMult = 0.45f + (_speed * 0.25f);
+        // Speed multiplier affects envelope timing (1-4 → 0.7x-1.3x)
+        var speedMult = 0.55f + (_speed * 0.2f);
 
         try
         {
@@ -161,94 +182,89 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 var dt = (float)((nowTicks - lastTicks) / ticksPerSecond);
                 lastTicks = nowTicks;
                 dt = Math.Clamp(dt, 0.001f, 0.1f);
-                var dtScaled = dt * speedMult;
 
                 // ============================================================
-                // STAGE 1: FFT → BAND RMS (instantaneous spectral energy)
+                // STAGE 1: FFT → BAND RMS
+                // Compute RMS power per band (square magnitudes before averaging)
                 // ============================================================
                 var bandRms = ComputeBandRms();
 
                 // ============================================================
-                // STAGE 2: ENERGY INTEGRATOR (time-domain accumulator)
-                // energy += input² * dt * gain (REDUCED gain prevents overshoot)
-                // energy -= energy * decayRate * dt
-                // This provides temporal mass that smooths transients
+                // STAGE 2: SHORT-TERM ENERGY INTEGRATION
+                // Provides temporal mass, smooths transients
+                // Energy persists across frames (NOT reset)
                 // ============================================================
                 for (var z = 0; z < 4; z++)
                 {
-                    // Integrate input energy (magnitude squared for power)
-                    var inputPower = bandRms[z] * bandRms[z];
-                    _energyAccumulator[z] += inputPower * dtScaled * EnergyInputGain;
+                    // Integrate RMS² (power) over time
+                    var power = bandRms[z] * bandRms[z];
+                    _energy[z] += power * dt * EnergyGain;
 
-                    // Decay energy over time
-                    _energyAccumulator[z] -= _energyAccumulator[z] * EnergyDecayRate * dtScaled;
+                    // Decay energy continuously
+                    _energy[z] -= _energy[z] * EnergyDecay * dt;
 
-                    // Clamp to valid range (never negative, cap at max)
-                    _energyAccumulator[z] = Math.Clamp(_energyAccumulator[z], 0f, MaxEnergy);
+                    // Prevent negative (numerical stability)
+                    if (_energy[z] < 0f) _energy[z] = 0f;
                 }
 
                 // ============================================================
                 // STAGE 3: ADAPTIVE NORMALIZATION
-                // Rolling max reference for auto-gain without clipping
+                // Rolling max reference for auto-gain without hard clamps
                 // ============================================================
                 for (var z = 0; z < 4; z++)
                 {
-                    // Update rolling max (fast rise, very slow decay)
-                    if (_energyAccumulator[z] > _rollingMax[z])
+                    // Update rolling max (instant rise, slow decay)
+                    if (_energy[z] > _maxEnergy[z])
                     {
-                        _rollingMax[z] = _energyAccumulator[z];
+                        _maxEnergy[z] = _energy[z];
                     }
                     else
                     {
-                        _rollingMax[z] *= RollingMaxDecay;
-                        if (_rollingMax[z] < MinRollingMax) _rollingMax[z] = MinRollingMax;
+                        _maxEnergy[z] *= MaxEnergyDecay;
+                        if (_maxEnergy[z] < MinMaxEnergy) _maxEnergy[z] = MinMaxEnergy;
                     }
                 }
 
                 // ============================================================
-                // STAGE 4: NORMALIZE + COMPRESS + ENVELOPE
-                // Pipeline: energy → normalize → gentle compression → envelope
+                // STAGE 4 + 5: PERCEPTUAL CURVE + ENVELOPE FOLLOWER
+                // Normalize → pow(x, 0.6) → exponential envelope
                 // ============================================================
-                var attackAlpha = 1f - MathF.Exp(-dtScaled / AttackTau);
-                var decayAlpha = 1f - MathF.Exp(-dtScaled / DecayTau);
+                var attackAlpha = 1f - MathF.Exp(-dt * speedMult / AttackTau);
+                var decayAlpha = 1f - MathF.Exp(-dt * speedMult / DecayTau);
 
                 for (var z = 0; z < 4; z++)
                 {
-                    // Normalize against rolling max (auto-gain)
-                    var normalized = _energyAccumulator[z] / _rollingMax[z];
-                    normalized = Math.Clamp(normalized, 0f, 1f);
+                    // Normalize against rolling max (no hard clamp to 1.0)
+                    var normalized = _energy[z] / _maxEnergy[z];
 
-                    // Gentle compression: pow(x, 0.6) expands low-level detail
-                    // This prevents "always high" and preserves micro-dynamics
-                    var compressed = MathF.Pow(normalized, CompressionExponent);
+                    // Perceptual curve: preserves low-level detail and wave motion
+                    var perceptual = MathF.Pow(normalized, PerceptualExponent);
 
-                    // Envelope follower: slow attack preserves wave motion
-                    float alpha = compressed > _envelope[z] ? attackAlpha : decayAlpha;
-                    _envelope[z] += (compressed - _envelope[z]) * alpha;
+                    // Envelope follower: asymmetric attack/decay
+                    var alpha = perceptual > _envelope[z] ? attackAlpha : decayAlpha;
+                    _envelope[z] += (perceptual - _envelope[z]) * alpha;
                 }
 
                 // ============================================================
-                // STAGE 5: SPATIAL BLEED (wave formation)
-                // Applied AFTER envelope for proper wave propagation
+                // STAGE 6: SPATIAL BLEED (wave formation)
+                // Creates wave flow between zones, applied AFTER envelope
                 // ============================================================
                 for (var z = 0; z < 4; z++)
                 {
                     var self = _envelope[z] * SelfWeight;
                     var left = (z > 0) ? _envelope[z - 1] * NeighborWeight : 0f;
                     var right = (z < 3) ? _envelope[z + 1] * NeighborWeight : 0f;
-
-                    // Store spatially blended value
-                    _displayEnvelope[z] = self + left + right;
+                    _output[z] = self + left + right;
                 }
 
                 // ============================================================
-                // FINAL: OUTPUT BRIGHTNESS TO CONTROLLER
-                // Apply envelope to zone colors
+                // FINAL: OUTPUT BRIGHTNESS
+                // Envelope × zone color (no per-frame clearing)
                 // ============================================================
-                var c0 = ScaleColor(_zoneColors.Zone1, _displayEnvelope[0]);
-                var c1 = ScaleColor(_zoneColors.Zone2, _displayEnvelope[1]);
-                var c2 = ScaleColor(_zoneColors.Zone3, _displayEnvelope[2]);
-                var c3 = ScaleColor(_zoneColors.Zone4, _displayEnvelope[3]);
+                var c0 = ScaleColor(_zoneColors.Zone1, _output[0]);
+                var c1 = ScaleColor(_zoneColors.Zone2, _output[1]);
+                var c2 = ScaleColor(_zoneColors.Zone3, _output[2]);
+                var c3 = ScaleColor(_zoneColors.Zone4, _output[3]);
 
                 await controller.SetColorsAsync(new ZoneColors(c0, c1, c2, c3), cancellationToken).ConfigureAwait(false);
 
@@ -263,8 +279,9 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     }
 
     /// <summary>
-    /// STAGE 1: Compute RMS magnitude for each frequency band from FFT.
-    /// Returns linear RMS (not squared) for each band.
+    /// STAGE 1: Compute RMS power for each frequency band.
+    /// Uses squared magnitudes before averaging (energy, not amplitude).
+    /// NO thresholds applied.
     /// </summary>
     private float[] ComputeBandRms()
     {
@@ -284,28 +301,28 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
         // In-place Cooley-Tukey FFT
         Fft(_fftComplex, FftLengthLog2);
 
-        // Frequency bin width
+        // Frequency resolution (Hz per bin)
         var binHz = (float)_sampleRate / FftLength;
 
-        // Extract RMS for each band
+        // Compute RMS for each band
         for (var b = 0; b < 4; b++)
         {
             var (lo, hi) = FrequencyBands[b];
             var loBin = Math.Max(1, (int)(lo / binHz));
             var hiBin = Math.Min(FftLength / 2 - 1, (int)(hi / binHz));
 
-            // Sum squared magnitudes
+            // Sum squared magnitudes (energy)
             var sumSquared = 0.0;
             var binCount = 0;
             for (var k = loBin; k <= hiBin; k++)
             {
                 var re = _fftComplex[k].Real;
                 var im = _fftComplex[k].Imaginary;
-                sumSquared += re * re + im * im;
+                sumSquared += re * re + im * im;  // mag² (energy)
                 binCount++;
             }
 
-            // Compute RMS with band sensitivity
+            // RMS = sqrt(sum(mag²) / count) with sensitivity scaling
             var bandRms = binCount > 0 ? (float)Math.Sqrt(sumSquared / binCount) : 0f;
             rms[b] = bandRms * BandSensitivity[b];
         }
@@ -315,7 +332,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
     /// <summary>
     /// Handle incoming audio data with proper format detection.
-    /// Supports IEEE Float, PCM (16/24/32-bit), and Extensible formats.
     /// </summary>
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
@@ -333,7 +349,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 // Decode based on WaveFormat.Encoding
                 if (_encoding == WaveFormatEncoding.IeeeFloat)
                 {
-                    // 32-bit IEEE float: already [-1, +1]
                     if (_bytesPerSample == 4)
                     {
                         sample = BitConverter.ToSingle(e.Buffer, offset);
@@ -341,14 +356,12 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 }
                 else if (_encoding == WaveFormatEncoding.Pcm)
                 {
-                    // PCM: normalize to [-1, +1]
                     if (_bytesPerSample == 2)
                     {
                         sample = BitConverter.ToInt16(e.Buffer, offset) / 32768f;
                     }
                     else if (_bytesPerSample == 3)
                     {
-                        // 24-bit PCM (sign extend)
                         var val = e.Buffer[offset] | (e.Buffer[offset + 1] << 8) | (e.Buffer[offset + 2] << 16);
                         if ((val & 0x800000) != 0) val |= unchecked((int)0xFF000000);
                         sample = val / 8388608f;
@@ -360,7 +373,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 }
                 else if (_encoding == WaveFormatEncoding.Extensible)
                 {
-                    // Extensible: try float first (common for WASAPI loopback)
                     if (_bytesPerSample == 4)
                     {
                         sample = BitConverter.ToSingle(e.Buffer, offset);
@@ -375,10 +387,10 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                     }
                 }
 
-                // Clamp sample to valid range
+                // Clamp to valid range
                 sample = Math.Clamp(sample, -1f, 1f);
 
-                // Store mono sample (first channel only)
+                // Store mono sample (first channel)
                 _fftBuffer[_fftBufferIndex] = sample;
                 _fftBufferIndex = (_fftBufferIndex + 1) % FftLength;
 
@@ -388,7 +400,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     }
 
     /// <summary>
-    /// Scale RGB color by brightness factor (0-1).
+    /// Scale RGB color by brightness factor.
     /// </summary>
     private static RGBColor ScaleColor(RGBColor color, float brightness)
     {
@@ -441,9 +453,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     /// <summary>
     /// Bit-reversal for FFT permutation.
     /// </summary>
-    /// <summary>
-    /// Bit-reversal for FFT permutation.
-    /// </summary>
     private static int BitReverse(int value, int bits)
     {
         var result = 0;
@@ -457,7 +466,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
     /// <summary>
     /// Fallback animation when audio capture fails.
-    /// Uses same 4-stage pipeline with synthetic input.
+    /// Uses same 6-stage pipeline with synthetic input.
     /// </summary>
     private async Task RunIdleFallbackAsync(CustomRGBEffectController controller, CancellationToken cancellationToken)
     {
@@ -467,7 +476,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            // Delta time
             var nowTicks = stopwatch.ElapsedTicks;
             var dt = (float)((nowTicks - lastTicks) / ticksPerSecond);
             lastTicks = nowTicks;
@@ -475,63 +483,62 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
             var time = stopwatch.Elapsed.TotalSeconds;
 
-            // Generate synthetic band input (sine waves with phase offset)
-            var syntheticInput = new float[4];
+            // Generate synthetic band input (phase-offset sine waves)
+            var syntheticRms = new float[4];
             for (var z = 0; z < 4; z++)
             {
                 var phase = time * 0.8 + z * 0.4;
-                syntheticInput[z] = 0.15f * (float)(Math.Sin(phase) * 0.5 + 0.5);
+                syntheticRms[z] = 0.12f * (float)(Math.Sin(phase) * 0.5 + 0.5);
             }
 
-            // STAGE 2: Energy integrator (same pipeline as main loop)
+            // STAGE 2: Energy integration
             for (var z = 0; z < 4; z++)
             {
-                var inputPower = syntheticInput[z] * syntheticInput[z];
-                _energyAccumulator[z] += inputPower * dt * EnergyInputGain;
-                _energyAccumulator[z] -= _energyAccumulator[z] * EnergyDecayRate * dt;
-                _energyAccumulator[z] = Math.Clamp(_energyAccumulator[z], 0f, MaxEnergy);
+                var power = syntheticRms[z] * syntheticRms[z];
+                _energy[z] += power * dt * EnergyGain;
+                _energy[z] -= _energy[z] * EnergyDecay * dt;
+                if (_energy[z] < 0f) _energy[z] = 0f;
             }
 
             // STAGE 3: Adaptive normalization
             for (var z = 0; z < 4; z++)
             {
-                if (_energyAccumulator[z] > _rollingMax[z])
-                    _rollingMax[z] = _energyAccumulator[z];
+                if (_energy[z] > _maxEnergy[z])
+                    _maxEnergy[z] = _energy[z];
                 else
                 {
-                    _rollingMax[z] *= RollingMaxDecay;
-                    if (_rollingMax[z] < MinRollingMax) _rollingMax[z] = MinRollingMax;
+                    _maxEnergy[z] *= MaxEnergyDecay;
+                    if (_maxEnergy[z] < MinMaxEnergy) _maxEnergy[z] = MinMaxEnergy;
                 }
             }
 
-            // STAGE 4: Normalize + compress + envelope
+            // STAGE 4+5: Perceptual + envelope
             var attackAlpha = 1f - MathF.Exp(-dt / AttackTau);
             var decayAlpha = 1f - MathF.Exp(-dt / DecayTau);
 
             for (var z = 0; z < 4; z++)
             {
-                var normalized = _energyAccumulator[z] / _rollingMax[z];
-                normalized = Math.Clamp(normalized, 0f, 1f);
-                var compressed = MathF.Pow(normalized, CompressionExponent);
-                float alpha = compressed > _envelope[z] ? attackAlpha : decayAlpha;
-                _envelope[z] += (compressed - _envelope[z]) * alpha;
+                var normalized = _energy[z] / _maxEnergy[z];
+                var perceptual = MathF.Pow(normalized, PerceptualExponent);
+                var alpha = perceptual > _envelope[z] ? attackAlpha : decayAlpha;
+                _envelope[z] += (perceptual - _envelope[z]) * alpha;
             }
 
-            // STAGE 5: Spatial bleed
+            // STAGE 6: Spatial bleed
             for (var z = 0; z < 4; z++)
             {
                 var self = _envelope[z] * SelfWeight;
                 var left = (z > 0) ? _envelope[z - 1] * NeighborWeight : 0f;
                 var right = (z < 3) ? _envelope[z + 1] * NeighborWeight : 0f;
-                _displayEnvelope[z] = self + left + right;
+                _output[z] = self + left + right;
             }
 
             // Output
             var colors = new ZoneColors(
-                ScaleColor(_zoneColors.Zone1, _displayEnvelope[0]),
-                ScaleColor(_zoneColors.Zone2, _displayEnvelope[1]),
-                ScaleColor(_zoneColors.Zone3, _displayEnvelope[2]),
-                ScaleColor(_zoneColors.Zone4, _displayEnvelope[3])
+                ScaleColor(_zoneColors.Zone1, _output[0]),
+                ScaleColor(_zoneColors.Zone2, _output[1]),
+                ScaleColor(_zoneColors.Zone3, _output[2]),
+                ScaleColor(_zoneColors.Zone4, _output[3])
             );
 
             await controller.SetColorsAsync(colors, cancellationToken).ConfigureAwait(false);
@@ -568,7 +575,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     }
 
     /// <summary>
-    /// Simple complex number struct for FFT.
+    /// Complex number struct for FFT computation.
     /// </summary>
     private readonly struct Complex
     {
@@ -580,8 +587,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
             Real = real;
             Imaginary = imaginary;
         }
-
-        public double Magnitude => Math.Sqrt(Real * Real + Imaginary * Imaginary);
 
         public static Complex operator +(Complex a, Complex b) =>
             new(a.Real + b.Real, a.Imaginary + b.Imaginary);
