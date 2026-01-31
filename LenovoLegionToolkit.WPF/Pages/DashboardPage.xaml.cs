@@ -7,11 +7,8 @@ using System.Windows.Controls;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Controls.Dashboard;
-using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Settings;
 using LenovoLegionToolkit.WPF.Windows.Dashboard;
-using Wpf.Ui.Common;
-using Wpf.Ui.Controls;
 
 namespace LenovoLegionToolkit.WPF.Pages;
 
@@ -21,11 +18,22 @@ public partial class DashboardPage
 
     private readonly List<DashboardGroupControl> _dashboardGroupControls = [];
 
-    public DashboardPage() => InitializeComponent();
+    public DashboardPage()
+    {
+        InitializeComponent();
+        _customizeLink.Click += CustomizeLink_Click;
+    }
 
     private async void DashboardPage_Initialized(object? sender, EventArgs e)
     {
         await RefreshAsync();
+    }
+
+    private void CustomizeLink_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new EditDashboardWindow { Owner = Window.GetWindow(this) };
+        window.Apply += async (_, _) => await RefreshAsync();
+        window.ShowDialog();
     }
 
     private async Task RefreshAsync()
@@ -36,7 +44,7 @@ public partial class DashboardPage
 
         ScrollHost?.ScrollToTop();
 
-        _sensors.Visibility = _dashboardSettings.Store.ShowSensors ? Visibility.Visible : Visibility.Collapsed;
+        _modernSensors.Visibility = _dashboardSettings.Store.ShowSensors ? Visibility.Visible : Visibility.Collapsed;
 
         _dashboardGroupControls.Clear();
         _content.ColumnDefinitions.Clear();
@@ -45,17 +53,22 @@ public partial class DashboardPage
 
         var groups = _dashboardSettings.Store.Groups ?? DashboardGroup.DefaultGroups;
 
+        // Filter out Power and Graphics groups since they're now handled by modern cards
+        var filteredGroups = groups.Where(g =>
+            g.Type != DashboardGroupType.Power &&
+            g.Type != DashboardGroupType.Graphics).ToArray();
+
         if (Log.Instance.IsTraceEnabled)
         {
             Log.Instance.Trace($"Groups:");
-            foreach (var group in groups)
+            foreach (var group in filteredGroups)
                 Log.Instance.Trace($" - {group}");
         }
 
         _content.ColumnDefinitions.Add(new ColumnDefinition { Width = new(1, GridUnitType.Star) });
         _content.ColumnDefinitions.Add(new ColumnDefinition { Width = new(1, GridUnitType.Star) });
 
-        foreach (var group in groups)
+        foreach (var group in filteredGroups)
         {
             _content.RowDefinitions.Add(new RowDefinition { Height = new(1, GridUnitType.Auto) });
 
@@ -64,28 +77,6 @@ public partial class DashboardPage
             _dashboardGroupControls.Add(control);
             initializedTasks.Add(control.InitializedTask);
         }
-
-        _content.RowDefinitions.Add(new RowDefinition { Height = new(1, GridUnitType.Auto) });
-
-        var editDashboardHyperlink = new Hyperlink
-        {
-            Icon = SymbolRegular.Edit24,
-            Content = Resource.DashboardPage_Customize,
-            Margin = new(0, 16, 0, 0),
-            HorizontalAlignment = HorizontalAlignment.Center
-        };
-        editDashboardHyperlink.Click += (_, _) =>
-        {
-            var window = new EditDashboardWindow { Owner = Window.GetWindow(this) };
-            window.Apply += async (_, _) => await RefreshAsync();
-            window.ShowDialog();
-        };
-
-        Grid.SetRow(editDashboardHyperlink, groups.Length);
-        Grid.SetColumn(editDashboardHyperlink, 0);
-        Grid.SetColumnSpan(editDashboardHyperlink, 2);
-
-        _content.Children.Add(editDashboardHyperlink);
 
         LayoutGroups(ActualWidth);
 

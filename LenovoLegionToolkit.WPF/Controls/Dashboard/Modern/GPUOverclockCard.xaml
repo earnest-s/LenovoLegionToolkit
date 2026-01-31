@@ -1,0 +1,63 @@
+<UserControl
+    x:Class="LenovoLegionToolkit.WPF.Controls.Dashboard.Modern.GPUOverclockCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:resources="clr-namespace:LenovoLegionToolkit.WPF.Resources"
+    xmlns:wpfui="http://schemas.lepo.co/wpfui/2022/xaml"
+    d:DesignHeight="100"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+
+    <wpfui:Card Padding="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                Width="48"
+                Height="48"
+                Background="{DynamicResource SystemAccentColorPrimaryBrush}"
+                CornerRadius="12">
+                <wpfui:SymbolIcon
+                    FontSize="24"
+                    Foreground="White"
+                    Symbol="DeveloperBoardLightning20" />
+            </Border>
+
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <TextBlock
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Text="{x:Static resources:Resource.OverclockDiscreteGPUControl_Title}" />
+                <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="12"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{x:Static resources:Resource.OverclockDiscreteGPUControl_Message}" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="3"
+                Orientation="Horizontal"
+                VerticalAlignment="Center">
+                <wpfui:Button
+                    x:Name="_configButton"
+                    Icon="Settings24"
+                    FontSize="20"
+                    Margin="0,0,8,0"
+                    ToolTip="{x:Static resources:Resource.Settings}" />
+                <wpfui:ToggleSwitch
+                    x:Name="_toggle"
+                    Visibility="Hidden" />
+            </StackPanel>
+        </Grid>
+    </wpfui:Card>
+</UserControl>

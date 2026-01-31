@@ -1,0 +1,76 @@
+<UserControl
+    x:Class="LenovoLegionToolkit.WPF.Controls.Dashboard.Modern.PowerModeCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:resources="clr-namespace:LenovoLegionToolkit.WPF.Resources"
+    xmlns:wpfui="http://schemas.lepo.co/wpfui/2022/xaml"
+    d:DesignHeight="120"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+
+    <wpfui:Card Padding="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                Width="48"
+                Height="48"
+                Background="{DynamicResource SystemAccentColorPrimaryBrush}"
+                CornerRadius="12">
+                <wpfui:SymbolIcon
+                    x:Name="_icon"
+                    FontSize="24"
+                    Foreground="White"
+                    Symbol="Gauge24" />
+            </Border>
+
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <TextBlock
+                    x:Name="_title"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Text="{x:Static resources:Resource.PowerModeControl_Title}" />
+                <TextBlock
+                    x:Name="_subtitle"
+                    Margin="0,2,0,0"
+                    FontSize="12"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{x:Static resources:Resource.PowerModeControl_Message}" />
+                <TextBlock
+                    x:Name="_warning"
+                    Margin="0,4,0,0"
+                    FontSize="11"
+                    Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                    Text=""
+                    TextWrapping="Wrap"
+                    Visibility="Collapsed" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="3"
+                Orientation="Horizontal"
+                VerticalAlignment="Center">
+                <wpfui:Button
+                    x:Name="_configButton"
+                    Icon="Settings24"
+                    FontSize="20"
+                    Margin="0,0,8,0"
+                    ToolTip="{x:Static resources:Resource.PowerModeControl_Settings}"
+                    Visibility="Collapsed" />
+                <ComboBox
+                    x:Name="_comboBox"
+                    MinWidth="150"
+                    Visibility="Hidden" />
+            </StackPanel>
+        </Grid>
+    </wpfui:Card>
+</UserControl>
