@@ -52,27 +52,40 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     // STAGE 2: ENERGY INTEGRATOR (time-domain accumulator)
     // Integrates magnitude² over time, decays slowly
     // This provides temporal mass that prevents binary ON/OFF behavior
+    // TUNED: Low gain prevents overshoot, preserves micro-dynamics
     // ========================================================================
     private readonly float[] _energyAccumulator = new float[4];
-    private const float EnergyDecayRate = 3.0f;      // Energy decay per second
-    private const float EnergyInputGain = 8.0f;      // Input scaling to accumulator
-    private const float MaxEnergy = 2.0f;            // Ceiling for accumulator
+    private const float EnergyDecayRate = 2.5f;      // Energy decay per second (slower = more mass)
+    private const float EnergyInputGain = 0.15f;     // REDUCED: prevents pinning at max during music
+    private const float MaxEnergy = 1.0f;            // Ceiling for accumulator (lower = more headroom)
 
     // ========================================================================
-    // STAGE 3: ENVELOPE FOLLOWER (exponential smoothing)
-    // Converts integrated energy to smooth visual envelope
+    // STAGE 3: ADAPTIVE NORMALIZATION
+    // Rolling max reference for auto-gain without clipping
+    // ========================================================================
+    private readonly float[] _rollingMax = new float[4];
+    private const float RollingMaxDecay = 0.9985f;   // Very slow decay for stable reference
+    private const float MinRollingMax = 0.001f;      // Prevent div-by-zero
+
+    // ========================================================================
+    // STAGE 4: ENVELOPE FOLLOWER (exponential smoothing)
+    // Converts normalized energy to smooth visual envelope
+    // TUNED: Slow attack preserves wave motion, prevents flattening
     // ========================================================================
     private readonly float[] _envelope = new float[4];
-    private const float AttackTau = 0.030f;          // 30ms attack time constant
-    private const float DecayTau = 0.400f;           // 400ms decay time constant
+    private const float AttackTau = 0.150f;          // 150ms attack (SLOW: preserves micro-dynamics)
+    private const float DecayTau = 0.450f;           // 450ms decay (graceful fade)
 
     // ========================================================================
-    // STAGE 4: DISPLAY OUTPUT (spatial bleed + brightness)
-    // Final smoothed values after spatial processing
+    // STAGE 5: SPATIAL BLEED (wave formation)
+    // Applied AFTER envelope for proper wave propagation
     // ========================================================================
     private readonly float[] _displayEnvelope = new float[4];
-    private const float SelfWeight = 0.60f;          // Self contribution
-    private const float NeighborWeight = 0.20f;      // Neighbor contribution
+    private const float SelfWeight = 0.70f;          // Self contribution
+    private const float NeighborWeight = 0.15f;      // Neighbor contribution
+
+    // Compression exponent: pow(x, 0.6) expands low-level detail
+    private const float CompressionExponent = 0.6f;
 
     // Frequency band boundaries (Hz)
     private static readonly (float Low, float High)[] FrequencyBands =
@@ -100,6 +113,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
         for (var i = 0; i < 4; i++)
         {
             _energyAccumulator[i] = 0f;
+            _rollingMax[i] = MinRollingMax;
             _envelope[i] = 0f;
             _displayEnvelope[i] = 0f;
         }
@@ -156,7 +170,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
                 // ============================================================
                 // STAGE 2: ENERGY INTEGRATOR (time-domain accumulator)
-                // energy += input² * dt * gain
+                // energy += input² * dt * gain (REDUCED gain prevents overshoot)
                 // energy -= energy * decayRate * dt
                 // This provides temporal mass that smooths transients
                 // ============================================================
@@ -174,26 +188,48 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 }
 
                 // ============================================================
-                // STAGE 3: ENVELOPE FOLLOWER (exponential smoothing)
-                // Converts integrated energy to smooth visual envelope
-                // alpha = 1 - exp(-dt / tau)  [frame-rate independent]
+                // STAGE 3: ADAPTIVE NORMALIZATION
+                // Rolling max reference for auto-gain without clipping
+                // ============================================================
+                for (var z = 0; z < 4; z++)
+                {
+                    // Update rolling max (fast rise, very slow decay)
+                    if (_energyAccumulator[z] > _rollingMax[z])
+                    {
+                        _rollingMax[z] = _energyAccumulator[z];
+                    }
+                    else
+                    {
+                        _rollingMax[z] *= RollingMaxDecay;
+                        if (_rollingMax[z] < MinRollingMax) _rollingMax[z] = MinRollingMax;
+                    }
+                }
+
+                // ============================================================
+                // STAGE 4: NORMALIZE + COMPRESS + ENVELOPE
+                // Pipeline: energy → normalize → gentle compression → envelope
                 // ============================================================
                 var attackAlpha = 1f - MathF.Exp(-dtScaled / AttackTau);
                 var decayAlpha = 1f - MathF.Exp(-dtScaled / DecayTau);
 
                 for (var z = 0; z < 4; z++)
                 {
-                    // Normalize energy to 0-1 range via sqrt (perceptual + range compression)
-                    var normalizedEnergy = MathF.Sqrt(_energyAccumulator[z] / MaxEnergy);
+                    // Normalize against rolling max (auto-gain)
+                    var normalized = _energyAccumulator[z] / _rollingMax[z];
+                    normalized = Math.Clamp(normalized, 0f, 1f);
 
-                    // Apply envelope follower: asymmetric attack/decay
-                    float alpha = normalizedEnergy > _envelope[z] ? attackAlpha : decayAlpha;
-                    _envelope[z] += (normalizedEnergy - _envelope[z]) * alpha;
+                    // Gentle compression: pow(x, 0.6) expands low-level detail
+                    // This prevents "always high" and preserves micro-dynamics
+                    var compressed = MathF.Pow(normalized, CompressionExponent);
+
+                    // Envelope follower: slow attack preserves wave motion
+                    float alpha = compressed > _envelope[z] ? attackAlpha : decayAlpha;
+                    _envelope[z] += (compressed - _envelope[z]) * alpha;
                 }
 
                 // ============================================================
-                // STAGE 4: SPATIAL BLEED (wave formation)
-                // Inter-zone energy bleeding creates wave-like continuity
+                // STAGE 5: SPATIAL BLEED (wave formation)
+                // Applied AFTER envelope for proper wave propagation
                 // ============================================================
                 for (var z = 0; z < 4; z++)
                 {
@@ -447,7 +483,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 syntheticInput[z] = 0.15f * (float)(Math.Sin(phase) * 0.5 + 0.5);
             }
 
-            // STAGE 2: Energy integrator
+            // STAGE 2: Energy integrator (same pipeline as main loop)
             for (var z = 0; z < 4; z++)
             {
                 var inputPower = syntheticInput[z] * syntheticInput[z];
@@ -456,18 +492,32 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                 _energyAccumulator[z] = Math.Clamp(_energyAccumulator[z], 0f, MaxEnergy);
             }
 
-            // STAGE 3: Envelope follower
+            // STAGE 3: Adaptive normalization
+            for (var z = 0; z < 4; z++)
+            {
+                if (_energyAccumulator[z] > _rollingMax[z])
+                    _rollingMax[z] = _energyAccumulator[z];
+                else
+                {
+                    _rollingMax[z] *= RollingMaxDecay;
+                    if (_rollingMax[z] < MinRollingMax) _rollingMax[z] = MinRollingMax;
+                }
+            }
+
+            // STAGE 4: Normalize + compress + envelope
             var attackAlpha = 1f - MathF.Exp(-dt / AttackTau);
             var decayAlpha = 1f - MathF.Exp(-dt / DecayTau);
 
             for (var z = 0; z < 4; z++)
             {
-                var normalizedEnergy = MathF.Sqrt(_energyAccumulator[z] / MaxEnergy);
-                float alpha = normalizedEnergy > _envelope[z] ? attackAlpha : decayAlpha;
-                _envelope[z] += (normalizedEnergy - _envelope[z]) * alpha;
+                var normalized = _energyAccumulator[z] / _rollingMax[z];
+                normalized = Math.Clamp(normalized, 0f, 1f);
+                var compressed = MathF.Pow(normalized, CompressionExponent);
+                float alpha = compressed > _envelope[z] ? attackAlpha : decayAlpha;
+                _envelope[z] += (compressed - _envelope[z]) * alpha;
             }
 
-            // STAGE 4: Spatial bleed
+            // STAGE 5: Spatial bleed
             for (var z = 0; z < 4; z++)
             {
                 var self = _envelope[z] * SelfWeight;
