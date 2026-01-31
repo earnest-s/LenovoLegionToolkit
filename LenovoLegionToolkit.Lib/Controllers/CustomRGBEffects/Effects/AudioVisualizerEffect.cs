@@ -3,6 +3,7 @@
 // 
 // FFT-based spectrum visualizer for 4-zone keyboards.
 // Each zone represents a fixed frequency band (Bass, Low-Mid, High-Mid, Treble).
+// Smooth analog meter behavior with attack/decay envelope.
 // ============================================================================
 
 using System;
@@ -15,7 +16,7 @@ using NAudio.Wave;
 namespace LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects.Effects;
 
 /// <summary>
-/// FFT-based audio spectrum visualizer. Each zone represents a frequency band:
+/// FFT-based audio spectrum visualizer with smooth analog meter behavior.
 /// Zone 0: Bass (20-150 Hz), Zone 1: Low-Mid (150-600 Hz),
 /// Zone 2: High-Mid (600-2500 Hz), Zone 3: Treble (2500-16000 Hz).
 /// </summary>
@@ -27,7 +28,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
     // FFT configuration
     private const int FftLength = 2048;
-    private const int FftLengthLog2 = 11; // log2(2048) = 11
+    private const int FftLengthLog2 = 11;
     private readonly float[] _fftBuffer = new float[FftLength];
     private readonly Complex[] _fftComplex = new Complex[FftLength];
     private int _fftBufferIndex;
@@ -37,10 +38,11 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     private WasapiLoopbackCapture? _capture;
     private int _sampleRate = 48000;
 
-    // Zone brightness with smoothing
-    private readonly double[] _zoneBrightness = new double[4];
-    private readonly double[] _zonePeakHold = new double[4];
-    private readonly double[] _zoneTargetLevel = new double[4];
+    // Per-zone envelope state for smooth analog behavior
+    private readonly double[] _zoneEnvelope = new double[4];           // Current smoothed level
+    private readonly double[] _zoneRawLevel = new double[4];           // Raw FFT level (smoothed)
+    private readonly double[] _zonePeakLevel = new double[4];          // Peak hold level
+    private readonly double[] _zoneVelocity = new double[4];           // Rate of change for momentum
 
     // Frequency band boundaries (Hz) - mapped to zones
     private static readonly (double Low, double High)[] FrequencyBands =
@@ -51,14 +53,18 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
         (2500, 16000)   // Zone 3: Treble
     };
 
-    // Smoothing parameters
-    private const double AttackRate = 0.35;      // How fast brightness rises
-    private const double DecayRate = 2.5;        // Brightness decay per second
-    private const double PeakHoldDecay = 0.8;    // Peak hold decay per second
-    private const double MinBrightness = 0.02;   // Minimum visible brightness
+    // Envelope parameters - tuned for smooth analog meter behavior
+    private const double AttackTime = 0.015;         // 15ms attack (fast rise)
+    private const double ReleaseTime = 0.35;         // 350ms release (slow fall)
+    private const double PeakHoldTime = 0.08;        // 80ms peak hold before decay
+    private const double PeakDecayTime = 0.5;        // 500ms peak decay
+    private const double RawSmoothingFactor = 0.25;  // Smoothing on raw FFT input
+    private const double MinBrightness = 0.03;       // Minimum visible glow
+    private const double NeighborBleed = 0.15;       // How much neighbors affect each other
 
-    // Sensitivity scaling per band (bass needs boost, treble needs attenuation)
-    private static readonly double[] BandSensitivity = { 2.5, 1.8, 1.2, 0.9 };
+    // Sensitivity scaling per band (perceptual equalization)
+    private static readonly double[] BandSensitivity = { 3.0, 2.0, 1.4, 1.0 };
+    private static readonly double[] BandGamma = { 0.7, 0.75, 0.8, 0.85 }; // Gamma curve per band
 
     public AudioVisualizerEffect(ZoneColors? zoneColors = null, int speed = 2)
     {
@@ -69,16 +75,21 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
             new RGBColor(0, 255, 100),  // Zone 2: Green (High-Mid)
             new RGBColor(0, 150, 255)   // Zone 3: Cyan-Blue (Treble)
         );
+
+        // Initialize envelopes to minimum
+        for (var i = 0; i < 4; i++)
+        {
+            _zoneEnvelope[i] = MinBrightness;
+        }
     }
 
     public CustomRGBEffectType Type => CustomRGBEffectType.AudioVisualizer;
-    public string Description => "FFT-based spectrum visualizer for 4-zone keyboards";
+    public string Description => "FFT-based spectrum visualizer with smooth analog response";
     public bool RequiresInputMonitoring => false;
     public bool RequiresSystemAccess => true;
 
     public async Task RunAsync(CustomRGBEffectController controller, CancellationToken cancellationToken)
     {
-        // Initialize WASAPI loopback capture
         try
         {
             _capture = new WasapiLoopbackCapture();
@@ -95,64 +106,105 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
         var stopwatch = Stopwatch.StartNew();
         var lastTime = 0.0;
 
-        // Speed multiplier affects responsiveness (1-4 maps to 0.6-1.5)
-        var speedMultiplier = 0.35 + (_speed * 0.3);
+        // Speed multiplier affects envelope timing (1-4 maps to 0.7-1.6)
+        var speedMultiplier = 0.4 + (_speed * 0.3);
+
+        // Calculate time constants based on speed
+        var attackCoeff = 1.0 - Math.Exp(-1.0 / (AttackTime * 60 / speedMultiplier));
+        var releaseCoeff = 1.0 - Math.Exp(-1.0 / (ReleaseTime * 60 * speedMultiplier));
 
         try
         {
             while (!cancellationToken.IsCancellationRequested)
             {
                 var currentTime = stopwatch.Elapsed.TotalSeconds;
-                var deltaTime = Math.Min(currentTime - lastTime, 0.1);
+                var deltaTime = Math.Min(currentTime - lastTime, 0.05);
                 lastTime = currentTime;
 
-                // Process FFT and get band magnitudes
-                ProcessFft();
+                // Process FFT and extract band levels
+                var bandLevels = ProcessFftBands();
 
-                // Update zone brightness with smoothing
+                // Update each zone with smooth envelope
                 for (var i = 0; i < 4; i++)
                 {
-                    var target = _zoneTargetLevel[i];
+                    // Smooth the raw FFT level (low-pass filter on input)
+                    _zoneRawLevel[i] += (bandLevels[i] - _zoneRawLevel[i]) * RawSmoothingFactor;
 
-                    // Peak hold
-                    if (target > _zonePeakHold[i])
+                    var targetLevel = _zoneRawLevel[i];
+
+                    // Apply neighbor bleed for wave-like cohesion (not directional)
+                    var neighborContribution = 0.0;
+                    if (i > 0) neighborContribution += _zoneRawLevel[i - 1] * NeighborBleed;
+                    if (i < 3) neighborContribution += _zoneRawLevel[i + 1] * NeighborBleed;
+                    targetLevel = Math.Max(targetLevel, neighborContribution);
+
+                    // Update peak hold with decay
+                    if (targetLevel > _zonePeakLevel[i])
                     {
-                        _zonePeakHold[i] = target;
+                        _zonePeakLevel[i] = targetLevel;
                     }
                     else
                     {
-                        _zonePeakHold[i] -= PeakHoldDecay * deltaTime * speedMultiplier;
-                        _zonePeakHold[i] = Math.Max(_zonePeakHold[i], target);
+                        // Decay peak after hold time
+                        var peakDecay = deltaTime / PeakDecayTime;
+                        _zonePeakLevel[i] = Math.Max(targetLevel, _zonePeakLevel[i] - peakDecay);
                     }
 
-                    // Smooth brightness transitions
-                    var effectiveTarget = Math.Max(target, _zonePeakHold[i] * 0.7);
+                    // Envelope follower with asymmetric attack/release
+                    var currentEnvelope = _zoneEnvelope[i];
+                    double newEnvelope;
 
-                    if (effectiveTarget > _zoneBrightness[i])
+                    if (targetLevel > currentEnvelope)
                     {
-                        // Attack - rise toward target
-                        _zoneBrightness[i] += (effectiveTarget - _zoneBrightness[i]) * AttackRate * speedMultiplier;
+                        // Attack phase - fast rise with slight overshoot
+                        var delta = targetLevel - currentEnvelope;
+                        _zoneVelocity[i] = Math.Max(_zoneVelocity[i], delta * attackCoeff * 2);
+                        newEnvelope = currentEnvelope + _zoneVelocity[i];
+
+                        // Clamp overshoot
+                        if (newEnvelope > targetLevel)
+                        {
+                            newEnvelope = targetLevel;
+                            _zoneVelocity[i] *= 0.5;
+                        }
                     }
                     else
                     {
-                        // Decay - fall smoothly
-                        _zoneBrightness[i] -= DecayRate * deltaTime * speedMultiplier;
+                        // Release phase - slow smooth decay
+                        _zoneVelocity[i] *= 0.8; // Dampen velocity
+
+                        // Blend toward target with peak influence
+                        var effectiveTarget = Math.Max(targetLevel, _zonePeakLevel[i] * 0.6);
+                        var delta = currentEnvelope - effectiveTarget;
+                        newEnvelope = currentEnvelope - delta * releaseCoeff;
+
+                        // Ensure we don't go below target
+                        newEnvelope = Math.Max(newEnvelope, targetLevel);
                     }
 
-                    _zoneBrightness[i] = Math.Clamp(_zoneBrightness[i], MinBrightness, 1.0);
+                    // Apply minimum and clamp
+                    _zoneEnvelope[i] = Math.Clamp(newEnvelope, MinBrightness, 1.0);
                 }
 
-                // Apply brightness to zone colors
+                // Apply gamma correction and generate colors
+                var finalBrightness = new double[4];
+                for (var i = 0; i < 4; i++)
+                {
+                    // Gamma correction for perceptual linearity
+                    finalBrightness[i] = Math.Pow(_zoneEnvelope[i], BandGamma[i]);
+                    finalBrightness[i] = Math.Clamp(finalBrightness[i], MinBrightness, 1.0);
+                }
+
                 var colors = new ZoneColors(
-                    ApplyBrightness(_zoneColors.Zone1, _zoneBrightness[0]),
-                    ApplyBrightness(_zoneColors.Zone2, _zoneBrightness[1]),
-                    ApplyBrightness(_zoneColors.Zone3, _zoneBrightness[2]),
-                    ApplyBrightness(_zoneColors.Zone4, _zoneBrightness[3])
+                    ApplyBrightness(_zoneColors.Zone1, finalBrightness[0]),
+                    ApplyBrightness(_zoneColors.Zone2, finalBrightness[1]),
+                    ApplyBrightness(_zoneColors.Zone3, finalBrightness[2]),
+                    ApplyBrightness(_zoneColors.Zone4, finalBrightness[3])
                 );
 
                 await controller.SetColorsAsync(colors, cancellationToken).ConfigureAwait(false);
 
-                // ~60 FPS
+                // ~60 FPS for smooth animation
                 await Task.Delay(16, cancellationToken).ConfigureAwait(false);
             }
         }
@@ -172,7 +224,6 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
         {
             for (var i = 0; i + bytesPerFrame <= e.BytesRecorded; i += bytesPerFrame)
             {
-                // Read sample (assuming 32-bit float format from WASAPI)
                 float sample;
                 if (bytesPerSample == 4)
                 {
@@ -187,20 +238,31 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
                     continue;
                 }
 
-                // Add to FFT buffer (mono mix if stereo)
-                _fftBuffer[_fftBufferIndex] = sample;
-                _fftBufferIndex++;
-
-                if (_fftBufferIndex >= FftLength)
+                // Stereo to mono mix
+                if (channels >= 2 && i + bytesPerFrame * 2 <= e.BytesRecorded)
                 {
-                    _fftBufferIndex = 0;
+                    float sample2;
+                    if (bytesPerSample == 4)
+                    {
+                        sample2 = BitConverter.ToSingle(e.Buffer, i + bytesPerSample);
+                    }
+                    else
+                    {
+                        sample2 = BitConverter.ToInt16(e.Buffer, i + bytesPerSample) / 32768f;
+                    }
+                    sample = (sample + sample2) * 0.5f;
                 }
+
+                _fftBuffer[_fftBufferIndex] = sample;
+                _fftBufferIndex = (_fftBufferIndex + 1) % FftLength;
             }
         }
     }
 
-    private void ProcessFft()
+    private double[] ProcessFftBands()
     {
+        var levels = new double[4];
+
         lock (_fftLock)
         {
             // Copy buffer to complex array with Hann window
@@ -212,43 +274,53 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
             }
         }
 
-        // Perform in-place FFT
+        // Perform FFT
         Fft(_fftComplex, FftLengthLog2);
 
         // Calculate frequency resolution
         var binWidth = (double)_sampleRate / FftLength;
 
-        // Calculate magnitude for each frequency band
+        // Extract magnitude for each frequency band
         for (var band = 0; band < 4; band++)
         {
             var (lowFreq, highFreq) = FrequencyBands[band];
-            var lowBin = (int)Math.Floor(lowFreq / binWidth);
-            var highBin = (int)Math.Ceiling(highFreq / binWidth);
+            var lowBin = Math.Max(1, (int)Math.Floor(lowFreq / binWidth));
+            var highBin = Math.Min(FftLength / 2 - 1, (int)Math.Ceiling(highFreq / binWidth));
 
-            lowBin = Math.Max(1, lowBin);
-            highBin = Math.Min(FftLength / 2 - 1, highBin);
-
-            // Sum magnitudes in this frequency range
-            var sum = 0.0;
+            // Use RMS of magnitudes for more stable reading
+            var sumSquares = 0.0;
             var count = 0;
 
             for (var bin = lowBin; bin <= highBin; bin++)
             {
                 var magnitude = _fftComplex[bin].Magnitude;
-                sum += magnitude;
+                sumSquares += magnitude * magnitude;
                 count++;
             }
 
-            // Average magnitude with sensitivity scaling
-            var avgMagnitude = count > 0 ? sum / count : 0;
-            var scaledMagnitude = avgMagnitude * BandSensitivity[band] * 15; // Boost for visibility
+            // RMS magnitude
+            var rmsMagnitude = count > 0 ? Math.Sqrt(sumSquares / count) : 0;
 
-            // Apply logarithmic scaling for better perception
-            var level = scaledMagnitude > 0 ? Math.Log10(1 + scaledMagnitude * 9) : 0;
-            level = Math.Clamp(level, 0, 1);
+            // Apply sensitivity and boost
+            var scaledMagnitude = rmsMagnitude * BandSensitivity[band] * 20;
 
-            _zoneTargetLevel[band] = level;
+            // Logarithmic/perceptual scaling
+            double level;
+            if (scaledMagnitude > 0)
+            {
+                // Attempt to map typical audio range to 0-1
+                // Using soft compression curve
+                level = 1.0 - (1.0 / (1.0 + scaledMagnitude * 2));
+            }
+            else
+            {
+                level = 0;
+            }
+
+            levels[band] = Math.Clamp(level, 0, 1);
         }
+
+        return levels;
     }
 
     private static void Fft(Complex[] buffer, int log2N)
@@ -308,7 +380,7 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
     private async Task RunIdleFallbackAsync(CustomRGBEffectController controller, CancellationToken cancellationToken)
     {
-        // Fallback when no audio device - subtle breathing
+        // Fallback when no audio device - subtle smooth breathing
         var stopwatch = Stopwatch.StartNew();
 
         while (!cancellationToken.IsCancellationRequested)
@@ -317,15 +389,21 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
 
             for (var i = 0; i < 4; i++)
             {
-                var phase = time * 0.5 + i * 0.3;
-                _zoneBrightness[i] = MinBrightness + 0.15 * (Math.Sin(phase) * 0.5 + 0.5);
+                // Staggered breathing with smooth sine waves
+                var phase = time * 0.8 + i * 0.4;
+                var breath = Math.Sin(phase) * 0.5 + 0.5;
+                var target = MinBrightness + 0.2 * breath;
+
+                // Smooth interpolation
+                _zoneEnvelope[i] += (target - _zoneEnvelope[i]) * 0.05;
+                _zoneEnvelope[i] = Math.Clamp(_zoneEnvelope[i], MinBrightness, 1.0);
             }
 
             var colors = new ZoneColors(
-                ApplyBrightness(_zoneColors.Zone1, _zoneBrightness[0]),
-                ApplyBrightness(_zoneColors.Zone2, _zoneBrightness[1]),
-                ApplyBrightness(_zoneColors.Zone3, _zoneBrightness[2]),
-                ApplyBrightness(_zoneColors.Zone4, _zoneBrightness[3])
+                ApplyBrightness(_zoneColors.Zone1, _zoneEnvelope[0]),
+                ApplyBrightness(_zoneColors.Zone2, _zoneEnvelope[1]),
+                ApplyBrightness(_zoneColors.Zone3, _zoneEnvelope[2]),
+                ApplyBrightness(_zoneColors.Zone4, _zoneEnvelope[3])
             );
 
             await controller.SetColorsAsync(colors, cancellationToken).ConfigureAwait(false);
