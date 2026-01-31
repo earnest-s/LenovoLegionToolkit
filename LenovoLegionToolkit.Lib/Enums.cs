@@ -439,7 +439,13 @@ public enum RGBKeyboardBacklightEffect
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Ripple")]
     Ripple,
     [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Ambient")]
-    Ambient
+    Ambient,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_BreathingColorCycle")]
+    BreathingColorCycle,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_Strobe")]
+    Strobe,
+    [Display(ResourceType = typeof(Resource), Name = "RGBKeyboardBacklightEffect_AudioVisualizer")]
+    AudioVisualizer
 }
 
 public enum RGBKeyboardBacklightPreset
@@ -521,7 +527,20 @@ public enum CustomRGBEffectType
     /// Ambient screen color sync (ambient.rs)
     /// Requires IScreenColorProvider - external signal effect
     /// </summary>
-    Ambient
+    Ambient,
+    /// <summary>
+    /// Breathing effect with color change on every breath cycle
+    /// </summary>
+    BreathingColorCycle,
+    /// <summary>
+    /// ASUS ROG-style strobing/flashing effect
+    /// </summary>
+    Strobe,
+    /// <summary>
+    /// Audio-reactive effect for 4-zone keyboards
+    /// Maps audio frequency bands to zones
+    /// </summary>
+    AudioVisualizer
 }
 
 public enum SpeakerState

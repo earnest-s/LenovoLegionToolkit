@@ -673,6 +673,132 @@ namespace LenovoLegionToolkit.Lib.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disco.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Disco {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Disco", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swipe.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Swipe {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Swipe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swipe Fill.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_SwipeFill {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_SwipeFill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swipe Clean.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_SwipeCleanWithBlack {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_SwipeCleanWithBlack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lightning.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Lightning {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Lightning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Christmas.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Christmas {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Christmas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Temperature.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Temperature {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Temperature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rainbow Wave.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_RainbowWave {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_RainbowWave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fade.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Fade {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Fade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ripple.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Ripple {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Ripple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ambient.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Ambient {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Ambient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Breathing Color Cycle.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_BreathingColorCycle {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_BreathingColorCycle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Strobe.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_Strobe {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_Strobe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Audio Visualizer.
+        /// </summary>
+        public static string RGBKeyboardBacklightEffect_AudioVisualizer {
+            get {
+                return ResourceManager.GetString("RGBKeyboardBacklightEffect_AudioVisualizer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Preset 4.
         /// </summary>
         public static string RGBKeyboardBacklightPreset_Four {
