@@ -76,8 +76,8 @@ public class AudioVisualizerEffect : ICustomRGBEffect, IDisposable
     private const float SpectrumSmooth = 0.7f;       // Current frame weight
     private const float SpectrumPrevWeight = 0.3f;   // Previous frame weight
     private const float DecayRate = 7.0f;            // Fast decay on silence (6-8 range)
-    private const float PerceptualExponent = 0.6f;   // pow(x, 0.6) for brightness scaling
-    private const float InputGain = 2.5f;            // Amplify spectrum for visibility
+    private const float PerceptualExponent = 0.5f;   // Lower exponent = brighter output
+    private const float InputGain = 5.0f;            // Increased for higher brightness
 
     static AudioVisualizerEffect()
     {
