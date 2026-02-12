@@ -80,6 +80,12 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
     }
 
     /// <summary>
+    /// When true, SetColorsAsync will skip writing to the device.
+    /// Used by strobe override in RGBKeyboardBacklightController.
+    /// </summary>
+    public bool IsOverrideActive { get; set; }
+
+    /// <summary>
     /// Checks if the RGB keyboard is supported.
     /// </summary>
     public Task<bool> IsSupportedAsync() => Task.FromResult(DeviceHandle is not null);
@@ -164,6 +170,13 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
     public async Task SetColorsAsync(ZoneColors colors, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        // Skip device write when strobe override is active
+        if (IsOverrideActive)
+        {
+            _currentColors = colors;
+            return;
+        }
 
         using (await IoLock.LockAsync(cancellationToken).ConfigureAwait(false))
         {
