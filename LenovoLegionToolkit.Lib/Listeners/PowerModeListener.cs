@@ -6,13 +6,15 @@ using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Messaging;
 using LenovoLegionToolkit.Lib.Messaging.Messages;
 using LenovoLegionToolkit.Lib.System.Management;
+using LenovoLegionToolkit.Lib.Utils;
 
 namespace LenovoLegionToolkit.Lib.Listeners;
 
 public class PowerModeListener(
     GodModeController godModeController,
     WindowsPowerModeController windowsPowerModeController,
-    WindowsPowerPlanController windowsPowerPlanController)
+    WindowsPowerPlanController windowsPowerPlanController,
+    RGBKeyboardBacklightController rgbKeyboardBacklightController)
     : AbstractWMIListener<PowerModeListener.ChangedEventArgs, PowerModeState, int>(WMI.LenovoGameZoneSmartFanModeEvent.Listen), INotifyingListener<PowerModeListener.ChangedEventArgs, PowerModeState>
 {
     public class ChangedEventArgs(PowerModeState state) : EventArgs
@@ -30,6 +32,18 @@ public class PowerModeListener(
 
     protected override async Task OnChangedAsync(PowerModeState value)
     {
+        // Trigger strobe FIRST for instant visual feedback
+        try
+        {
+            if (await rgbKeyboardBacklightController.IsSupportedAsync().ConfigureAwait(false))
+                await rgbKeyboardBacklightController.TriggerStrobeAsync(value).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"Failed to trigger strobe for power mode {value}", ex);
+        }
+
         await ChangeDependenciesAsync(value).ConfigureAwait(false);
         PublishNotification(value);
     }
