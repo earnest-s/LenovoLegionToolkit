@@ -32,16 +32,16 @@ public class PowerModeListener(
 
     protected override async Task OnChangedAsync(PowerModeState value)
     {
-        // Trigger strobe FIRST for instant visual feedback
+        // Trigger premium transition animation for instant visual feedback
         try
         {
             if (await rgbKeyboardBacklightController.IsSupportedAsync().ConfigureAwait(false))
-                await rgbKeyboardBacklightController.TriggerStrobeAsync(value).ConfigureAwait(false);
+                await rgbKeyboardBacklightController.PlayTransitionAsync(value).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             if (Log.Instance.IsTraceEnabled)
-                Log.Instance.Trace($"Failed to trigger strobe for power mode {value}", ex);
+                Log.Instance.Trace($"Failed to trigger transition for power mode {value}", ex);
         }
 
         await ChangeDependenciesAsync(value).ConfigureAwait(false);

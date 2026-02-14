@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,13 +44,9 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
         public bool ForceDisable { get; set; }
 
-        // --- Strobe override state ---
-#pragma warning disable CS0414
-        private bool _strobeActive;
-#pragma warning restore CS0414
-        private RGBColor _strobeColor;
-        private CancellationTokenSource? _strobeCts;
-        private Task? _strobeTask;
+        // --- Performance mode transition state ---
+        private CancellationTokenSource? _transitionCts;
+        private Task? _transitionTask;
 
         public Task<bool> IsSupportedAsync()
         {
@@ -422,124 +417,62 @@ namespace LenovoLegionToolkit.Lib.Controllers
         }
 
         /// <summary>
-        /// Triggers a 3-second smooth strobe on all zones with the color mapped to the given power mode.
-        /// Stops the current effect, plays strobe, waits, then restarts effect cleanly.
+        /// Plays a premium performance-mode transition animation (3 breathing pulses + fade to black).
+        /// Pauses the current effect, plays the animation, then seamlessly resumes.
+        /// Double-trigger safe: a new call cancels any running transition.
         /// </summary>
-        public async Task TriggerStrobeAsync(PowerModeState mode)
+        public async Task PlayTransitionAsync(PowerModeState mode)
         {
-            // Map power mode to strobe color
-            _strobeColor = mode switch
+            var modeColor = mode switch
             {
                 PowerModeState.Quiet => new RGBColor(0, 120, 255),       // Blue
                 PowerModeState.Balance => new RGBColor(255, 255, 255),   // White
                 PowerModeState.Performance => new RGBColor(255, 0, 0),   // Red
-                PowerModeState.GodMode => new RGBColor(180, 0, 255),     // Purple (Custom/GodMode)
+                PowerModeState.GodMode => new RGBColor(180, 0, 255),     // Purple
                 _ => new RGBColor(255, 255, 255)
             };
 
-            // Cancel any existing strobe
-            if (_strobeCts is not null)
+            // Cancel any in-flight transition
+            if (_transitionCts is not null)
             {
-                await _strobeCts.CancelAsync().ConfigureAwait(false);
-                if (_strobeTask is not null)
+                await _transitionCts.CancelAsync().ConfigureAwait(false);
+                if (_transitionTask is not null)
                 {
-                    try { await _strobeTask.ConfigureAwait(false); }
+                    try { await _transitionTask.ConfigureAwait(false); }
                     catch (OperationCanceledException) { }
                 }
-                _strobeCts.Dispose();
+                _transitionCts.Dispose();
             }
 
-            // Stop current effect completely so it can't write during strobe
-            await customEffectController.StopEffectAsync().ConfigureAwait(false);
+            // Pause running custom effect (it stays alive in memory)
+            customEffectController.IsOverrideActive = true;
 
-            _strobeActive = true;
-
-            _strobeCts = new CancellationTokenSource();
-            _strobeTask = RunStrobeAsync(_strobeCts.Token);
+            _transitionCts = new CancellationTokenSource();
+            _transitionTask = RunTransitionAsync(modeColor, _transitionCts.Token);
 
             if (Log.Instance.IsTraceEnabled)
-                Log.Instance.Trace($"Strobe triggered for power mode: {mode}");
+                Log.Instance.Trace($"Transition triggered for power mode: {mode}");
         }
 
-        private async Task RunStrobeAsync(CancellationToken cancellationToken)
+        private async Task RunTransitionAsync(RGBColor modeColor, CancellationToken cancellationToken)
         {
-            const float strobeDuration = 3.0f;
-
-            var sw = Stopwatch.StartNew();
-
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    var t = (float)sw.Elapsed.TotalSeconds;
-                    if (t >= strobeDuration)
-                        break;
-
-                    // Breathing curve (slow)
-                    var breathe = 0.5f + 0.5f * MathF.Sin(t * 4f);
-
-                    // Strobe modulation (soft)
-                    var strobe = 0.5f + 0.5f * MathF.Sin(t * 12f);
-
-                    // Mix: breathing dominant, strobe subtle
-                    var intensity = breathe * 0.7f + strobe * 0.3f;
-
-                    var r = (byte)(_strobeColor.R * intensity);
-                    var g = (byte)(_strobeColor.G * intensity);
-                    var b = (byte)(_strobeColor.B * intensity);
-
-                    var state = new LENOVO_RGB_KEYBOARD_STATE
-                    {
-                        Header = [0xCC, 0x16],
-                        Effect = 1,
-                        Speed = 1,
-                        Brightness = 2,
-                        Zone1Rgb = [r, g, b],
-                        Zone2Rgb = [r, g, b],
-                        Zone3Rgb = [r, g, b],
-                        Zone4Rgb = [r, g, b],
-                        Padding = 0,
-                        WaveLTR = 0,
-                        WaveRTL = 0,
-                        Unused = new byte[13]
-                    };
-
-                    await SendToDevice(state).ConfigureAwait(false);
-                    await Task.Delay(20, cancellationToken).ConfigureAwait(false); // ~50fps
-                }
+#if !MOCK_RGB
+                var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
+                await PerformanceModeTransitionEffect.PlayAsync(handle, modeColor, cancellationToken)
+                    .ConfigureAwait(false);
+#else
+                await Task.Delay(3500, cancellationToken).ConfigureAwait(false);
+#endif
             }
             catch (OperationCanceledException) { }
             finally
             {
-                // Force keyboard BLACK immediately after strobe
-                try
-                {
-                    var blackState = new LENOVO_RGB_KEYBOARD_STATE
-                    {
-                        Header = [0xCC, 0x16],
-                        Effect = 1,
-                        Speed = 1,
-                        Brightness = 2,
-                        Zone1Rgb = [0, 0, 0],
-                        Zone2Rgb = [0, 0, 0],
-                        Zone3Rgb = [0, 0, 0],
-                        Zone4Rgb = [0, 0, 0],
-                        Padding = 0,
-                        WaveLTR = 0,
-                        WaveRTL = 0,
-                        Unused = new byte[13]
-                    };
+                // Lift the override — effect can write to device again
+                customEffectController.IsOverrideActive = false;
 
-                    await SendToDevice(blackState).ConfigureAwait(false);
-                }
-                catch { }
-
-                // Wait 0.5s on black — no effect running, nothing can interrupt
-                await Task.Delay(500).ConfigureAwait(false);
-
-                _strobeActive = false;
-
-                // Now restart the preset/effect cleanly
+                // Restore the current preset (re-sends HID state + restarts custom effect)
                 try
                 {
                     await SetCurrentPresetAsync().ConfigureAwait(false);
@@ -547,11 +480,11 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 catch (Exception ex)
                 {
                     if (Log.Instance.IsTraceEnabled)
-                        Log.Instance.Trace($"Failed to restore preset after strobe", ex);
+                        Log.Instance.Trace($"Failed to restore preset after transition", ex);
                 }
 
                 if (Log.Instance.IsTraceEnabled)
-                    Log.Instance.Trace($"Strobe ended, effect resumed");
+                    Log.Instance.Trace($"Transition ended, effect resumed");
             }
         }
 
