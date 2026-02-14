@@ -50,6 +50,9 @@ public sealed class PerformanceModeTransitionEffect
     // ── Frame pacing ──────────────────────────────────────────────────────
     private const int FrameDelayMs = 16;               // ≈ 60 fps
 
+    // ── Playback speed ────────────────────────────────────────────────────
+    private const float Speed = 1.5f;                  // 1.5x faster than base timing
+
     /// <summary>
     /// Plays the full transition animation on the keyboard.
     /// Blocks asynchronously for ~2.5 s. Fully cancellable.
@@ -65,7 +68,7 @@ public sealed class PerformanceModeTransitionEffect
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var elapsedMs = (float)sw.Elapsed.TotalMilliseconds;
+                var elapsedMs = (float)sw.Elapsed.TotalMilliseconds * Speed;
                 if (elapsedMs >= TotalDurationMs)
                     break;
 
