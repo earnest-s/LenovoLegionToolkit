@@ -2,11 +2,14 @@
 // PerformanceModeTransitionEffect.cs
 //
 // Premium performance-mode keyboard transition (ROG / Predator style).
-// Plays 3 smooth breathing pulses over 3 seconds, then fades to black
-// over 0.5 seconds before yielding control back.
+// Pattern per pulse: instant flash → sine breath-out → dark gap.
+// 3 pulses total, then 0.5 s black hold before resuming.
 //
-// Each pulse uses a gamma-corrected sine curve:
-//   brightness = sin(t * PI) ^ gamma
+// Pulse timing:
+//   Flash:     0–50 ms   (full brightness, instant ON)
+//   Breath-out: 50–550 ms (sine ease 1.0 → 0.0)
+//   Dark gap:  550–670 ms (black)
+//   → one cycle ≈ 670 ms, 3 cycles ≈ 2.0 s + 0.5 s hold = ~2.5 s total
 //
 // All 4 zones glow the same mode color simultaneously.
 // ============================================================================
@@ -31,21 +34,25 @@ namespace LenovoLegionToolkit.Lib.Controllers;
 /// </summary>
 public sealed class PerformanceModeTransitionEffect
 {
-    // ── Animation timing ──────────────────────────────────────────────────
+    // ── Pulse structure ───────────────────────────────────────────────────
     private const int PulseCount = 3;
-    private const float PulseDuration = 1.0f;                   // 1 s per pulse  → 3 s total
-    private const float FadeOutDuration = 0.5f;                 // black fade after last pulse
-    private const float TotalDuration = PulseCount * PulseDuration + FadeOutDuration;
+    private const float FlashDurationMs = 50f;         // instant-on flash
+    private const float BreathOutDurationMs = 500f;    // sine fade 1→0
+    private const float DarkGapMs = 120f;              // black pause between pulses
+    private const float PulseCycleMs = FlashDurationMs + BreathOutDurationMs + DarkGapMs; // ≈ 670 ms
 
-    // ── Easing ────────────────────────────────────────────────────────────
-    private const float Gamma = 2.2f;                           // perceptual gamma correction
+    // ── Post-animation hold ───────────────────────────────────────────────
+    private const float BlackHoldMs = 500f;            // stay black before resuming effect
+
+    // ── Total duration ────────────────────────────────────────────────────
+    private const float TotalDurationMs = PulseCount * PulseCycleMs + BlackHoldMs;
 
     // ── Frame pacing ──────────────────────────────────────────────────────
-    private const int FrameDelayMs = 16;                        // ≈ 60 fps
+    private const int FrameDelayMs = 16;               // ≈ 60 fps
 
     /// <summary>
     /// Plays the full transition animation on the keyboard.
-    /// Blocks asynchronously for ~3.5 s. Fully cancellable.
+    /// Blocks asynchronously for ~2.5 s. Fully cancellable.
     /// </summary>
     public static async Task PlayAsync(
         SafeFileHandle deviceHandle,
@@ -58,11 +65,11 @@ public sealed class PerformanceModeTransitionEffect
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var t = (float)sw.Elapsed.TotalSeconds;
-                if (t >= TotalDuration)
+                var elapsedMs = (float)sw.Elapsed.TotalMilliseconds;
+                if (elapsedMs >= TotalDurationMs)
                     break;
 
-                var brightness = ComputeBrightness(t);
+                var brightness = ComputeBrightness(elapsedMs);
                 var r = (byte)(modeColor.R * brightness);
                 var g = (byte)(modeColor.G * brightness);
                 var b = (byte)(modeColor.B * brightness);
@@ -86,29 +93,35 @@ public sealed class PerformanceModeTransitionEffect
 
     // ── Brightness curve ──────────────────────────────────────────────────
 
-    private static float ComputeBrightness(float t)
+    private static float ComputeBrightness(float elapsedMs)
     {
-        var pulsePhase = t / PulseDuration;          // which pulse we're in (fractional)
-        var pulseTime = PulseDuration;
+        // Determine which pulse we are in
+        var pulseIndex = (int)(elapsedMs / PulseCycleMs);
 
-        if (pulsePhase < PulseCount)
+        // Past all pulses → black hold region
+        if (pulseIndex >= PulseCount)
+            return 0f;
+
+        // Local time within this pulse cycle
+        var localMs = elapsedMs - pulseIndex * PulseCycleMs;
+
+        // ── Phase 1: Flash (instant ON) ──
+        if (localMs < FlashDurationMs)
+            return 1f;
+
+        // ── Phase 2: Breath-out (sine ease 1→0) ──
+        var breathLocal = localMs - FlashDurationMs;
+        if (breathLocal < BreathOutDurationMs)
         {
-            // Inside a pulse — sine envelope with gamma correction
-            var local = t - MathF.Floor(pulsePhase) * pulseTime;
-            var normalised = local / pulseTime;      // 0 → 1 within one pulse
-
-            // sin(0..PI) gives 0 → 1 → 0  (smooth fade-in, hold, fade-out)
-            var raw = MathF.Sin(normalised * MathF.PI);
-            return MathF.Pow(raw, Gamma);
+            // progress: 0 → 1
+            var progress = breathLocal / BreathOutDurationMs;
+            // sin(0) = 0, sin(PI/2) = 1 → we want 1→0, so use cos or offset sine
+            // brightness = sin((1 - progress) * PI/2)  gives smooth 1→0
+            return MathF.Sin((1f - progress) * MathF.PI * 0.5f);
         }
 
-        // After last pulse — fade to black over FadeOutDuration
-        var fadeT = (t - PulseCount * PulseDuration) / FadeOutDuration;
-        fadeT = Math.Clamp(fadeT, 0f, 1f);
-
-        // Smoothstep-out: 1 → 0
-        var inv = 1f - fadeT;
-        return inv * inv * (3f - 2f * inv);          // smoothstep
+        // ── Phase 3: Dark gap ──
+        return 0f;
     }
 
     // ── HID write ─────────────────────────────────────────────────────────
