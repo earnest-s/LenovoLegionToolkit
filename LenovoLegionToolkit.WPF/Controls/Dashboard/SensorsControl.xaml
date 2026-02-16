@@ -45,18 +45,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_Utilization_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_cpuUtilizationBar"
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="1" Grid.Column="1" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_cpuUtilizationBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_cpuUtilizationOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_cpuUtilizationLabel"
                     Grid.Row="1"
@@ -72,18 +80,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_CoreClock_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_cpuCoreClockBar"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="2" Grid.Column="1" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_cpuCoreClockBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_cpuCoreClockOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_cpuCoreClockLabel"
                     Grid.Row="2"
@@ -99,18 +115,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_Temperature_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_cpuTemperatureBar"
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="3" Grid.Column="1" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_cpuTemperatureBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_cpuTemperatureOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_cpuTemperatureLabel"
                     Grid.Row="3"
@@ -125,18 +149,26 @@
                     Grid.Column="0"
                     Content="{x:Static resources:Resource.SensorsControl_Fan_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_cpuFanSpeedBar"
-                    Grid.Row="4"
-                    Grid.Column="1"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="4" Grid.Column="1" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_cpuFanSpeedBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_cpuFanSpeedOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_cpuFanSpeedLabel"
                     Grid.Row="4"
@@ -159,18 +191,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_Utilization_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_gpuUtilizationBar"
-                    Grid.Row="1"
-                    Grid.Column="5"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="1" Grid.Column="5" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_gpuUtilizationBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_gpuUtilizationOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_gpuUtilizationLabel"
                     Grid.Row="1"
@@ -186,18 +226,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_CoreClock_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_gpuCoreClockBar"
-                    Grid.Row="2"
-                    Grid.Column="5"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="2" Grid.Column="5" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_gpuCoreClockBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_gpuCoreClockOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_gpuCoreClockLabel"
                     Grid.Row="2"
@@ -213,18 +261,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_MemoryClock_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_gpuMemoryClockBar"
-                    Grid.Row="3"
-                    Grid.Column="5"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="3" Grid.Column="5" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_gpuMemoryClockBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_gpuMemoryClockOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_gpuMemoryClockLabel"
                     Grid.Row="3"
@@ -240,18 +296,26 @@
                     VerticalContentAlignment="Center"
                     Content="{x:Static resources:Resource.SensorsControl_Temperature_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_gpuTemperatureBar"
-                    Grid.Row="4"
-                    Grid.Column="5"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="4" Grid.Column="5" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_gpuTemperatureBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_gpuTemperatureOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_gpuTemperatureLabel"
                     Grid.Row="4"
@@ -266,18 +330,26 @@
                     Grid.Column="4"
                     Content="{x:Static resources:Resource.SensorsControl_Fan_Title}"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar
-                    x:Name="_gpuFanSpeedBar"
-                    Grid.Row="5"
-                    Grid.Column="5"
-                    Margin="16,0,16,0"
-                    Maximum="100"
-                    Minimum="0"
-                    Value="0">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ProgressBarAnimateBehavior />
-                    </i:Interaction.Behaviors>
-                </ProgressBar>
+                <Grid Grid.Row="5" Grid.Column="5" Margin="16,0,16,0">
+                    <ProgressBar
+                        x:Name="_gpuFanSpeedBar"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="0">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ProgressBarAnimateBehavior />
+                        </i:Interaction.Behaviors>
+                    </ProgressBar>
+                    <Rectangle
+                        x:Name="_gpuFanSpeedOverlay"
+                        Height="0"
+                        Opacity="0"
+                        VerticalAlignment="Bottom"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="2"
+                        RadiusX="2"
+                        RadiusY="2" />
+                </Grid>
                 <Label
                     x:Name="_gpuFanSpeedLabel"
                     Grid.Row="5"

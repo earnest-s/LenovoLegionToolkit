@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using Humanizer;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers.Sensors;
@@ -40,6 +41,15 @@ public partial class SensorsControl
     private ProgressBar[] AllBars => [
         _cpuUtilizationBar, _cpuCoreClockBar, _cpuTemperatureBar, _cpuFanSpeedBar,
         _gpuUtilizationBar, _gpuCoreClockBar, _gpuMemoryClockBar, _gpuTemperatureBar, _gpuFanSpeedBar
+    ];
+
+    /// <summary>
+    /// Overlay rectangles that produce the swipe-up color transition.
+    /// Indices correspond 1:1 with <see cref="AllBars"/>.
+    /// </summary>
+    private Rectangle[] AllOverlays => [
+        _cpuUtilizationOverlay, _cpuCoreClockOverlay, _cpuTemperatureOverlay, _cpuFanSpeedOverlay,
+        _gpuUtilizationOverlay, _gpuCoreClockOverlay, _gpuMemoryClockOverlay, _gpuTemperatureOverlay, _gpuFanSpeedOverlay
     ];
 
     public SensorsControl()
@@ -81,6 +91,13 @@ public partial class SensorsControl
     private void UpdateAccent(PowerModeState mode)
     {
         var target = PerformanceModeColors.GetAccent(mode);
+        var targetBrush = new SolidColorBrush(target);
+
+        // Play the swipe-up overlay on every bar before the color changes.
+        var bars = AllBars;
+        var overlays = AllOverlays;
+        for (var i = 0; i < bars.Length; i++)
+            PlaySwipeUp(overlays[i], bars[i], targetBrush);
 
         // Animate the single shared brush so all bars transition together.
         var anim = new ColorAnimation
@@ -91,6 +108,60 @@ public partial class SensorsControl
         };
 
         _accentBrush.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+    }
+
+    /// <summary>
+    /// Plays a bottom-to-top color wipe on <paramref name="overlay"/> that
+    /// matches the height of <paramref name="bar"/>.  The overlay grows
+    /// upward while fading out, revealing the new accent underneath.
+    /// Duration matches the bar color animation (250 ms).
+    /// </summary>
+    private static void PlaySwipeUp(Rectangle overlay, FrameworkElement bar, SolidColorBrush fill)
+    {
+        var height = bar.ActualHeight;
+        if (height <= 0)
+            return;
+
+        // Stop any in-flight animations so we start from a clean state.
+        overlay.BeginAnimation(FrameworkElement.HeightProperty, null);
+        overlay.BeginAnimation(UIElement.OpacityProperty, null);
+
+        overlay.Fill = fill;
+        overlay.Height = 0;
+        overlay.Opacity = 0.9;
+
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        var duration = TimeSpan.FromMilliseconds(250);
+
+        // Swipe height: 0 → bar height
+        var heightAnim = new DoubleAnimation
+        {
+            From = 0,
+            To = height,
+            Duration = duration,
+            EasingFunction = ease
+        };
+
+        // Fade out: 0.9 → 0  (overlay disappears as it reaches full height)
+        var fadeAnim = new DoubleAnimation
+        {
+            From = 0.9,
+            To = 0,
+            Duration = duration,
+            EasingFunction = ease
+        };
+
+        // Reset overlay to invisible once the animation completes.
+        fadeAnim.Completed += (_, _) =>
+        {
+            overlay.BeginAnimation(FrameworkElement.HeightProperty, null);
+            overlay.BeginAnimation(UIElement.OpacityProperty, null);
+            overlay.Height = 0;
+            overlay.Opacity = 0;
+        };
+
+        overlay.BeginAnimation(FrameworkElement.HeightProperty, heightAnim);
+        overlay.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
     }
 
     private void InitializeContextMenu()
