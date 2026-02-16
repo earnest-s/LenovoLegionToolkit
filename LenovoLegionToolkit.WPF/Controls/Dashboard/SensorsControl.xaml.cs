@@ -4,13 +4,18 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Humanizer;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers.Sensors;
+using LenovoLegionToolkit.Lib.Features;
+using LenovoLegionToolkit.Lib.Listeners;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Settings;
+using LenovoLegionToolkit.WPF.Utils;
 using Wpf.Ui.Common;
 using MenuItem = Wpf.Ui.Controls.MenuItem;
 
@@ -21,16 +26,71 @@ public partial class SensorsControl
     private readonly ISensorsController _controller = IoCContainer.Resolve<ISensorsController>();
     private readonly ApplicationSettings _applicationSettings = IoCContainer.Resolve<ApplicationSettings>();
     private readonly DashboardSettings _dashboardSettings = IoCContainer.Resolve<DashboardSettings>();
+    private readonly PowerModeListener _powerModeListener = IoCContainer.Resolve<PowerModeListener>();
+    private readonly PowerModeFeature _powerModeFeature = IoCContainer.Resolve<PowerModeFeature>();
+
+    private SolidColorBrush _accentBrush = new(PerformanceModeColors.GetAccent(PowerModeState.Balance));
 
     private CancellationTokenSource? _cts;
     private Task? _refreshTask;
+
+    /// <summary>
+    /// All progress bars whose foreground tracks the active PowerMode accent.
+    /// </summary>
+    private ProgressBar[] AllBars => [
+        _cpuUtilizationBar, _cpuCoreClockBar, _cpuTemperatureBar, _cpuFanSpeedBar,
+        _gpuUtilizationBar, _gpuCoreClockBar, _gpuMemoryClockBar, _gpuTemperatureBar, _gpuFanSpeedBar
+    ];
 
     public SensorsControl()
     {
         InitializeComponent();
         InitializeContextMenu();
 
+        // Apply the shared accent brush to every bar up-front so the
+        // animated ColorAnimation on the single brush instance propagates
+        // to all bars simultaneously with no per-bar overhead.
+        foreach (var bar in AllBars)
+            bar.Foreground = _accentBrush;
+
         IsVisibleChanged += SensorsControl_IsVisibleChanged;
+        Loaded += SensorsControl_Loaded;
+    }
+
+    private async void SensorsControl_Loaded(object sender, RoutedEventArgs e)
+    {
+        _powerModeListener.Changed += PowerModeListener_Changed;
+
+        // Seed accent with current mode.
+        try
+        {
+            if (await _powerModeFeature.IsSupportedAsync())
+            {
+                var mode = await _powerModeFeature.GetStateAsync();
+                UpdateAccent(mode);
+            }
+        }
+        catch { /* best-effort on init */ }
+    }
+
+    private void PowerModeListener_Changed(object? sender, PowerModeListener.ChangedEventArgs e)
+    {
+        Dispatcher.Invoke(() => UpdateAccent(e.State));
+    }
+
+    private void UpdateAccent(PowerModeState mode)
+    {
+        var target = PerformanceModeColors.GetAccent(mode);
+
+        // Animate the single shared brush so all bars transition together.
+        var anim = new ColorAnimation
+        {
+            To = target,
+            Duration = TimeSpan.FromMilliseconds(250),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        };
+
+        _accentBrush.BeginAnimation(SolidColorBrush.ColorProperty, anim);
     }
 
     private void InitializeContextMenu()
