@@ -23,6 +23,14 @@ public class NotificationsManager
 
     private readonly ApplicationSettings _settings;
 
+    /// <summary>
+    /// Mode-identity gate for PowerMode OSD notifications.
+    /// Prevents duplicate OSD when both the immediate UI path and the
+    /// later WMI confirmation path publish the same mode notification.
+    /// Resets naturally when a different mode is published.
+    /// </summary>
+    private NotificationType? _lastPowerModeNotification;
+
     private List<INotificationWindow?> _windows = [];
 
     public NotificationsManager(ApplicationSettings settings)
@@ -103,6 +111,24 @@ public class NotificationsManager
                     Log.Instance.Trace($"Notification BLOCKED by settings: {notification.Type} (CapsNumLock={_settings.Store.Notifications.CapsNumLock}, FnLock={_settings.Store.Notifications.FnLock}, DontShow={_settings.Store.DontShowNotifications})");
 
                 return;
+            }
+
+            // Mode-identity gate for PowerMode notifications.
+            // The immediate UI path publishes the OSD first; the later
+            // WMI hardware confirmation publishes the same type again.
+            // Show only the first one per mode.
+            if (notification.Type is NotificationType.PowerModeQuiet
+                or NotificationType.PowerModeBalance
+                or NotificationType.PowerModePerformance
+                or NotificationType.PowerModeGodMode)
+            {
+                if (_lastPowerModeNotification == notification.Type)
+                {
+                    if (Log.Instance.IsTraceEnabled)
+                        Log.Instance.Trace($"PowerMode OSD SUPPRESSED (duplicate): {notification.Type}");
+                    return;
+                }
+                _lastPowerModeNotification = notification.Type;
             }
 
             if (Log.Instance.IsTraceEnabled)

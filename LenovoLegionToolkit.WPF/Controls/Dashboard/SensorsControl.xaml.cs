@@ -35,20 +35,11 @@ public partial class SensorsControl
     private SolidColorBrush _accentBrush = new(PerformanceModeColors.GetAccent(PowerModeState.Balance));
 
     /// <summary>
-    /// Tracks the last mode for which a transition animation was played,
-    /// so that the later <see cref="PowerModeListener.Changed"/> event
-    /// (which arrives after hardware confirmation) does not trigger a
-    /// redundant second animation.
+    /// Tracks the last mode for which a transition animation was played.
+    /// Pure mode-identity gate — any later event carrying the same mode
+    /// is silently ignored.  Naturally resets when a different mode is selected.
     /// </summary>
     private PowerModeState? _lastAnimatedMode;
-
-    /// <summary>
-    /// UTC timestamp of the last transition animation start.
-    /// Used together with <see cref="_lastAnimatedMode"/> to suppress
-    /// duplicate animations within a debounce window (Custom/GodMode
-    /// can emit multiple confirmations that arrive after the sweep ends).
-    /// </summary>
-    private DateTime _lastAnimatedTime;
 
     /// <summary>
     /// When true, <see cref="UpdateValues"/> is suppressed so the sweep
@@ -124,20 +115,13 @@ public partial class SensorsControl
 
     private void UpdateAccent(PowerModeState mode, bool playTransition = false)
     {
-        // Deduplicate: skip animation when the same mode was animated
-        // within the last 2 seconds.  This prevents Custom/GodMode's
-        // multi-step hardware confirmation from re-triggering visuals
-        // after the sweep has already completed and reset _sweepInProgress.
-        if (playTransition
-            && _lastAnimatedMode == mode
-            && (DateTime.UtcNow - _lastAnimatedTime).TotalMilliseconds < 2000)
+        // Pure mode-identity gate: skip if we already animated for this exact mode.
+        // The gate naturally opens when a *different* mode is selected.
+        if (playTransition && _lastAnimatedMode == mode)
             return;
 
         if (playTransition)
-        {
             _lastAnimatedMode = mode;
-            _lastAnimatedTime = DateTime.UtcNow;
-        }
         var target = PerformanceModeColors.GetAccent(mode);
         var targetBrush = new SolidColorBrush(target);
 
@@ -282,9 +266,9 @@ public partial class SensorsControl
                 Behaviors.ProgressBarAnimateBehavior.SetIsSuspended(bar, false);
 
             // NOTE: _lastAnimatedMode is intentionally NOT reset here.
-            // The time-based debounce (2 s window) handles the case where
-            // Custom/GodMode emits late confirmations after the sweep ends.
-            // A genuinely new mode selection will carry a different State.
+            // It stays set so that later hardware confirmations carrying
+            // the same mode are ignored.  It resets naturally when the
+            // user selects a different mode.
         }
         finally
         {
