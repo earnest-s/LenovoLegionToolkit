@@ -91,6 +91,33 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
     public Task<bool> IsSupportedAsync() => Task.FromResult(DeviceHandle is not null);
 
     /// <summary>
+    /// Resumes from override by lifting the HID-write gate and immediately
+    /// pushing the last computed frame to the device.  This must be called
+    /// instead of toggling <see cref="IsOverrideActive"/> manually when the
+    /// caller needs zero idle gap — the HID controller renders its default
+    /// (white) frame if even one refresh cycle passes without a write.
+    /// </summary>
+    public async Task ResumeFromOverrideAsync()
+    {
+        // Lift the gate so the effect loop's subsequent frames go through.
+        IsOverrideActive = false;
+
+        // Immediately push the last frame the effect loop computed while
+        // gated.  This overwrites the HID buffer in the same scheduling
+        // quantum as the gate-lift, so the controller never idles.
+        var colors = _currentColors;
+        using (await IoLock.LockAsync().ConfigureAwait(false))
+        {
+            var handle = DeviceHandle;
+            if (handle is null)
+                return;
+
+            var state = CreateState(colors);
+            await SendToDeviceAsync(handle, state).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
     /// Starts a custom RGB effect.
     /// </summary>
     public async Task StartEffectAsync(ICustomRGBEffect effect)

@@ -463,13 +463,13 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 await PerformanceModeTransitionEffect.PlayAsync(handle, modeColor, cancellationToken)
                     .ConfigureAwait(false);
 
-                // ── Settle frame: flush hardware buffer before profile resumes ──
-                // PlayAsync already ends on black after the 0.5 s hold, but we
-                // send one more explicit black frame + 16 ms delay so the HID
-                // controller fully latches black before the profile effect writes
-                // its first frame.  This eliminates the 1-frame colour glitch.
+                // ── Final black frame: ensure HID buffer is black ──
+                // PlayAsync already ends on black after the 0.5 s hold, but
+                // we send one more explicit black frame to guarantee the
+                // controller buffer is zeroed.  NO delay after this — the
+                // profile effect must resume in the very next operation so
+                // the HID controller never idles (which causes a white flash).
                 await PerformanceModeTransitionEffect.SendBlackFrame(handle).ConfigureAwait(false);
-                await Task.Delay(16, CancellationToken.None).ConfigureAwait(false);
 #else
                 await Task.Delay(3500, cancellationToken).ConfigureAwait(false);
 #endif
@@ -534,17 +534,32 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
             if (presetDescription.Effect.IsCustomEffect())
             {
-                // ── Custom effect path (no preset flash) ─────────────────
-                // 1. Start the effect loop while override is still active.
-                //    The effect's SetColorsAsync calls will be gated and
-                //    will NOT reach HID until we lift the override.
-                await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
-
-                // 2. Lift the override — the next SetColorsAsync from the
-                //    effect loop writes directly to the device.  Because
-                //    the keyboard is already black (from the transition
-                //    settle frame), there is no intermediate preset flash.
-                customEffectController.IsOverrideActive = false;
+                // ── Custom effect path (zero-gap resume) ─────────────────
+                // The effect loop was never stopped — PlayTransitionAsync
+                // only set IsOverrideActive = true to gate HID writes.
+                // The loop has been computing frames the whole time,
+                // storing results in CurrentColors.
+                //
+                // ResumeFromOverrideAsync lifts the gate AND immediately
+                // pushes the last computed frame to HID in one operation,
+                // so the controller never idles between the black frame
+                // and the first effect frame (which would show white).
+                //
+                // We do NOT call HandleCustomEffectAsync here because
+                // StartEffectAsync → SetStaticModeAsync writes 0xFF white
+                // to all zones as part of taking ownership — that IS the
+                // white flash.
+                if (customEffectController.IsEffectRunning)
+                {
+                    await customEffectController.ResumeFromOverrideAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    // Edge case: effect was not running (e.g. app restart
+                    // during transition).  Must start fresh.
+                    customEffectController.IsOverrideActive = false;
+                    await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
+                }
             }
             else
             {
