@@ -7,6 +7,8 @@ using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Features;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Messaging;
+using LenovoLegionToolkit.Lib.Messaging.Messages;
 using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
@@ -76,6 +78,14 @@ public class PowerModeControl : AbstractComboBoxFeatureCardControl<PowerModeStat
 
     protected override async Task OnStateChangeAsync(ComboBox comboBox, IFeature<PowerModeState> feature, PowerModeState? newValue, PowerModeState? oldValue)
     {
+        // Fire OSD + telemetry visual feedback IMMEDIATELY, before the
+        // hardware write which may block for 500 ms+ on Performance/GodMode.
+        if (newValue is { } mode && newValue != oldValue)
+        {
+            PublishImmediateNotification(mode);
+            MessagingCenter.Publish(new PowerModeVisualMessage(mode));
+        }
+
         await base.OnStateChangeAsync(comboBox, feature, newValue, oldValue);
 
         var mi = await Compatibility.GetMachineInformationAsync();
@@ -102,6 +112,25 @@ public class PowerModeControl : AbstractComboBoxFeatureCardControl<PowerModeStat
                 string.Format(Resource.PowerModeUnavailableWithoutACException_Message, ex1.PowerMode.GetDisplayName()),
                 SnackbarType.Warning);
         }
+    }
+
+    /// <summary>
+    /// Publishes the same OSD notification that <see cref="PowerModeListener"/>
+    /// would publish on the WMI (Fn+Q) path, but without waiting for hardware.
+    /// </summary>
+    private static void PublishImmediateNotification(PowerModeState mode)
+    {
+        var type = mode switch
+        {
+            PowerModeState.Quiet => NotificationType.PowerModeQuiet,
+            PowerModeState.Balance => NotificationType.PowerModeBalance,
+            PowerModeState.Performance => NotificationType.PowerModePerformance,
+            PowerModeState.GodMode => NotificationType.PowerModeGodMode,
+            _ => (NotificationType?)null
+        };
+
+        if (type is { } t)
+            MessagingCenter.Publish(new NotificationMessage(t, mode.GetDisplayName()));
     }
 
     protected override FrameworkElement GetAccessory(ComboBox comboBox)

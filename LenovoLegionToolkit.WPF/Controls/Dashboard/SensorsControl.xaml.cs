@@ -12,6 +12,8 @@ using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers.Sensors;
 using LenovoLegionToolkit.Lib.Features;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Messaging;
+using LenovoLegionToolkit.Lib.Messaging.Messages;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
@@ -31,6 +33,14 @@ public partial class SensorsControl
     private readonly PowerModeFeature _powerModeFeature = IoCContainer.Resolve<PowerModeFeature>();
 
     private SolidColorBrush _accentBrush = new(PerformanceModeColors.GetAccent(PowerModeState.Balance));
+
+    /// <summary>
+    /// Tracks the last mode for which a transition animation was played,
+    /// so that the later <see cref="PowerModeListener.Changed"/> event
+    /// (which arrives after hardware confirmation) does not trigger a
+    /// redundant second animation.
+    /// </summary>
+    private PowerModeState? _lastAnimatedMode;
 
     /// <summary>
     /// When true, <see cref="UpdateValues"/> is suppressed so the sweep
@@ -78,6 +88,13 @@ public partial class SensorsControl
     {
         _powerModeListener.Changed += PowerModeListener_Changed;
 
+        // Subscribe to the immediate UI-level notification published by
+        // PowerModeControl so we can animate without waiting for hardware.
+        MessagingCenter.Subscribe<PowerModeVisualMessage>(this, msg =>
+        {
+            Dispatcher.Invoke(() => UpdateAccent(msg.State, playTransition: true));
+        });
+
         // Seed accent with current mode.
         try
         {
@@ -92,11 +109,19 @@ public partial class SensorsControl
 
     private void PowerModeListener_Changed(object? sender, PowerModeListener.ChangedEventArgs e)
     {
+        // If we already animated for this mode (from the immediate
+        // FeatureStateMessage), skip the duplicate animation.
         Dispatcher.Invoke(() => UpdateAccent(e.State, playTransition: true));
     }
 
     private void UpdateAccent(PowerModeState mode, bool playTransition = false)
     {
+        // Deduplicate: skip animation if we already played for this mode.
+        if (playTransition && _lastAnimatedMode == mode)
+            return;
+
+        if (playTransition)
+            _lastAnimatedMode = mode;
         var target = PerformanceModeColors.GetAccent(mode);
         var targetBrush = new SolidColorBrush(target);
 
@@ -239,6 +264,10 @@ public partial class SensorsControl
             // Re-enable the per-bar animate behavior.
             foreach (var bar in bars)
                 Behaviors.ProgressBarAnimateBehavior.SetIsSuspended(bar, false);
+
+            // Allow the next PowerModeListener.Changed to animate even if
+            // it carries the same mode (e.g. after a failed set + retry).
+            _lastAnimatedMode = null;
         }
         finally
         {
