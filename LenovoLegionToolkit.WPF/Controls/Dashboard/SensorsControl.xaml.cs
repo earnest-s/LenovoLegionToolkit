@@ -122,21 +122,28 @@ public partial class SensorsControl
     }
 
     /// <summary>
-    /// Runs a 3-phase value sweep on every bar simultaneously:
-    ///   Phase 1: current value → 0   (250 ms, ease-in-out)
-    ///   Phase 2: 0 → Maximum         (300 ms, ease-out)
-    ///   Phase 3: Maximum → actual     (300 ms, ease-out)
-    /// Total ≈ 850 ms.  Telemetry updates are suppressed for the duration.
+    /// Runs a 3-phase value sweep on every bar via a single
+    /// <see cref="Storyboard"/> per bar (no <c>Task.Delay</c> gaps):
+    ///   Phase 1: current value → 0   (260 ms, QuinticEase EaseInOut)
+    ///   Phase 2: 0 → Maximum         (320 ms, QuinticEase EaseOut)
+    ///   Phase 3: Maximum → actual     (320 ms, QuinticEase EaseOut)
+    /// Total = 900 ms.  Telemetry updates and the
+    /// <see cref="Behaviors.ProgressBarAnimateBehavior"/> are suspended
+    /// for the full duration so nothing fights the timeline.
     /// </summary>
     private async Task SweepAllBarsAsync()
     {
+        // Guard: do not stack overlapping sweeps.
+        if (_sweepInProgress)
+            return;
+
         _sweepInProgress = true;
 
         try
         {
             var bars = AllBars;
 
-            // Snapshot each bar's current value and maximum so we restore correctly.
+            // Snapshot current values and maximums.
             var targets = new double[bars.Length];
             var maxes = new double[bars.Length];
             for (var i = 0; i < bars.Length; i++)
@@ -145,54 +152,93 @@ public partial class SensorsControl
                 maxes[i] = bars[i].Maximum;
             }
 
-            // Phase 1: collapse to 0
-            var collapseEase = new CubicEase { EasingMode = EasingMode.EaseInOut };
+            // Suspend the per-bar animate behavior so it cannot
+            // start its own 250 ms DoubleAnimation on each frame.
             foreach (var bar in bars)
-            {
-                bar.BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
-                {
-                    To = 0,
-                    Duration = TimeSpan.FromMilliseconds(250),
-                    EasingFunction = collapseEase,
-                    FillBehavior = FillBehavior.HoldEnd
-                });
-            }
-            await Task.Delay(250);
+                Behaviors.ProgressBarAnimateBehavior.SetIsSuspended(bar, true);
 
-            // Phase 2: expand to maximum
-            var expandEase = new CubicEase { EasingMode = EasingMode.EaseOut };
+            // Phase durations
+            var collapseDur = TimeSpan.FromMilliseconds(260);
+            var expandDur = TimeSpan.FromMilliseconds(320);
+            var settleDur = TimeSpan.FromMilliseconds(320);
+
+            // Easing – QuinticEase gives a smoother, more "weighted" feel.
+            var collapseEase = new QuinticEase { EasingMode = EasingMode.EaseInOut };
+            var expandEase = new QuinticEase { EasingMode = EasingMode.EaseOut };
+            var settleEase = new QuinticEase { EasingMode = EasingMode.EaseOut };
+
+            // Use a TaskCompletionSource tied to the LAST storyboard so we
+            // can await the entire sweep without any Task.Delay.
+            var tcs = new TaskCompletionSource();
+            var pendingCount = bars.Length;
+
             for (var i = 0; i < bars.Length; i++)
             {
-                bars[i].BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
+                var bar = bars[i];
+                var start = targets[i];
+                var max = maxes[i];
+                var target = targets[i];
+
+                // Phase 1 – collapse to 0
+                var collapse = new DoubleAnimation
+                {
+                    From = start,
+                    To = 0,
+                    Duration = collapseDur,
+                    EasingFunction = collapseEase
+                };
+
+                // Phase 2 – expand to maximum
+                var expand = new DoubleAnimation
                 {
                     From = 0,
-                    To = maxes[i],
-                    Duration = TimeSpan.FromMilliseconds(300),
+                    To = max,
+                    Duration = expandDur,
                     EasingFunction = expandEase,
-                    FillBehavior = FillBehavior.HoldEnd
-                });
-            }
-            await Task.Delay(300);
+                    BeginTime = collapseDur
+                };
 
-            // Phase 3: settle to actual telemetry value
-            var settleEase = new CubicEase { EasingMode = EasingMode.EaseOut };
-            for (var i = 0; i < bars.Length; i++)
-            {
-                bars[i].BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
+                // Phase 3 – settle to actual telemetry value
+                var settle = new DoubleAnimation
                 {
-                    From = maxes[i],
-                    To = targets[i],
-                    Duration = TimeSpan.FromMilliseconds(300),
+                    From = max,
+                    To = target,
+                    Duration = settleDur,
                     EasingFunction = settleEase,
-                    FillBehavior = FillBehavior.Stop
-                });
-            }
-            await Task.Delay(300);
+                    BeginTime = collapseDur + expandDur
+                };
 
-            // Clear the animation layer so the behavior and UpdateValues can
-            // drive the property again.
+                var sb = new Storyboard { FillBehavior = FillBehavior.Stop };
+                Storyboard.SetTarget(collapse, bar);
+                Storyboard.SetTargetProperty(collapse, new PropertyPath(RangeBase.ValueProperty));
+                Storyboard.SetTarget(expand, bar);
+                Storyboard.SetTargetProperty(expand, new PropertyPath(RangeBase.ValueProperty));
+                Storyboard.SetTarget(settle, bar);
+                Storyboard.SetTargetProperty(settle, new PropertyPath(RangeBase.ValueProperty));
+
+                sb.Children.Add(collapse);
+                sb.Children.Add(expand);
+                sb.Children.Add(settle);
+
+                sb.Completed += (_, _) =>
+                {
+                    // Clear animation layer so the behavior + UpdateValues
+                    // can drive the property again.
+                    bar.BeginAnimation(RangeBase.ValueProperty, null);
+
+                    if (Interlocked.Decrement(ref pendingCount) == 0)
+                        tcs.TrySetResult();
+                };
+
+                sb.Begin();
+            }
+
+            // Wait for every bar's storyboard to finish.
+            await tcs.Task;
+
+            // Re-enable the per-bar animate behavior.
             foreach (var bar in bars)
-                bar.BeginAnimation(RangeBase.ValueProperty, null);
+                Behaviors.ProgressBarAnimateBehavior.SetIsSuspended(bar, false);
         }
         finally
         {

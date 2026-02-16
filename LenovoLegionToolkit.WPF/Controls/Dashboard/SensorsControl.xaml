@@ -50,6 +50,8 @@
                         x:Name="_cpuUtilizationBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -85,6 +87,8 @@
                         x:Name="_cpuCoreClockBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -120,6 +124,8 @@
                         x:Name="_cpuTemperatureBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -154,6 +160,8 @@
                         x:Name="_cpuFanSpeedBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -196,6 +204,8 @@
                         x:Name="_gpuUtilizationBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -231,6 +241,8 @@
                         x:Name="_gpuCoreClockBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -266,6 +278,8 @@
                         x:Name="_gpuMemoryClockBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -301,6 +315,8 @@
                         x:Name="_gpuTemperatureBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
@@ -335,6 +351,8 @@
                         x:Name="_gpuFanSpeedBar"
                         Maximum="100"
                         Minimum="0"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
                         Value="0">
                         <i:Interaction.Behaviors>
                             <behaviors:ProgressBarAnimateBehavior />
