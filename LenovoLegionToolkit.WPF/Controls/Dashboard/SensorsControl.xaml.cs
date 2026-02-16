@@ -32,6 +32,13 @@ public partial class SensorsControl
 
     private SolidColorBrush _accentBrush = new(PerformanceModeColors.GetAccent(PowerModeState.Balance));
 
+    /// <summary>
+    /// When true, <see cref="UpdateValues"/> is suppressed so the sweep
+    /// animation can drive bar values without interference from the
+    /// telemetry refresh loop.
+    /// </summary>
+    private bool _sweepInProgress;
+
     private CancellationTokenSource? _cts;
     private Task? _refreshTask;
 
@@ -85,10 +92,10 @@ public partial class SensorsControl
 
     private void PowerModeListener_Changed(object? sender, PowerModeListener.ChangedEventArgs e)
     {
-        Dispatcher.Invoke(() => UpdateAccent(e.State));
+        Dispatcher.Invoke(() => UpdateAccent(e.State, playTransition: true));
     }
 
-    private void UpdateAccent(PowerModeState mode)
+    private void UpdateAccent(PowerModeState mode, bool playTransition = false)
     {
         var target = PerformanceModeColors.GetAccent(mode);
         var targetBrush = new SolidColorBrush(target);
@@ -108,6 +115,89 @@ public partial class SensorsControl
         };
 
         _accentBrush.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+
+        // Fire-and-forget the 3-phase sweep (collapse → expand → settle).
+        if (playTransition)
+            _ = SweepAllBarsAsync();
+    }
+
+    /// <summary>
+    /// Runs a 3-phase value sweep on every bar simultaneously:
+    ///   Phase 1: current value → 0   (120 ms, ease-in)
+    ///   Phase 2: 0 → Maximum         (150 ms, ease-out)
+    ///   Phase 3: Maximum → actual     (150 ms, ease-out)
+    /// Total ≈ 420 ms.  Telemetry updates are suppressed for the duration.
+    /// </summary>
+    private async Task SweepAllBarsAsync()
+    {
+        _sweepInProgress = true;
+
+        try
+        {
+            var bars = AllBars;
+
+            // Snapshot each bar's current value and maximum so we restore correctly.
+            var targets = new double[bars.Length];
+            var maxes = new double[bars.Length];
+            for (var i = 0; i < bars.Length; i++)
+            {
+                targets[i] = bars[i].Value;
+                maxes[i] = bars[i].Maximum;
+            }
+
+            // Phase 1: collapse to 0
+            var collapseEase = new CubicEase { EasingMode = EasingMode.EaseIn };
+            foreach (var bar in bars)
+            {
+                bar.BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
+                {
+                    To = 0,
+                    Duration = TimeSpan.FromMilliseconds(120),
+                    EasingFunction = collapseEase,
+                    FillBehavior = FillBehavior.HoldEnd
+                });
+            }
+            await Task.Delay(120);
+
+            // Phase 2: expand to maximum
+            var expandEase = new CubicEase { EasingMode = EasingMode.EaseOut };
+            for (var i = 0; i < bars.Length; i++)
+            {
+                bars[i].BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
+                {
+                    From = 0,
+                    To = maxes[i],
+                    Duration = TimeSpan.FromMilliseconds(150),
+                    EasingFunction = expandEase,
+                    FillBehavior = FillBehavior.HoldEnd
+                });
+            }
+            await Task.Delay(150);
+
+            // Phase 3: settle to actual telemetry value
+            var settleEase = new CubicEase { EasingMode = EasingMode.EaseOut };
+            for (var i = 0; i < bars.Length; i++)
+            {
+                bars[i].BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
+                {
+                    From = maxes[i],
+                    To = targets[i],
+                    Duration = TimeSpan.FromMilliseconds(150),
+                    EasingFunction = settleEase,
+                    FillBehavior = FillBehavior.Stop
+                });
+            }
+            await Task.Delay(150);
+
+            // Clear the animation layer so the behavior and UpdateValues can
+            // drive the property again.
+            foreach (var bar in bars)
+                bar.BeginAnimation(RangeBase.ValueProperty, null);
+        }
+        finally
+        {
+            _sweepInProgress = false;
+        }
     }
 
     /// <summary>
@@ -255,6 +345,11 @@ public partial class SensorsControl
 
     private void UpdateValues(SensorsData data)
     {
+        // During the sweep animation, skip telemetry updates so the
+        // animation can drive bar values uninterrupted.
+        if (_sweepInProgress)
+            return;
+
         UpdateValue(_cpuUtilizationBar, _cpuUtilizationLabel, data.CPU.MaxUtilization, data.CPU.Utilization,
             $"{data.CPU.Utilization}%");
         UpdateValue(_cpuCoreClockBar, _cpuCoreClockLabel, data.CPU.MaxCoreClock, data.CPU.CoreClock,
