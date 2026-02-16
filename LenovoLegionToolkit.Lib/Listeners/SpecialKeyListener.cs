@@ -135,9 +135,13 @@ public class SpecialKeyListener(
         switch (value)
         {
             case SpecialKey.FnLockOn:
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"FnLock event On received, publishing FnLockOn");
                 MessagingCenter.Publish(new NotificationMessage(NotificationType.FnLockOn));
                 break;
             case SpecialKey.FnLockOff:
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"FnLock event Off received, publishing FnLockOff");
                 MessagingCenter.Publish(new NotificationMessage(NotificationType.FnLockOff));
                 break;
         }

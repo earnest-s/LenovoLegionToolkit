@@ -9,13 +9,13 @@ public class ApplicationSettings : AbstractSettings<ApplicationSettings.Applicat
     public class Notifications
     {
         public bool UpdateAvailable { get; set; } = true;
-        public bool CapsNumLock { get; set; }
-        public bool FnLock { get; set; }
+        public bool CapsNumLock { get; set; } = true;
+        public bool FnLock { get; set; } = true;
         public bool TouchpadLock { get; set; } = true;
         public bool KeyboardBacklight { get; set; } = true;
         public bool CameraLock { get; set; } = true;
         public bool Microphone { get; set; } = true;
-        public bool PowerMode { get; set; }
+        public bool PowerMode { get; set; } = true;
         public bool RefreshRate { get; set; } = true;
         public bool ACAdapter { get; set; }
         public bool SmartKey { get; set; }

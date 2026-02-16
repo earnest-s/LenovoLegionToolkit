@@ -61,24 +61,24 @@ public class NotificationsManager
                 NotificationType.ACAdapterConnectedLowWattage => _settings.Store.Notifications.ACAdapter,
                 NotificationType.ACAdapterDisconnected => _settings.Store.Notifications.ACAdapter,
                 NotificationType.AutomationNotification => _settings.Store.Notifications.AutomationNotification,
-                NotificationType.CapsLockOn => _settings.Store.Notifications.CapsNumLock,
-                NotificationType.CapsLockOff => _settings.Store.Notifications.CapsNumLock,
+                NotificationType.CapsLockOn => true,
+                NotificationType.CapsLockOff => true,
                 NotificationType.CameraOn => _settings.Store.Notifications.CameraLock,
                 NotificationType.CameraOff => _settings.Store.Notifications.CameraLock,
-                NotificationType.FnLockOn => _settings.Store.Notifications.FnLock,
-                NotificationType.FnLockOff => _settings.Store.Notifications.FnLock,
+                NotificationType.FnLockOn => true,
+                NotificationType.FnLockOff => true,
                 NotificationType.MicrophoneOn => _settings.Store.Notifications.Microphone,
                 NotificationType.MicrophoneOff => _settings.Store.Notifications.Microphone,
-                NotificationType.NumLockOn => _settings.Store.Notifications.CapsNumLock,
-                NotificationType.NumLockOff => _settings.Store.Notifications.CapsNumLock,
+                NotificationType.NumLockOn => true,
+                NotificationType.NumLockOff => true,
                 NotificationType.PanelLogoLightingOn => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.PanelLogoLightingOff => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.PortLightingOn => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.PortLightingOff => _settings.Store.Notifications.KeyboardBacklight,
-                NotificationType.PowerModeQuiet => _settings.Store.Notifications.PowerMode,
-                NotificationType.PowerModeBalance => _settings.Store.Notifications.PowerMode,
-                NotificationType.PowerModePerformance => _settings.Store.Notifications.PowerMode,
-                NotificationType.PowerModeGodMode => _settings.Store.Notifications.PowerMode,
+                NotificationType.PowerModeQuiet => true,
+                NotificationType.PowerModeBalance => true,
+                NotificationType.PowerModePerformance => true,
+                NotificationType.PowerModeGodMode => true,
                 NotificationType.RefreshRate => _settings.Store.Notifications.RefreshRate,
                 NotificationType.RGBKeyboardBacklightOff => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.RGBKeyboardBacklightChanged => _settings.Store.Notifications.KeyboardBacklight,
@@ -98,10 +98,13 @@ public class NotificationsManager
             if (!allow)
             {
                 if (Log.Instance.IsTraceEnabled)
-                    Log.Instance.Trace($"Notification type {notification.Type} is disabled.");
+                    Log.Instance.Trace($"Notification BLOCKED by settings: {notification.Type} (CapsNumLock={_settings.Store.Notifications.CapsNumLock}, FnLock={_settings.Store.Notifications.FnLock}, DontShow={_settings.Store.DontShowNotifications})");
 
                 return;
             }
+
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"Notification ALLOWED, preparing OSD: {notification.Type}");
 
             var symbol = notification.Type switch
             {

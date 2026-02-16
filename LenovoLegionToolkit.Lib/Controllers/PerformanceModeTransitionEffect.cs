@@ -127,6 +127,16 @@ public sealed class PerformanceModeTransitionEffect
         return 0f;
     }
 
+    // ── Public helpers ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// Sends a single all-black frame to the keyboard.
+    /// Used by the controller as a hardware-settle frame before resuming
+    /// an active RGB profile, ensuring the HID buffer is flushed to black.
+    /// </summary>
+    public static Task SendBlackFrame(SafeFileHandle handle) =>
+        SendColorToDevice(handle, 0, 0, 0);
+
     // ── HID write ─────────────────────────────────────────────────────────
 
     private static unsafe Task SendColorToDevice(SafeFileHandle handle, byte r, byte g, byte b) => Task.Run(() =>

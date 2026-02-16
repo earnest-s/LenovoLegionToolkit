@@ -462,6 +462,14 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
                 await PerformanceModeTransitionEffect.PlayAsync(handle, modeColor, cancellationToken)
                     .ConfigureAwait(false);
+
+                // ── Settle frame: flush hardware buffer before profile resumes ──
+                // PlayAsync already ends on black after the 0.5 s hold, but we
+                // send one more explicit black frame + 16 ms delay so the HID
+                // controller fully latches black before the profile effect writes
+                // its first frame.  This eliminates the 1-frame colour glitch.
+                await PerformanceModeTransitionEffect.SendBlackFrame(handle).ConfigureAwait(false);
+                await Task.Delay(16, CancellationToken.None).ConfigureAwait(false);
 #else
                 await Task.Delay(3500, cancellationToken).ConfigureAwait(false);
 #endif

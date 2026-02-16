@@ -340,16 +340,29 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
 
         if (kbStruct.vkCode == (ulong)VIRTUAL_KEY.VK_CAPITAL)
         {
+            // Read toggle state while still inside the hook callback (OS state is current here)
             var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_CAPITAL) & 0x1) != 0;
             var type = isOn ? NotificationType.CapsLockOn : NotificationType.CapsLockOff;
-            MessagingCenter.Publish(new NotificationMessage(type));
+
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"CapsLock WM_KEYUP, state={isOn}, publishing {type}");
+
+            // Defer publish off the hook callback to avoid exceeding LowLevelHooksTimeout.
+            // WH_KEYBOARD_LL has a ~200 ms timeout; synchronous MessagingCenter.Publish can
+            // trigger Dispatcher.Invoke → WPF window creation which exceeds this, causing
+            // Windows to silently remove the hook after the first notification.
+            Task.Run(() => MessagingCenter.Publish(new NotificationMessage(type)));
         }
 
         if (kbStruct.vkCode == (ulong)VIRTUAL_KEY.VK_NUMLOCK)
         {
             var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_NUMLOCK) & 0x1) != 0;
             var type = isOn ? NotificationType.NumLockOn : NotificationType.NumLockOff;
-            MessagingCenter.Publish(new NotificationMessage(type));
+
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"NumLock WM_KEYUP, state={isOn}, publishing {type}");
+
+            Task.Run(() => MessagingCenter.Publish(new NotificationMessage(type)));
         }
 
         return PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
