@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using LenovoLegionToolkit.Lib;
@@ -23,10 +22,17 @@ public class NotificationAoTWindow : NativeLayeredWindow, INotificationWindow
     public void Show(int closeAfter)
     {
         Show();
-        Task.Delay(closeAfter).ContinueWith(_ =>
+
+        // Use a WinForms Timer (same thread, no async gap) instead of
+        // Task.Delay + ContinueWith to dismiss the notification.
+        var timer = new Timer { Interval = closeAfter };
+        timer.Tick += (_, _) =>
         {
+            timer.Stop();
+            timer.Dispose();
             Close(false);
-        }, TaskScheduler.FromCurrentSynchronizationContext());
+        };
+        timer.Start();
     }
 
     protected override void Paint(PaintEventArgs e)

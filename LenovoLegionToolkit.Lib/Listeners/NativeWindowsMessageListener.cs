@@ -34,6 +34,15 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
 
     private readonly HOOKPROC _kbProc;
 
+    // Custom messages posted from the keyboard hook to avoid blocking the hook callback.
+    // WH_KEYBOARD_LL has a ~200ms timeout; synchronous publish can trigger WPF window
+    // creation which exceeds this. PostMessage returns immediately and the WndProc
+    // processes the notification on the next message-loop iteration — same thread, zero
+    // ThreadPool hops, minimal latency.
+    private const uint WM_APP = 0x8000;
+    private const uint WM_LOCKKEY_CAPSLOCK = WM_APP + 1;
+    private const uint WM_LOCKKEY_NUMLOCK = WM_APP + 2;
+
     private readonly TaskCompletionSource _isMonitorOnTaskCompletionSource = new();
     private readonly TaskCompletionSource _isLidOpenTaskCompletionSource = new();
 
@@ -228,6 +237,29 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
             }
         }
 
+        // Handle lock-key notifications posted from the keyboard hook callback.
+        if (m.Msg == (int)WM_LOCKKEY_CAPSLOCK)
+        {
+            var isOn = m.WParam != IntPtr.Zero;
+            var type = isOn ? NotificationType.CapsLockOn : NotificationType.CapsLockOff;
+
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"WndProc: WM_LOCKKEY_CAPSLOCK, publishing {type}");
+
+            MessagingCenter.Publish(new NotificationMessage(type));
+        }
+
+        if (m.Msg == (int)WM_LOCKKEY_NUMLOCK)
+        {
+            var isOn = m.WParam != IntPtr.Zero;
+            var type = isOn ? NotificationType.NumLockOn : NotificationType.NumLockOff;
+
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"WndProc: WM_LOCKKEY_NUMLOCK, publishing {type}");
+
+            MessagingCenter.Publish(new NotificationMessage(type));
+        }
+
         base.WndProc(ref m);
     }
 
@@ -342,27 +374,24 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
         {
             // Read toggle state while still inside the hook callback (OS state is current here)
             var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_CAPITAL) & 0x1) != 0;
-            var type = isOn ? NotificationType.CapsLockOn : NotificationType.CapsLockOff;
 
             if (Log.Instance.IsTraceEnabled)
-                Log.Instance.Trace($"CapsLock WM_KEYUP, state={isOn}, publishing {type}");
+                Log.Instance.Trace($"CapsLock WM_KEYUP, state={isOn}, posting WM_LOCKKEY_CAPSLOCK");
 
-            // Defer publish off the hook callback to avoid exceeding LowLevelHooksTimeout.
-            // WH_KEYBOARD_LL has a ~200 ms timeout; synchronous MessagingCenter.Publish can
-            // trigger Dispatcher.Invoke → WPF window creation which exceeds this, causing
-            // Windows to silently remove the hook after the first notification.
-            Task.Run(() => MessagingCenter.Publish(new NotificationMessage(type)));
+            // PostMessage returns immediately — hook callback stays within the
+            // LowLevelHooksTimeout.  The WndProc processes the notification on
+            // the next message-loop iteration (same UI thread, no ThreadPool hop).
+            PInvoke.PostMessage(new HWND(Handle), WM_LOCKKEY_CAPSLOCK, new WPARAM((nuint)(isOn ? 1 : 0)), new LPARAM(0));
         }
 
         if (kbStruct.vkCode == (ulong)VIRTUAL_KEY.VK_NUMLOCK)
         {
             var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_NUMLOCK) & 0x1) != 0;
-            var type = isOn ? NotificationType.NumLockOn : NotificationType.NumLockOff;
 
             if (Log.Instance.IsTraceEnabled)
-                Log.Instance.Trace($"NumLock WM_KEYUP, state={isOn}, publishing {type}");
+                Log.Instance.Trace($"NumLock WM_KEYUP, state={isOn}, posting WM_LOCKKEY_NUMLOCK");
 
-            Task.Run(() => MessagingCenter.Publish(new NotificationMessage(type)));
+            PInvoke.PostMessage(new HWND(Handle), WM_LOCKKEY_NUMLOCK, new WPARAM((nuint)(isOn ? 1 : 0)), new LPARAM(0));
         }
 
         return PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);

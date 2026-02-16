@@ -2,12 +2,12 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.WPF.Utils;
 using Windows.Win32;
@@ -72,10 +72,17 @@ public class NotificationWindow : UiWindow, INotificationWindow
     public void Show(int closeAfter)
     {
         Show();
-        Task.Delay(closeAfter).ContinueWith(_ =>
+
+        // Use a DispatcherTimer instead of Task.Delay + ContinueWith.
+        // DispatcherTimer fires on the UI thread with no async gap,
+        // avoiding a ThreadPool → Dispatcher round-trip on dismiss.
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(closeAfter) };
+        timer.Tick += (_, _) =>
         {
+            timer.Stop();
             Close();
-        }, TaskScheduler.FromCurrentSynchronizationContext());
+        };
+        timer.Start();
     }
 
     public void Close(bool immediate)

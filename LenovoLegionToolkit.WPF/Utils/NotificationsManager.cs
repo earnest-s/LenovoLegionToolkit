@@ -34,6 +34,8 @@ public class NotificationsManager
 
     private void OnNotificationReceived(NotificationMessage notification)
     {
+        // Send is the highest dispatcher priority — runs before layout/render
+        // so the OSD appears within the same frame (<16 ms).
         Dispatcher.Invoke(() =>
         {
             if (Log.Instance.IsTraceEnabled)
@@ -224,7 +226,7 @@ public class NotificationsManager
 
             if (Log.Instance.IsTraceEnabled)
                 Log.Instance.Trace($"Notification {notification} shown.");
-        });
+        }, DispatcherPriority.Send);
     }
 
     private void ShowNotification(SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Action? clickAction)

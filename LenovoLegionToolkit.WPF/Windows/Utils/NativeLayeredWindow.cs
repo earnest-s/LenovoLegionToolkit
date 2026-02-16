@@ -83,9 +83,11 @@ public class NativeLayeredWindow : NativeWindow, IDisposable
         if (Handle == nint.Zero)
             CreateLayeredWindow();
 
-        _opacity = 0;
-        _animationStep = 255 / (ANIMATION_DURATION_MS / ANIMATION_INTERVAL_MS);
-        _animationTimer.Start();
+        // Show at full opacity immediately — no fade-in delay.
+        // The window is visible from the very first frame.
+        _opacity = 255;
+        _animationTimer.Stop();
+        UpdateLayeredWindow();
         PInvoke.ShowWindow((HWND)Handle, SHOW_WINDOW_CMD.SW_SHOWNOACTIVATE);
     }
 
