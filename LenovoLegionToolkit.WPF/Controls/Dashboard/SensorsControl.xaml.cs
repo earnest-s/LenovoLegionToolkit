@@ -43,6 +43,14 @@ public partial class SensorsControl
     private PowerModeState? _lastAnimatedMode;
 
     /// <summary>
+    /// UTC timestamp of the last transition animation start.
+    /// Used together with <see cref="_lastAnimatedMode"/> to suppress
+    /// duplicate animations within a debounce window (Custom/GodMode
+    /// can emit multiple confirmations that arrive after the sweep ends).
+    /// </summary>
+    private DateTime _lastAnimatedTime;
+
+    /// <summary>
     /// When true, <see cref="UpdateValues"/> is suppressed so the sweep
     /// animation can drive bar values without interference from the
     /// telemetry refresh loop.
@@ -116,12 +124,20 @@ public partial class SensorsControl
 
     private void UpdateAccent(PowerModeState mode, bool playTransition = false)
     {
-        // Deduplicate: skip animation if we already played for this mode.
-        if (playTransition && _lastAnimatedMode == mode)
+        // Deduplicate: skip animation when the same mode was animated
+        // within the last 2 seconds.  This prevents Custom/GodMode's
+        // multi-step hardware confirmation from re-triggering visuals
+        // after the sweep has already completed and reset _sweepInProgress.
+        if (playTransition
+            && _lastAnimatedMode == mode
+            && (DateTime.UtcNow - _lastAnimatedTime).TotalMilliseconds < 2000)
             return;
 
         if (playTransition)
+        {
             _lastAnimatedMode = mode;
+            _lastAnimatedTime = DateTime.UtcNow;
+        }
         var target = PerformanceModeColors.GetAccent(mode);
         var targetBrush = new SolidColorBrush(target);
 
@@ -265,9 +281,10 @@ public partial class SensorsControl
             foreach (var bar in bars)
                 Behaviors.ProgressBarAnimateBehavior.SetIsSuspended(bar, false);
 
-            // Allow the next PowerModeListener.Changed to animate even if
-            // it carries the same mode (e.g. after a failed set + retry).
-            _lastAnimatedMode = null;
+            // NOTE: _lastAnimatedMode is intentionally NOT reset here.
+            // The time-based debounce (2 s window) handles the case where
+            // Custom/GodMode emits late confirmations after the sweep ends.
+            // A genuinely new mode selection will carry a different State.
         }
         finally
         {
