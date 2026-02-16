@@ -477,22 +477,83 @@ namespace LenovoLegionToolkit.Lib.Controllers
             catch (OperationCanceledException) { }
             finally
             {
-                // Lift the override — effect can write to device again
-                customEffectController.IsOverrideActive = false;
-
-                // Restore the current preset (re-sends HID state + restarts custom effect)
+                // Resume the current preset WITHOUT the zone-colour flash.
+                //
+                // For custom (software-driven) effects the standard
+                // SetCurrentPresetAsync() writes the preset's static zone
+                // colours as an HID frame BEFORE starting the effect loop.
+                // That produces a visible 1-frame flash of the preset palette
+                // between the black hold and the first effect frame.
+                //
+                // Fix: keep the keyboard black, start the effect loop while
+                // the override is still active (so its warm-up frames are
+                // gated), then lift the override so the very first HID write
+                // comes from the effect itself — no intermediate preset frame.
                 try
                 {
-                    await SetCurrentPresetAsync().ConfigureAwait(false);
+                    await ResumeAfterTransitionAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     if (Log.Instance.IsTraceEnabled)
-                        Log.Instance.Trace($"Failed to restore preset after transition", ex);
+                        Log.Instance.Trace($"Failed to resume after transition", ex);
                 }
 
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Transition ended, effect resumed");
+            }
+        }
+
+        /// <summary>
+        /// Resumes the current RGB preset after a transition animation ends.
+        /// For firmware-driven effects (Static, Breath, Wave) the HID preset
+        /// state is written directly (the firmware handles the animation).
+        /// For custom (software-driven) effects the keyboard stays black and
+        /// the effect loop is restarted while <see cref="CustomRGBEffectController.IsOverrideActive"/>
+        /// is still <c>true</c>; the override is lifted only after the loop
+        /// is running so the first HID frame comes from the effect, not from
+        /// a static preset write.
+        /// </summary>
+        private async Task ResumeAfterTransitionAsync()
+        {
+            await ThrowIfVantageEnabled().ConfigureAwait(false);
+
+            var state = settings.Store.State;
+            var preset = state.SelectedPreset;
+
+            if (preset == RGBKeyboardBacklightPreset.Off)
+            {
+                customEffectController.IsOverrideActive = false;
+                await customEffectController.StopEffectAsync().ConfigureAwait(false);
+                await SendToDevice(CreateOffState()).ConfigureAwait(false);
+                return;
+            }
+
+            var presetDescription = state.Presets.GetValueOrDefault(
+                preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+
+            if (presetDescription.Effect.IsCustomEffect())
+            {
+                // ── Custom effect path (no preset flash) ─────────────────
+                // 1. Start the effect loop while override is still active.
+                //    The effect's SetColorsAsync calls will be gated and
+                //    will NOT reach HID until we lift the override.
+                await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
+
+                // 2. Lift the override — the next SetColorsAsync from the
+                //    effect loop writes directly to the device.  Because
+                //    the keyboard is already black (from the transition
+                //    settle frame), there is no intermediate preset flash.
+                customEffectController.IsOverrideActive = false;
+            }
+            else
+            {
+                // ── Firmware-driven effect path (Static/Breath/Wave) ─────
+                // The preset HID write IS the desired state — no software
+                // loop is involved so there is no flash risk.
+                customEffectController.IsOverrideActive = false;
+                await SendToDevice(Convert(presetDescription)).ConfigureAwait(false);
+                await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
             }
         }
 
