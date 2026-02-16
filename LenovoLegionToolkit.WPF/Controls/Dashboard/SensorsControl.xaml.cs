@@ -123,10 +123,10 @@ public partial class SensorsControl
 
     /// <summary>
     /// Runs a 3-phase value sweep on every bar simultaneously:
-    ///   Phase 1: current value → 0   (120 ms, ease-in)
-    ///   Phase 2: 0 → Maximum         (150 ms, ease-out)
-    ///   Phase 3: Maximum → actual     (150 ms, ease-out)
-    /// Total ≈ 420 ms.  Telemetry updates are suppressed for the duration.
+    ///   Phase 1: current value → 0   (250 ms, ease-in-out)
+    ///   Phase 2: 0 → Maximum         (300 ms, ease-out)
+    ///   Phase 3: Maximum → actual     (300 ms, ease-out)
+    /// Total ≈ 850 ms.  Telemetry updates are suppressed for the duration.
     /// </summary>
     private async Task SweepAllBarsAsync()
     {
@@ -146,18 +146,18 @@ public partial class SensorsControl
             }
 
             // Phase 1: collapse to 0
-            var collapseEase = new CubicEase { EasingMode = EasingMode.EaseIn };
+            var collapseEase = new CubicEase { EasingMode = EasingMode.EaseInOut };
             foreach (var bar in bars)
             {
                 bar.BeginAnimation(RangeBase.ValueProperty, new DoubleAnimation
                 {
                     To = 0,
-                    Duration = TimeSpan.FromMilliseconds(120),
+                    Duration = TimeSpan.FromMilliseconds(250),
                     EasingFunction = collapseEase,
                     FillBehavior = FillBehavior.HoldEnd
                 });
             }
-            await Task.Delay(120);
+            await Task.Delay(250);
 
             // Phase 2: expand to maximum
             var expandEase = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -167,12 +167,12 @@ public partial class SensorsControl
                 {
                     From = 0,
                     To = maxes[i],
-                    Duration = TimeSpan.FromMilliseconds(150),
+                    Duration = TimeSpan.FromMilliseconds(300),
                     EasingFunction = expandEase,
                     FillBehavior = FillBehavior.HoldEnd
                 });
             }
-            await Task.Delay(150);
+            await Task.Delay(300);
 
             // Phase 3: settle to actual telemetry value
             var settleEase = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -182,12 +182,12 @@ public partial class SensorsControl
                 {
                     From = maxes[i],
                     To = targets[i],
-                    Duration = TimeSpan.FromMilliseconds(150),
+                    Duration = TimeSpan.FromMilliseconds(300),
                     EasingFunction = settleEase,
                     FillBehavior = FillBehavior.Stop
                 });
             }
-            await Task.Delay(150);
+            await Task.Delay(300);
 
             // Clear the animation layer so the behavior and UpdateValues can
             // drive the property again.

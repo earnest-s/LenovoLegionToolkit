@@ -90,8 +90,8 @@ public static class RGBKeyboardBacklightEffectExtensions
         RGBKeyboardBacklightEffect.Fade => true,
         RGBKeyboardBacklightEffect.Ripple => true,
         RGBKeyboardBacklightEffect.BreathingColorCycle => true,
-        RGBKeyboardBacklightEffect.Strobe => true,
-        RGBKeyboardBacklightEffect.AudioVisualizer => true,
+        RGBKeyboardBacklightEffect.Strobe => false,
+        RGBKeyboardBacklightEffect.AudioVisualizer => false,
         _ => false
     };
 

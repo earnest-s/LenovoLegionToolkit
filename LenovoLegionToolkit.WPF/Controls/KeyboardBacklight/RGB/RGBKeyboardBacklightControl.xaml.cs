@@ -194,6 +194,7 @@ public partial class RGBKeyboardBacklightControl
         _brightnessControl.IsEnabled = true;
         _effectControl.IsEnabled = true;
         _speedControl.IsEnabled = speedEnabled;
+        _speedControl.Visibility = speedEnabled ? Visibility.Visible : Visibility.Collapsed;
 
         _zone1Control.IsEnabled = zonesEnabled;
         _zone2Control.IsEnabled = zonesEnabled;
