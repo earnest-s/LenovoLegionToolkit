@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
@@ -11,12 +10,9 @@ using LenovoLegionToolkit.Lib.Controllers.Sensors;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
-using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.System.Management;
 using LenovoLegionToolkit.Lib.Utils;
-using Microsoft.Win32.SafeHandles;
 using NeoSmart.AsyncLock;
-using Windows.Win32;
 
 namespace LenovoLegionToolkit.Lib.Controllers
 {
@@ -24,25 +20,10 @@ namespace LenovoLegionToolkit.Lib.Controllers
         RGBKeyboardSettings settings,
         VantageDisabler vantageDisabler,
         CustomRGBEffectController customEffectController,
-        ISensorsController sensorsController)
+        ISensorsController sensorsController,
+        RgbFrameDispatcher dispatcher)
     {
         private static readonly AsyncLock IoLock = new();
-
-        private SafeFileHandle? _deviceHandle;
-
-        private SafeFileHandle? DeviceHandle
-        {
-            get
-            {
-                if (ForceDisable)
-                    return null;
-
-                _deviceHandle ??= Devices.GetRGBKeyboard();
-                return _deviceHandle;
-            }
-        }
-
-        public bool ForceDisable { get; set; }
 
         // --- Performance mode transition state ---
         private CancellationTokenSource? _transitionCts;
@@ -50,11 +31,7 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
         public Task<bool> IsSupportedAsync()
         {
-#if MOCK_RGB
-            return Task.FromResult(true);
-#else
-            return Task.FromResult(DeviceHandle is not null);
-#endif
+            return Task.FromResult(dispatcher.IsSupported);
         }
 
         public async Task SetLightControlOwnerAsync(bool enable, bool restorePreset = false)
@@ -63,9 +40,8 @@ namespace LenovoLegionToolkit.Lib.Controllers
             {
                 try
                 {
-#if !MOCK_RGB
-                    _ = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-#endif
+                    if (!dispatcher.IsSupported)
+                        throw new InvalidOperationException("RGB Keyboard unsupported");
 
                     await ThrowIfVantageEnabled().ConfigureAwait(false);
 
@@ -104,9 +80,8 @@ namespace LenovoLegionToolkit.Lib.Controllers
         {
             using (await IoLock.LockAsync().ConfigureAwait(false))
             {
-#if !MOCK_RGB
-                _ = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-#endif
+                if (!dispatcher.IsSupported)
+                    throw new InvalidOperationException("RGB Keyboard unsupported");
 
                 await ThrowIfVantageEnabled().ConfigureAwait(false);
 
@@ -118,9 +93,8 @@ namespace LenovoLegionToolkit.Lib.Controllers
         {
             using (await IoLock.LockAsync().ConfigureAwait(false))
             {
-#if !MOCK_RGB
-                _ = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-#endif
+                if (!dispatcher.IsSupported)
+                    throw new InvalidOperationException("RGB Keyboard unsupported");
 
                 await ThrowIfVantageEnabled().ConfigureAwait(false);
 
@@ -132,31 +106,31 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Selected preset: {selectedPreset}");
 
-                LENOVO_RGB_KEYBOARD_STATE str;
-                RGBKeyboardBacklightBacklightPresetDescription presetDescription;
-
                 if (selectedPreset == RGBKeyboardBacklightPreset.Off)
                 {
                     if (Log.Instance.IsTraceEnabled)
                         Log.Instance.Trace($"Creating off state.");
 
-                    str = CreateOffState();
-
-                    // Stop any custom effect when turning off
                     await customEffectController.StopEffectAsync().ConfigureAwait(false);
-
-                    await SendToDevice(str).ConfigureAwait(false);
+                    await dispatcher.SendFirmwareCommandAsync(CreateOffState()).ConfigureAwait(false);
+                    dispatcher.RenderPreviewOnly(ZoneColors.Black);
                     return;
                 }
 
-                presetDescription = state.Presets.GetValueOrDefault(selectedPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+                var presetDescription = state.Presets.GetValueOrDefault(selectedPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Creating state: {presetDescription}");
 
-                str = Convert(presetDescription);
+                await dispatcher.SendFirmwareCommandAsync(Convert(presetDescription)).ConfigureAwait(false);
 
-                await SendToDevice(str).ConfigureAwait(false);
+                // Notify preview for non-custom presets
+                if (!presetDescription.Effect.IsCustomEffect())
+                {
+                    dispatcher.RenderPreviewOnly(new ZoneColors(
+                        presetDescription.Zone1, presetDescription.Zone2,
+                        presetDescription.Zone3, presetDescription.Zone4));
+                }
 
                 // Start custom effect if applicable
                 await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
@@ -167,9 +141,8 @@ namespace LenovoLegionToolkit.Lib.Controllers
         {
             using (await IoLock.LockAsync().ConfigureAwait(false))
             {
-#if !MOCK_RGB
-                _ = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-#endif
+                if (!dispatcher.IsSupported)
+                    throw new InvalidOperationException("RGB Keyboard unsupported");
 
                 await ThrowIfVantageEnabled().ConfigureAwait(false);
 
@@ -182,33 +155,31 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Preset is {preset}.");
 
-                LENOVO_RGB_KEYBOARD_STATE str;
-                RGBKeyboardBacklightBacklightPresetDescription presetDescription;
-
                 if (preset == RGBKeyboardBacklightPreset.Off)
                 {
                     if (Log.Instance.IsTraceEnabled)
                         Log.Instance.Trace($"Creating off state.");
 
-                    str = CreateOffState();
-
-                    // Stop any custom effect when turning off
                     await customEffectController.StopEffectAsync().ConfigureAwait(false);
-
-                    await SendToDevice(str).ConfigureAwait(false);
+                    await dispatcher.SendFirmwareCommandAsync(CreateOffState()).ConfigureAwait(false);
+                    dispatcher.RenderPreviewOnly(ZoneColors.Black);
                     return;
                 }
 
-                presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+                var presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Creating state: {presetDescription}");
 
-                str = Convert(presetDescription);
+                await dispatcher.SendFirmwareCommandAsync(Convert(presetDescription)).ConfigureAwait(false);
 
-                await SendToDevice(str).ConfigureAwait(false);
+                if (!presetDescription.Effect.IsCustomEffect())
+                {
+                    dispatcher.RenderPreviewOnly(new ZoneColors(
+                        presetDescription.Zone1, presetDescription.Zone2,
+                        presetDescription.Zone3, presetDescription.Zone4));
+                }
 
-                // Start custom effect if applicable
                 await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
             }
         }
@@ -217,9 +188,8 @@ namespace LenovoLegionToolkit.Lib.Controllers
         {
             using (await IoLock.LockAsync().ConfigureAwait(false))
             {
-#if !MOCK_RGB
-                _ = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-#endif
+                if (!dispatcher.IsSupported)
+                    throw new InvalidOperationException("RGB Keyboard unsupported");
 
                 await ThrowIfVantageEnabled().ConfigureAwait(false);
 
@@ -234,33 +204,31 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"New preset is {newPreset}.");
 
-                LENOVO_RGB_KEYBOARD_STATE str;
-                RGBKeyboardBacklightBacklightPresetDescription presetDescription;
-
                 if (newPreset == RGBKeyboardBacklightPreset.Off)
                 {
                     if (Log.Instance.IsTraceEnabled)
                         Log.Instance.Trace($"Creating off state.");
 
-                    str = CreateOffState();
-
-                    // Stop any custom effect when turning off
                     await customEffectController.StopEffectAsync().ConfigureAwait(false);
-
-                    await SendToDevice(str).ConfigureAwait(false);
+                    await dispatcher.SendFirmwareCommandAsync(CreateOffState()).ConfigureAwait(false);
+                    dispatcher.RenderPreviewOnly(ZoneColors.Black);
                     return newPreset;
                 }
 
-                presetDescription = state.Presets.GetValueOrDefault(newPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+                var presetDescription = state.Presets.GetValueOrDefault(newPreset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Creating state: {presetDescription}");
 
-                str = Convert(presetDescription);
+                await dispatcher.SendFirmwareCommandAsync(Convert(presetDescription)).ConfigureAwait(false);
 
-                await SendToDevice(str).ConfigureAwait(false);
+                if (!presetDescription.Effect.IsCustomEffect())
+                {
+                    dispatcher.RenderPreviewOnly(new ZoneColors(
+                        presetDescription.Zone1, presetDescription.Zone2,
+                        presetDescription.Zone3, presetDescription.Zone4));
+                }
 
-                // Start custom effect if applicable
                 await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
 
                 return newPreset;
@@ -269,59 +237,41 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
         private async Task SetCurrentPresetAsync()
         {
-#if !MOCK_RGB
-            _ = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-#endif
+            if (!dispatcher.IsSupported)
+                throw new InvalidOperationException("RGB Keyboard unsupported");
 
             await ThrowIfVantageEnabled().ConfigureAwait(false);
 
             var state = settings.Store.State;
-
             var preset = state.SelectedPreset;
 
             if (Log.Instance.IsTraceEnabled)
                 Log.Instance.Trace($"Current preset is {preset}.");
-
-            LENOVO_RGB_KEYBOARD_STATE str;
-            RGBKeyboardBacklightBacklightPresetDescription presetDescription;
 
             if (preset == RGBKeyboardBacklightPreset.Off)
             {
                 if (Log.Instance.IsTraceEnabled)
                     Log.Instance.Trace($"Creating off state.");
 
-                str = CreateOffState();
-
-                // Stop any custom effect when turning off
                 await customEffectController.StopEffectAsync().ConfigureAwait(false);
-
-                await SendToDevice(str).ConfigureAwait(false);
-
-                // Notify preview: keyboard is off (all black)
-                customEffectController.RaisePreviewFrame(ZoneColors.Black);
+                await dispatcher.SendFirmwareCommandAsync(CreateOffState()).ConfigureAwait(false);
+                dispatcher.RenderPreviewOnly(ZoneColors.Black);
                 return;
             }
 
-            presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
+            var presetDescription = state.Presets.GetValueOrDefault(preset, RGBKeyboardBacklightBacklightPresetDescription.Default);
 
             if (Log.Instance.IsTraceEnabled)
                 Log.Instance.Trace($"Creating state: {presetDescription}");
 
-            str = Convert(presetDescription);
+            await dispatcher.SendFirmwareCommandAsync(Convert(presetDescription)).ConfigureAwait(false);
 
-            await SendToDevice(str).ConfigureAwait(false);
-
-            // Notify preview for firmware-driven presets (Static/Breath/Wave/Smooth)
-            // Custom effects fire their own PreviewFrame from the effect loop.
+            // Notify preview for firmware-driven presets
             if (!presetDescription.Effect.IsCustomEffect())
             {
-                customEffectController.RaisePreviewFrame(new ZoneColors
-                {
-                    Zone1 = presetDescription.Zone1,
-                    Zone2 = presetDescription.Zone2,
-                    Zone3 = presetDescription.Zone3,
-                    Zone4 = presetDescription.Zone4
-                });
+                dispatcher.RenderPreviewOnly(new ZoneColors(
+                    presetDescription.Zone1, presetDescription.Zone2,
+                    presetDescription.Zone3, presetDescription.Zone4));
             }
 
             // Start custom effect if applicable
@@ -334,28 +284,6 @@ namespace LenovoLegionToolkit.Lib.Controllers
             if (vantageStatus == SoftwareStatus.Enabled)
                 throw new InvalidOperationException("Can't manage RGB keyboard with Vantage enabled");
         }
-
-        private unsafe Task SendToDevice(LENOVO_RGB_KEYBOARD_STATE str) => Task.Run(() =>
-        {
-#if !MOCK_RGB
-            var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-
-            var ptr = IntPtr.Zero;
-            try
-            {
-                var size = Marshal.SizeOf<LENOVO_RGB_KEYBOARD_STATE>();
-                ptr = Marshal.AllocHGlobal(size);
-                Marshal.StructureToPtr(str, ptr, false);
-
-                if (!PInvoke.HidD_SetFeature(handle, ptr.ToPointer(), (uint)size))
-                    PInvokeExtensions.ThrowIfWin32Error("HidD_SetFeature");
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-#endif
-        });
 
         private static LENOVO_RGB_KEYBOARD_STATE CreateOffState()
         {
@@ -433,20 +361,14 @@ namespace LenovoLegionToolkit.Lib.Controllers
         }
 
         /// <summary>
-        /// Plays a premium performance-mode transition animation (3 breathing pulses + fade to black).
-        /// Pauses the current effect, plays the animation, then seamlessly resumes.
+        /// Plays a premium performance-mode transition animation.
+        /// Pauses the current effect, plays the strobe, then seamlessly resumes.
         /// Double-trigger safe: a new call cancels any running transition.
+        /// Uses centralized <see cref="RgbFrameDispatcher.GetPerformanceModeColor"/>.
         /// </summary>
         public async Task PlayTransitionAsync(PowerModeState mode)
         {
-            var modeColor = mode switch
-            {
-                PowerModeState.Quiet => new RGBColor(0, 120, 255),       // Blue
-                PowerModeState.Balance => new RGBColor(255, 255, 255),   // White
-                PowerModeState.Performance => new RGBColor(255, 0, 0),   // Red
-                PowerModeState.GodMode => new RGBColor(180, 0, 255),     // Purple
-                _ => new RGBColor(255, 255, 255)
-            };
+            var modeColor = RgbFrameDispatcher.GetPerformanceModeColor(mode);
 
             // Cancel any in-flight transition
             if (_transitionCts is not null)
@@ -461,7 +383,7 @@ namespace LenovoLegionToolkit.Lib.Controllers
             }
 
             // Pause running custom effect (it stays alive in memory)
-            customEffectController.IsOverrideActive = true;
+            dispatcher.IsOverrideActive = true;
 
             _transitionCts = new CancellationTokenSource();
             _transitionTask = RunTransitionAsync(modeColor, _transitionCts.Token);
@@ -472,60 +394,23 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
         private async Task RunTransitionAsync(RGBColor modeColor, CancellationToken cancellationToken)
         {
+            // Full brightness for strobe, restore after
+            var savedBrightness = dispatcher.CurrentBrightness;
+            dispatcher.CurrentBrightness = 2;
+
             try
             {
-#if !MOCK_RGB
-                var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-                await PerformanceModeTransitionEffect.PlayAsync(
-                    handle,
-                    modeColor,
-                    cancellationToken,
-                    onFrameRendered: frameColor =>
-                    {
-                        // Notify preview with uniform zone colors for every strobe frame
-                        customEffectController.RaisePreviewFrame(new ZoneColors
-                        {
-                            Zone1 = frameColor,
-                            Zone2 = frameColor,
-                            Zone3 = frameColor,
-                            Zone4 = frameColor
-                        });
-                    })
+                await PerformanceModeTransitionEffect.PlayAsync(dispatcher, modeColor, cancellationToken)
                     .ConfigureAwait(false);
 
-                // ── Final black frame: ensure HID buffer is black ──
-                // PlayAsync already ends on black after the 0.5 s hold, but
-                // we send one more explicit black frame to guarantee the
-                // controller buffer is zeroed.  NO delay after this — the
-                // profile effect must resume in the very next operation so
-                // the HID controller never idles (which causes a white flash).
-                await PerformanceModeTransitionEffect.SendBlackFrame(handle).ConfigureAwait(false);
-                customEffectController.RaisePreviewFrame(new ZoneColors
-                {
-                    Zone1 = new RGBColor(0, 0, 0),
-                    Zone2 = new RGBColor(0, 0, 0),
-                    Zone3 = new RGBColor(0, 0, 0),
-                    Zone4 = new RGBColor(0, 0, 0)
-                });
-#else
-                await Task.Delay(3500, cancellationToken).ConfigureAwait(false);
-#endif
+                // Safety black frame
+                await dispatcher.ForceRenderAsync(ZoneColors.Black).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { }
             finally
             {
-                // Resume the current preset WITHOUT the zone-colour flash.
-                //
-                // For custom (software-driven) effects the standard
-                // SetCurrentPresetAsync() writes the preset's static zone
-                // colours as an HID frame BEFORE starting the effect loop.
-                // That produces a visible 1-frame flash of the preset palette
-                // between the black hold and the first effect frame.
-                //
-                // Fix: keep the keyboard black, start the effect loop while
-                // the override is still active (so its warm-up frames are
-                // gated), then lift the override so the very first HID write
-                // comes from the effect itself — no intermediate preset frame.
+                dispatcher.CurrentBrightness = savedBrightness;
+
                 try
                 {
                     await ResumeAfterTransitionAsync().ConfigureAwait(false);
@@ -543,13 +428,6 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
         /// <summary>
         /// Resumes the current RGB preset after a transition animation ends.
-        /// For firmware-driven effects (Static, Breath, Wave) the HID preset
-        /// state is written directly (the firmware handles the animation).
-        /// For custom (software-driven) effects the keyboard stays black and
-        /// the effect loop is restarted while <see cref="CustomRGBEffectController.IsOverrideActive"/>
-        /// is still <c>true</c>; the override is lifted only after the loop
-        /// is running so the first HID frame comes from the effect, not from
-        /// a static preset write.
         /// </summary>
         private async Task ResumeAfterTransitionAsync()
         {
@@ -560,9 +438,10 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
             if (preset == RGBKeyboardBacklightPreset.Off)
             {
-                customEffectController.IsOverrideActive = false;
+                dispatcher.IsOverrideActive = false;
                 await customEffectController.StopEffectAsync().ConfigureAwait(false);
-                await SendToDevice(CreateOffState()).ConfigureAwait(false);
+                await dispatcher.SendFirmwareCommandAsync(CreateOffState()).ConfigureAwait(false);
+                dispatcher.RenderPreviewOnly(ZoneColors.Black);
                 return;
             }
 
@@ -571,40 +450,23 @@ namespace LenovoLegionToolkit.Lib.Controllers
 
             if (presetDescription.Effect.IsCustomEffect())
             {
-                // ── Custom effect path (zero-gap resume) ─────────────────
-                // The effect loop was never stopped — PlayTransitionAsync
-                // only set IsOverrideActive = true to gate HID writes.
-                // The loop has been computing frames the whole time,
-                // storing results in CurrentColors.
-                //
-                // ResumeFromOverrideAsync lifts the gate AND immediately
-                // pushes the last computed frame to HID in one operation,
-                // so the controller never idles between the black frame
-                // and the first effect frame (which would show white).
-                //
-                // We do NOT call HandleCustomEffectAsync here because
-                // StartEffectAsync → SetStaticModeAsync writes 0xFF white
-                // to all zones as part of taking ownership — that IS the
-                // white flash.
                 if (customEffectController.IsEffectRunning)
                 {
                     await customEffectController.ResumeFromOverrideAsync().ConfigureAwait(false);
                 }
                 else
                 {
-                    // Edge case: effect was not running (e.g. app restart
-                    // during transition).  Must start fresh.
-                    customEffectController.IsOverrideActive = false;
+                    dispatcher.IsOverrideActive = false;
                     await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
                 }
             }
             else
             {
-                // ── Firmware-driven effect path (Static/Breath/Wave) ─────
-                // The preset HID write IS the desired state — no software
-                // loop is involved so there is no flash risk.
-                customEffectController.IsOverrideActive = false;
-                await SendToDevice(Convert(presetDescription)).ConfigureAwait(false);
+                dispatcher.IsOverrideActive = false;
+                await dispatcher.SendFirmwareCommandAsync(Convert(presetDescription)).ConfigureAwait(false);
+                dispatcher.RenderPreviewOnly(new ZoneColors(
+                    presetDescription.Zone1, presetDescription.Zone2,
+                    presetDescription.Zone3, presetDescription.Zone4));
                 await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);
             }
         }
@@ -621,8 +483,8 @@ namespace LenovoLegionToolkit.Lib.Controllers
             if (customEffectType is null)
                 return;
 
-            // Set brightness from preset (1=Low, 2=High) - must be set before starting effect
-            customEffectController.CurrentBrightness = preset.Brightness switch
+            // Set brightness on the dispatcher (used by all HID writes)
+            dispatcher.CurrentBrightness = preset.Brightness switch
             {
                 RGBKeyboardBacklightBrightness.Low => 1,
                 RGBKeyboardBacklightBrightness.High => 2,

@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
+using LenovoLegionToolkit.Lib.Controllers.PreviewEffects;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Listeners;
 using LenovoLegionToolkit.Lib.Messaging;
@@ -27,7 +28,8 @@ public partial class RGBKeyboardBacklightControl
 
     private readonly RGBKeyboardBacklightController _controller = IoCContainer.Resolve<RGBKeyboardBacklightController>();
     private readonly RGBKeyboardBacklightListener _listener = IoCContainer.Resolve<RGBKeyboardBacklightListener>();
-    private readonly CustomRGBEffectController _customEffectController = IoCContainer.Resolve<CustomRGBEffectController>();
+    private readonly RgbFrameDispatcher _dispatcher = IoCContainer.Resolve<RgbFrameDispatcher>();
+    private readonly PreviewEffectManager _previewManager = IoCContainer.Resolve<PreviewEffectManager>();
     private readonly VantageDisabler _vantageDisabler = IoCContainer.Resolve<VantageDisabler>();
 
     protected override bool DisablesWhileRefreshing => false;
@@ -38,8 +40,8 @@ public partial class RGBKeyboardBacklightControl
 
         _listener.Changed += Listener_Changed;
 
-        // Live preview: subscribe to effect frame output
-        _customEffectController.PreviewFrame += colors => _keyboardPreview.UpdateZones(colors);
+        // Live preview: subscribe to the single central frame output
+        _dispatcher.FrameRendered += colors => _keyboardPreview.UpdateZones(colors);
 
         SizeChanged += RGBKeyboardBacklightControl_SizeChanged;
 
@@ -164,6 +166,7 @@ public partial class RGBKeyboardBacklightControl
             _zone4Control.IsEnabled = false;
 
             // Preview: keyboard off → all black
+            _previewManager.Stop();
             _keyboardPreview.SetOff();
 
             return;
@@ -212,13 +215,23 @@ public partial class RGBKeyboardBacklightControl
         // Preview: update keyboard preview based on effect type
         if (preset.Effect.IsCustomEffect())
         {
-            // Custom effects drive the preview via PreviewFrame events — nothing to do here.
+            // Custom effects drive the preview via FrameRendered events — stop any firmware sim.
+            _previewManager.Stop();
+        }
+        else if (preset.Effect is RGBKeyboardBacklightEffect.Breath
+                 or RGBKeyboardBacklightEffect.WaveLTR
+                 or RGBKeyboardBacklightEffect.WaveRTL
+                 or RGBKeyboardBacklightEffect.Smooth)
+        {
+            // Animated firmware effects: show snapshot then start simulator.
+            var colors = new ZoneColors(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
+            _keyboardPreview.SetStaticZones(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
+            _previewManager.Start(preset.Effect, preset.Speed, colors);
         }
         else
         {
-            // Firmware presets (Static/Breath/Wave/Smooth): show the zone colors.
-            // For animated firmware effects the static snapshot is shown until
-            // the next HID write triggers a PreviewFrame event.
+            // Static firmware preset: show zone colors, no animation.
+            _previewManager.Stop();
             _keyboardPreview.SetStaticZones(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
         }
     }

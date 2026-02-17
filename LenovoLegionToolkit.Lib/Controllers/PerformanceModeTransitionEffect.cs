@@ -5,67 +5,45 @@
 // Pattern per pulse: instant flash → sine breath-out → dark gap.
 // 3 pulses total, then 0.5 s black hold before resuming.
 //
-// Pulse timing:
-//   Flash:     0–50 ms   (full brightness, instant ON)
-//   Breath-out: 50–550 ms (sine ease 1.0 → 0.0)
-//   Dark gap:  550–670 ms (black)
-//   → one cycle ≈ 670 ms, 3 cycles ≈ 2.0 s + 0.5 s hold = ~2.5 s total
-//
-// All 4 zones glow the same mode color simultaneously.
+// All output goes through RgbFrameDispatcher.ForceRenderAsync so the
+// preview stays in sync automatically — no callback needed.
 // ============================================================================
 
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.Lib.System;
-using LenovoLegionToolkit.Lib.Utils;
-using Microsoft.Win32.SafeHandles;
-using Windows.Win32;
+using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
 
 namespace LenovoLegionToolkit.Lib.Controllers;
 
 /// <summary>
 /// Self-contained premium transition animation for performance mode changes.
-/// Writes directly to the HID device — caller is responsible for pausing
-/// and resuming any running RGB effect around this call.
+/// All output goes through <see cref="RgbFrameDispatcher"/> — caller is
+/// responsible for pausing and resuming any running RGB effect.
 /// </summary>
 public sealed class PerformanceModeTransitionEffect
 {
-    // ── Pulse structure ───────────────────────────────────────────────────
     private const int PulseCount = 3;
-    private const float FlashDurationMs = 50f;         // instant-on flash
-    private const float BreathOutDurationMs = 500f;    // sine fade 1→0
-    private const float DarkGapMs = 120f;              // black pause between pulses
-    private const float PulseCycleMs = FlashDurationMs + BreathOutDurationMs + DarkGapMs; // ≈ 670 ms
-
-    // ── Post-animation hold ───────────────────────────────────────────────
-    private const float BlackHoldMs = 500f;            // stay black before resuming effect
-
-    // ── Total duration ────────────────────────────────────────────────────
+    private const float FlashDurationMs = 50f;
+    private const float BreathOutDurationMs = 500f;
+    private const float DarkGapMs = 120f;
+    private const float PulseCycleMs = FlashDurationMs + BreathOutDurationMs + DarkGapMs;
+    private const float BlackHoldMs = 500f;
     private const float TotalDurationMs = PulseCount * PulseCycleMs + BlackHoldMs;
-
-    // ── Frame pacing ──────────────────────────────────────────────────────
-    private const int FrameDelayMs = 16;               // ≈ 60 fps
-
-    // ── Playback speed ────────────────────────────────────────────────────
-    private const float Speed = 1.5f;                  // 1.5x faster than base timing
+    private const int FrameDelayMs = 16;
+    private const float Speed = 1.5f;
 
     /// <summary>
-    /// Plays the full transition animation on the keyboard.
+    /// Plays the full transition animation via the dispatcher.
     /// Blocks asynchronously for ~2.5 s. Fully cancellable.
+    /// Every frame fires <see cref="RgbFrameDispatcher.FrameRendered"/>
+    /// automatically through <see cref="RgbFrameDispatcher.ForceRenderAsync"/>.
     /// </summary>
-    /// <param name="onFrameRendered">
-    /// Optional callback invoked after every HID frame with the zone colors
-    /// that were just sent to the device.  Used by the UI preview.
-    /// </param>
     public static async Task PlayAsync(
-        SafeFileHandle deviceHandle,
+        RgbFrameDispatcher dispatcher,
         RGBColor modeColor,
-        CancellationToken cancellationToken,
-        Action<RGBColor>? onFrameRendered = null)
+        CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
 
@@ -81,108 +59,44 @@ public sealed class PerformanceModeTransitionEffect
                 var r = (byte)(modeColor.R * brightness);
                 var g = (byte)(modeColor.G * brightness);
                 var b = (byte)(modeColor.B * brightness);
+                var color = new RGBColor(r, g, b);
 
-                await SendColorToDevice(deviceHandle, r, g, b).ConfigureAwait(false);
-                onFrameRendered?.Invoke(new RGBColor(r, g, b));
+                await dispatcher.ForceRenderAsync(new ZoneColors(color), cancellationToken)
+                    .ConfigureAwait(false);
                 await Task.Delay(FrameDelayMs, cancellationToken).ConfigureAwait(false);
             }
 
-            // Ensure we end on pure black (no leftover glow)
+            // Ensure we end on pure black
             if (!cancellationToken.IsCancellationRequested)
-            {
-                await SendColorToDevice(deviceHandle, 0, 0, 0).ConfigureAwait(false);
-                onFrameRendered?.Invoke(new RGBColor(0, 0, 0));
-            }
+                await dispatcher.ForceRenderAsync(ZoneColors.Black, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
-            // Interrupted by a new mode change — send black and exit cleanly
-            try
-            {
-                await SendColorToDevice(deviceHandle, 0, 0, 0).ConfigureAwait(false);
-                onFrameRendered?.Invoke(new RGBColor(0, 0, 0));
-            }
+            // Interrupted — send black and exit cleanly
+            try { await dispatcher.ForceRenderAsync(ZoneColors.Black).ConfigureAwait(false); }
             catch { /* best effort */ }
             throw;
         }
     }
 
-    // ── Brightness curve ──────────────────────────────────────────────────
-
     private static float ComputeBrightness(float elapsedMs)
     {
-        // Determine which pulse we are in
         var pulseIndex = (int)(elapsedMs / PulseCycleMs);
-
-        // Past all pulses → black hold region
         if (pulseIndex >= PulseCount)
             return 0f;
 
-        // Local time within this pulse cycle
         var localMs = elapsedMs - pulseIndex * PulseCycleMs;
 
-        // ── Phase 1: Flash (instant ON) ──
         if (localMs < FlashDurationMs)
             return 1f;
 
-        // ── Phase 2: Breath-out (sine ease 1→0) ──
         var breathLocal = localMs - FlashDurationMs;
         if (breathLocal < BreathOutDurationMs)
         {
-            // progress: 0 → 1
             var progress = breathLocal / BreathOutDurationMs;
-            // sin(0) = 0, sin(PI/2) = 1 → we want 1→0, so use cos or offset sine
-            // brightness = sin((1 - progress) * PI/2)  gives smooth 1→0
             return MathF.Sin((1f - progress) * MathF.PI * 0.5f);
         }
 
-        // ── Phase 3: Dark gap ──
         return 0f;
     }
-
-    // ── Public helpers ───────────────────────────────────────────────────
-
-    /// <summary>
-    /// Sends a single all-black frame to the keyboard.
-    /// Used by the controller as a hardware-settle frame before resuming
-    /// an active RGB profile, ensuring the HID buffer is flushed to black.
-    /// </summary>
-    public static Task SendBlackFrame(SafeFileHandle handle) =>
-        SendColorToDevice(handle, 0, 0, 0);
-
-    // ── HID write ─────────────────────────────────────────────────────────
-
-    private static unsafe Task SendColorToDevice(SafeFileHandle handle, byte r, byte g, byte b) => Task.Run(() =>
-    {
-        var state = new LENOVO_RGB_KEYBOARD_STATE
-        {
-            Header = [0xCC, 0x16],
-            Effect = 1,           // Static
-            Speed = 1,
-            Brightness = 2,       // High
-            Zone1Rgb = [r, g, b],
-            Zone2Rgb = [r, g, b],
-            Zone3Rgb = [r, g, b],
-            Zone4Rgb = [r, g, b],
-            Padding = 0,
-            WaveLTR = 0,
-            WaveRTL = 0,
-            Unused = new byte[13]
-        };
-
-        var ptr = IntPtr.Zero;
-        try
-        {
-            var size = Marshal.SizeOf<LENOVO_RGB_KEYBOARD_STATE>();
-            ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(state, ptr, false);
-
-            if (!PInvoke.HidD_SetFeature(handle, ptr.ToPointer(), (uint)size))
-                PInvokeExtensions.ThrowIfWin32Error("HidD_SetFeature");
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
-    });
 }
