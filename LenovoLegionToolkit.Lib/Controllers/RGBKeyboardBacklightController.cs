@@ -476,7 +476,21 @@ namespace LenovoLegionToolkit.Lib.Controllers
             {
 #if !MOCK_RGB
                 var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
-                await PerformanceModeTransitionEffect.PlayAsync(handle, modeColor, cancellationToken)
+                await PerformanceModeTransitionEffect.PlayAsync(
+                    handle,
+                    modeColor,
+                    cancellationToken,
+                    onFrameRendered: frameColor =>
+                    {
+                        // Notify preview with uniform zone colors for every strobe frame
+                        customEffectController.RaisePreviewFrame(new ZoneColors
+                        {
+                            Zone1 = frameColor,
+                            Zone2 = frameColor,
+                            Zone3 = frameColor,
+                            Zone4 = frameColor
+                        });
+                    })
                     .ConfigureAwait(false);
 
                 // ── Final black frame: ensure HID buffer is black ──
@@ -486,6 +500,13 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 // profile effect must resume in the very next operation so
                 // the HID controller never idles (which causes a white flash).
                 await PerformanceModeTransitionEffect.SendBlackFrame(handle).ConfigureAwait(false);
+                customEffectController.RaisePreviewFrame(new ZoneColors
+                {
+                    Zone1 = new RGBColor(0, 0, 0),
+                    Zone2 = new RGBColor(0, 0, 0),
+                    Zone3 = new RGBColor(0, 0, 0),
+                    Zone4 = new RGBColor(0, 0, 0)
+                });
 #else
                 await Task.Delay(3500, cancellationToken).ConfigureAwait(false);
 #endif

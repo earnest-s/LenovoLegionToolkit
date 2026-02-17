@@ -57,10 +57,15 @@ public sealed class PerformanceModeTransitionEffect
     /// Plays the full transition animation on the keyboard.
     /// Blocks asynchronously for ~2.5 s. Fully cancellable.
     /// </summary>
+    /// <param name="onFrameRendered">
+    /// Optional callback invoked after every HID frame with the zone colors
+    /// that were just sent to the device.  Used by the UI preview.
+    /// </param>
     public static async Task PlayAsync(
         SafeFileHandle deviceHandle,
         RGBColor modeColor,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<RGBColor>? onFrameRendered = null)
     {
         var sw = Stopwatch.StartNew();
 
@@ -78,17 +83,25 @@ public sealed class PerformanceModeTransitionEffect
                 var b = (byte)(modeColor.B * brightness);
 
                 await SendColorToDevice(deviceHandle, r, g, b).ConfigureAwait(false);
+                onFrameRendered?.Invoke(new RGBColor(r, g, b));
                 await Task.Delay(FrameDelayMs, cancellationToken).ConfigureAwait(false);
             }
 
             // Ensure we end on pure black (no leftover glow)
             if (!cancellationToken.IsCancellationRequested)
+            {
                 await SendColorToDevice(deviceHandle, 0, 0, 0).ConfigureAwait(false);
+                onFrameRendered?.Invoke(new RGBColor(0, 0, 0));
+            }
         }
         catch (OperationCanceledException)
         {
             // Interrupted by a new mode change — send black and exit cleanly
-            try { await SendColorToDevice(deviceHandle, 0, 0, 0).ConfigureAwait(false); }
+            try
+            {
+                await SendColorToDevice(deviceHandle, 0, 0, 0).ConfigureAwait(false);
+                onFrameRendered?.Invoke(new RGBColor(0, 0, 0));
+            }
             catch { /* best effort */ }
             throw;
         }

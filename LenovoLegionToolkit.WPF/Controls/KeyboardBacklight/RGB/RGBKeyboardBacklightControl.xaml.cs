@@ -212,22 +212,14 @@ public partial class RGBKeyboardBacklightControl
         // Preview: update keyboard preview based on effect type
         if (preset.Effect.IsCustomEffect())
         {
-            // Custom effects drive the preview via PreviewFrame events.
-            // Stop any firmware simulation that might be running.
-            _keyboardPreview.StopFirmwareSimulation();
-        }
-        else if (preset.Effect is RGBKeyboardBacklightEffect.Static)
-        {
-            // Static: just show the zone colors
-            _keyboardPreview.StopFirmwareSimulation();
-            _keyboardPreview.SetStaticZones(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
+            // Custom effects drive the preview via PreviewFrame events — nothing to do here.
         }
         else
         {
-            // Breath, Wave, Smooth: simulate the firmware animation
-            _keyboardPreview.StartFirmwareSimulation(
-                preset.Effect, preset.Speed,
-                preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
+            // Firmware presets (Static/Breath/Wave/Smooth): show the zone colors.
+            // For animated firmware effects the static snapshot is shown until
+            // the next HID write triggers a PreviewFrame event.
+            _keyboardPreview.SetStaticZones(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
         }
     }
 
@@ -261,10 +253,10 @@ public partial class RGBKeyboardBacklightControl
         Grid.SetColumn(_zone3Control, 2);
         Grid.SetColumn(_zone4Control, 3);
 
-        Grid.SetRow(_zone1Control, 6);
-        Grid.SetRow(_zone2Control, 6);
-        Grid.SetRow(_zone3Control, 6);
-        Grid.SetRow(_zone4Control, 6);
+        Grid.SetRow(_zone1Control, 5);
+        Grid.SetRow(_zone2Control, 5);
+        Grid.SetRow(_zone3Control, 5);
+        Grid.SetRow(_zone4Control, 5);
 
         Grid.SetColumnSpan(_zone1Control, 1);
         Grid.SetColumnSpan(_zone2Control, 1);
@@ -279,10 +271,10 @@ public partial class RGBKeyboardBacklightControl
         Grid.SetColumn(_zone3Control, 0);
         Grid.SetColumn(_zone4Control, 0);
 
-        Grid.SetRow(_zone1Control, 6);
-        Grid.SetRow(_zone2Control, 7);
-        Grid.SetRow(_zone3Control, 8);
-        Grid.SetRow(_zone4Control, 9);
+        Grid.SetRow(_zone1Control, 5);
+        Grid.SetRow(_zone2Control, 6);
+        Grid.SetRow(_zone3Control, 7);
+        Grid.SetRow(_zone4Control, 8);
 
         Grid.SetColumnSpan(_zone1Control, 4);
         Grid.SetColumnSpan(_zone2Control, 4);
