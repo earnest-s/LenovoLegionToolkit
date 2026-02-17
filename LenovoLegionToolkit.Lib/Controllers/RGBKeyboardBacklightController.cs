@@ -296,6 +296,9 @@ namespace LenovoLegionToolkit.Lib.Controllers
                 await customEffectController.StopEffectAsync().ConfigureAwait(false);
 
                 await SendToDevice(str).ConfigureAwait(false);
+
+                // Notify preview: keyboard is off (all black)
+                customEffectController.RaisePreviewFrame(ZoneColors.Black);
                 return;
             }
 
@@ -307,6 +310,19 @@ namespace LenovoLegionToolkit.Lib.Controllers
             str = Convert(presetDescription);
 
             await SendToDevice(str).ConfigureAwait(false);
+
+            // Notify preview for firmware-driven presets (Static/Breath/Wave/Smooth)
+            // Custom effects fire their own PreviewFrame from the effect loop.
+            if (!presetDescription.Effect.IsCustomEffect())
+            {
+                customEffectController.RaisePreviewFrame(new ZoneColors
+                {
+                    Zone1 = presetDescription.Zone1,
+                    Zone2 = presetDescription.Zone2,
+                    Zone3 = presetDescription.Zone3,
+                    Zone4 = presetDescription.Zone4
+                });
+            }
 
             // Start custom effect if applicable
             await HandleCustomEffectAsync(presetDescription).ConfigureAwait(false);

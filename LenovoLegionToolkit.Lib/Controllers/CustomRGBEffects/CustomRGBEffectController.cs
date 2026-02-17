@@ -86,6 +86,19 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
     public bool IsOverrideActive { get; set; }
 
     /// <summary>
+    /// Raised every time a frame is written to the HID device (or would be
+    /// written if the device were present).  UI preview controls subscribe
+    /// to this to render live zone colors without duplicating effect logic.
+    /// </summary>
+    public event Action<ZoneColors>? PreviewFrame;
+
+    /// <summary>
+    /// Raises <see cref="PreviewFrame"/> for callers that write to HID
+    /// directly (e.g. firmware-driven presets in RGBKeyboardBacklightController).
+    /// </summary>
+    public void RaisePreviewFrame(ZoneColors colors) => PreviewFrame?.Invoke(colors);
+
+    /// <summary>
     /// Checks if the RGB keyboard is supported.
     /// </summary>
     public Task<bool> IsSupportedAsync() => Task.FromResult(DeviceHandle is not null);
@@ -115,6 +128,8 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
             var state = CreateState(colors);
             await SendToDeviceAsync(handle, state).ConfigureAwait(false);
         }
+
+        PreviewFrame?.Invoke(colors);
     }
 
     /// <summary>
@@ -213,6 +228,8 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
             var state = CreateState(colors);
             await SendToDeviceAsync(handle, state).ConfigureAwait(false);
         }
+
+        PreviewFrame?.Invoke(colors);
     }
 
     /// <summary>

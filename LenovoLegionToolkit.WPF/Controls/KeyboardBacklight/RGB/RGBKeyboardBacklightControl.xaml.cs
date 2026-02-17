@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers;
+using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Listeners;
 using LenovoLegionToolkit.Lib.Messaging;
@@ -26,6 +27,7 @@ public partial class RGBKeyboardBacklightControl
 
     private readonly RGBKeyboardBacklightController _controller = IoCContainer.Resolve<RGBKeyboardBacklightController>();
     private readonly RGBKeyboardBacklightListener _listener = IoCContainer.Resolve<RGBKeyboardBacklightListener>();
+    private readonly CustomRGBEffectController _customEffectController = IoCContainer.Resolve<CustomRGBEffectController>();
     private readonly VantageDisabler _vantageDisabler = IoCContainer.Resolve<VantageDisabler>();
 
     protected override bool DisablesWhileRefreshing => false;
@@ -35,6 +37,9 @@ public partial class RGBKeyboardBacklightControl
         InitializeComponent();
 
         _listener.Changed += Listener_Changed;
+
+        // Live preview: subscribe to effect frame output
+        _customEffectController.PreviewFrame += colors => _keyboardPreview.UpdateZones(colors);
 
         SizeChanged += RGBKeyboardBacklightControl_SizeChanged;
 
@@ -158,6 +163,9 @@ public partial class RGBKeyboardBacklightControl
             _zone3Control.IsEnabled = false;
             _zone4Control.IsEnabled = false;
 
+            // Preview: keyboard off → all black
+            _keyboardPreview.SetOff();
+
             return;
         }
 
@@ -200,6 +208,13 @@ public partial class RGBKeyboardBacklightControl
         _zone2Control.IsEnabled = zonesEnabled;
         _zone3Control.IsEnabled = zonesEnabled;
         _zone4Control.IsEnabled = zonesEnabled;
+
+        // Preview: show static zone colors for firmware presets.
+        // Custom effects update the preview via PreviewFrame events.
+        if (!preset.Effect.IsCustomEffect())
+        {
+            _keyboardPreview.SetStaticZones(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
+        }
     }
 
     protected override void OnFinishedLoading() { }
@@ -232,10 +247,10 @@ public partial class RGBKeyboardBacklightControl
         Grid.SetColumn(_zone3Control, 2);
         Grid.SetColumn(_zone4Control, 3);
 
-        Grid.SetRow(_zone1Control, 5);
-        Grid.SetRow(_zone2Control, 5);
-        Grid.SetRow(_zone3Control, 5);
-        Grid.SetRow(_zone4Control, 5);
+        Grid.SetRow(_zone1Control, 6);
+        Grid.SetRow(_zone2Control, 6);
+        Grid.SetRow(_zone3Control, 6);
+        Grid.SetRow(_zone4Control, 6);
 
         Grid.SetColumnSpan(_zone1Control, 1);
         Grid.SetColumnSpan(_zone2Control, 1);
@@ -250,10 +265,10 @@ public partial class RGBKeyboardBacklightControl
         Grid.SetColumn(_zone3Control, 0);
         Grid.SetColumn(_zone4Control, 0);
 
-        Grid.SetRow(_zone1Control, 5);
-        Grid.SetRow(_zone2Control, 6);
-        Grid.SetRow(_zone3Control, 7);
-        Grid.SetRow(_zone4Control, 8);
+        Grid.SetRow(_zone1Control, 6);
+        Grid.SetRow(_zone2Control, 7);
+        Grid.SetRow(_zone3Control, 8);
+        Grid.SetRow(_zone4Control, 9);
 
         Grid.SetColumnSpan(_zone1Control, 4);
         Grid.SetColumnSpan(_zone2Control, 4);
