@@ -213,6 +213,10 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
     {
         cancellationToken.ThrowIfCancellationRequested();
 
+        // Always notify preview subscribers so the UI reflects computed
+        // frames even when the HID write is suppressed by override.
+        PreviewFrame?.Invoke(colors);
+
         // Skip device write when strobe override is active
         if (IsOverrideActive)
         {
@@ -228,8 +232,6 @@ public class CustomRGBEffectController(RGBKeyboardSettings settings, VantageDisa
             var state = CreateState(colors);
             await SendToDeviceAsync(handle, state).ConfigureAwait(false);
         }
-
-        PreviewFrame?.Invoke(colors);
     }
 
     /// <summary>

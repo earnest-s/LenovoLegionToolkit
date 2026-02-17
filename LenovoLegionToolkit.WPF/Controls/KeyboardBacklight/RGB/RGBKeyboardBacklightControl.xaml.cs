@@ -209,11 +209,25 @@ public partial class RGBKeyboardBacklightControl
         _zone3Control.IsEnabled = zonesEnabled;
         _zone4Control.IsEnabled = zonesEnabled;
 
-        // Preview: show static zone colors for firmware presets.
-        // Custom effects update the preview via PreviewFrame events.
-        if (!preset.Effect.IsCustomEffect())
+        // Preview: update keyboard preview based on effect type
+        if (preset.Effect.IsCustomEffect())
         {
+            // Custom effects drive the preview via PreviewFrame events.
+            // Stop any firmware simulation that might be running.
+            _keyboardPreview.StopFirmwareSimulation();
+        }
+        else if (preset.Effect is RGBKeyboardBacklightEffect.Static)
+        {
+            // Static: just show the zone colors
+            _keyboardPreview.StopFirmwareSimulation();
             _keyboardPreview.SetStaticZones(preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
+        }
+        else
+        {
+            // Breath, Wave, Smooth: simulate the firmware animation
+            _keyboardPreview.StartFirmwareSimulation(
+                preset.Effect, preset.Speed,
+                preset.Zone1, preset.Zone2, preset.Zone3, preset.Zone4);
         }
     }
 
