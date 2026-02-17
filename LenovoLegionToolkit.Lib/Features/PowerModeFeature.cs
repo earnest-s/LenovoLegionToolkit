@@ -48,6 +48,11 @@ public class PowerModeFeature(
             && await Power.IsPowerAdapterConnectedAsync().ConfigureAwait(false) is PowerAdapterStatus.Disconnected)
             throw new PowerModeUnavailableWithoutACException(state);
 
+        // Fire OSD + RGB strobe IMMEDIATELY — before hardware write.
+        // This gives instant visual feedback while WMI blocks.
+        PublishNotification(state);
+        _ = FireStrobeAsync(state);
+
         var currentState = await GetStateAsync().ConfigureAwait(false);
 
         var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
@@ -83,29 +88,42 @@ public class PowerModeFeature(
         thermalModeListener.SuppressNext();
         await base.SetStateAsync(state).ConfigureAwait(false);
 
-        // Central post-change logic: dependencies, RGB strobe, notification
-        await ApplyPerformanceModeAsync(state).ConfigureAwait(false);
+        // Dependencies run after hardware write succeeds
+        await ApplyDependenciesAsync(state).ConfigureAwait(false);
 
         // Raise listener Changed event for existing subscribers
         await powerModeListener.NotifyAsync(state).ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Central performance mode change logic. Called by both
+    /// Central performance mode post-change logic. Called by both
     /// <see cref="SetStateAsync"/> (dropdown / automation) and
     /// <see cref="PowerModeListener"/> (Fn+Q hardware key).
-    /// Handles dependencies, RGB strobe, and OSD notification.
+    /// Fires OSD + RGB strobe immediately, then applies dependencies.
     /// </summary>
     public async Task ApplyPerformanceModeAsync(PowerModeState mode)
     {
-        // 1. Apply dependencies (GodMode preset, Windows power mode/plan)
+        // 1. OSD notification — instant
+        PublishNotification(mode);
+
+        // 2. RGB strobe — fire-and-forget, runs concurrently with deps
+        _ = FireStrobeAsync(mode);
+
+        // 3. Apply dependencies (GodMode preset, Windows power mode/plan)
+        await ApplyDependenciesAsync(mode).ConfigureAwait(false);
+    }
+
+    private async Task ApplyDependenciesAsync(PowerModeState mode)
+    {
         if (mode is PowerModeState.GodMode)
             await godModeController.ApplyStateAsync().ConfigureAwait(false);
 
         await windowsPowerModeController.SetPowerModeAsync(mode).ConfigureAwait(false);
         await windowsPowerPlanController.SetPowerPlanAsync(mode).ConfigureAwait(false);
+    }
 
-        // 2. RGB strobe (fire-and-forget animation via PlayTransitionAsync)
+    private async Task FireStrobeAsync(PowerModeState mode)
+    {
         try
         {
             if (await rgbKeyboardBacklightController.IsSupportedAsync().ConfigureAwait(false))
@@ -116,9 +134,6 @@ public class PowerModeFeature(
             if (Log.Instance.IsTraceEnabled)
                 Log.Instance.Trace($"Failed to trigger RGB strobe for power mode {mode}", ex);
         }
-
-        // 3. OSD notification
-        PublishNotification(mode);
     }
 
     public async Task EnsureCorrectWindowsPowerSettingsAreSetAsync()
