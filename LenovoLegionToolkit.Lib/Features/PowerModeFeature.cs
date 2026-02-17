@@ -3,7 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Controllers.GodMode;
+using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Messaging;
+using LenovoLegionToolkit.Lib.Messaging.Messages;
 using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.System.Management;
 using LenovoLegionToolkit.Lib.Utils;
@@ -19,6 +22,7 @@ public class PowerModeFeature(
     GodModeController godModeController,
     WindowsPowerModeController windowsPowerModeController,
     WindowsPowerPlanController windowsPowerPlanController,
+    RGBKeyboardBacklightController rgbKeyboardBacklightController,
     ThermalModeListener thermalModeListener,
     PowerModeListener powerModeListener)
     : AbstractWmiFeature<PowerModeState>(WMI.LenovoGameZoneData.GetSmartFanModeAsync, WMI.LenovoGameZoneData.SetSmartFanModeAsync, WMI.LenovoGameZoneData.IsSupportSmartFanAsync, 1)
@@ -79,7 +83,42 @@ public class PowerModeFeature(
         thermalModeListener.SuppressNext();
         await base.SetStateAsync(state).ConfigureAwait(false);
 
+        // Central post-change logic: dependencies, RGB strobe, notification
+        await ApplyPerformanceModeAsync(state).ConfigureAwait(false);
+
+        // Raise listener Changed event for existing subscribers
         await powerModeListener.NotifyAsync(state).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Central performance mode change logic. Called by both
+    /// <see cref="SetStateAsync"/> (dropdown / automation) and
+    /// <see cref="PowerModeListener"/> (Fn+Q hardware key).
+    /// Handles dependencies, RGB strobe, and OSD notification.
+    /// </summary>
+    public async Task ApplyPerformanceModeAsync(PowerModeState mode)
+    {
+        // 1. Apply dependencies (GodMode preset, Windows power mode/plan)
+        if (mode is PowerModeState.GodMode)
+            await godModeController.ApplyStateAsync().ConfigureAwait(false);
+
+        await windowsPowerModeController.SetPowerModeAsync(mode).ConfigureAwait(false);
+        await windowsPowerPlanController.SetPowerPlanAsync(mode).ConfigureAwait(false);
+
+        // 2. RGB strobe (fire-and-forget animation via PlayTransitionAsync)
+        try
+        {
+            if (await rgbKeyboardBacklightController.IsSupportedAsync().ConfigureAwait(false))
+                await rgbKeyboardBacklightController.PlayTransitionAsync(mode).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"Failed to trigger RGB strobe for power mode {mode}", ex);
+        }
+
+        // 3. OSD notification
+        PublishNotification(mode);
     }
 
     public async Task EnsureCorrectWindowsPowerSettingsAreSetAsync()
@@ -96,5 +135,20 @@ public class PowerModeFeature(
             return;
 
         await godModeController.ApplyStateAsync().ConfigureAwait(false);
+    }
+
+    private static void PublishNotification(PowerModeState value)
+    {
+        var type = value switch
+        {
+            PowerModeState.Quiet => NotificationType.PowerModeQuiet,
+            PowerModeState.Balance => NotificationType.PowerModeBalance,
+            PowerModeState.Performance => NotificationType.PowerModePerformance,
+            PowerModeState.GodMode => NotificationType.PowerModeGodMode,
+            _ => (NotificationType?)null
+        };
+
+        if (type is { } t)
+            MessagingCenter.Publish(new NotificationMessage(t, value.GetDisplayName()));
     }
 }

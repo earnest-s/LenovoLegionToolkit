@@ -78,14 +78,12 @@ public class PowerModeControl : AbstractComboBoxFeatureCardControl<PowerModeStat
 
     protected override async Task OnStateChangeAsync(ComboBox comboBox, IFeature<PowerModeState> feature, PowerModeState? newValue, PowerModeState? oldValue)
     {
-        // Fire OSD + telemetry visual feedback IMMEDIATELY, before the
-        // hardware write which may block for 500 ms+ on Performance/GodMode.
+        // Visual feedback for sensor bar color immediately
         if (newValue is { } mode && newValue != oldValue)
-        {
-            PublishImmediateNotification(mode);
             MessagingCenter.Publish(new PowerModeVisualMessage(mode));
-        }
 
+        // base calls PowerModeFeature.SetStateAsync → ApplyPerformanceModeAsync
+        // which handles dependencies, RGB strobe, and OSD notification centrally.
         await base.OnStateChangeAsync(comboBox, feature, newValue, oldValue);
 
         var mi = await Compatibility.GetMachineInformationAsync();
@@ -112,25 +110,6 @@ public class PowerModeControl : AbstractComboBoxFeatureCardControl<PowerModeStat
                 string.Format(Resource.PowerModeUnavailableWithoutACException_Message, ex1.PowerMode.GetDisplayName()),
                 SnackbarType.Warning);
         }
-    }
-
-    /// <summary>
-    /// Publishes the same OSD notification that <see cref="PowerModeListener"/>
-    /// would publish on the WMI (Fn+Q) path, but without waiting for hardware.
-    /// </summary>
-    private static void PublishImmediateNotification(PowerModeState mode)
-    {
-        var type = mode switch
-        {
-            PowerModeState.Quiet => NotificationType.PowerModeQuiet,
-            PowerModeState.Balance => NotificationType.PowerModeBalance,
-            PowerModeState.Performance => NotificationType.PowerModePerformance,
-            PowerModeState.GodMode => NotificationType.PowerModeGodMode,
-            _ => (NotificationType?)null
-        };
-
-        if (type is { } t)
-            MessagingCenter.Publish(new NotificationMessage(t, mode.GetDisplayName()));
     }
 
     protected override FrameworkElement GetAccessory(ComboBox comboBox)
