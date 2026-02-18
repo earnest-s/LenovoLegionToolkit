@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Controllers.GodMode;
@@ -27,6 +28,8 @@ public class PowerModeFeature(
     PowerModeListener powerModeListener)
     : AbstractWmiFeature<PowerModeState>(WMI.LenovoGameZoneData.GetSmartFanModeAsync, WMI.LenovoGameZoneData.SetSmartFanModeAsync, WMI.LenovoGameZoneData.IsSupportSmartFanAsync, 1)
 {
+    private int _strobeGuard;
+
     public bool AllowAllPowerModesOnBattery { get; set; }
 
     public override async Task<PowerModeState[]> GetAllStatesAsync()
@@ -124,6 +127,11 @@ public class PowerModeFeature(
 
     private async Task FireStrobeAsync(PowerModeState mode)
     {
+        // Guard: allow only one strobe at a time — prevents triple execution
+        // when SetStateAsync and ApplyPerformanceModeAsync overlap.
+        if (Interlocked.CompareExchange(ref _strobeGuard, 1, 0) != 0)
+            return;
+
         try
         {
             if (await rgbKeyboardBacklightController.IsSupportedAsync().ConfigureAwait(false))
@@ -133,6 +141,10 @@ public class PowerModeFeature(
         {
             if (Log.Instance.IsTraceEnabled)
                 Log.Instance.Trace($"Failed to trigger RGB strobe for power mode {mode}", ex);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _strobeGuard, 0);
         }
     }
 

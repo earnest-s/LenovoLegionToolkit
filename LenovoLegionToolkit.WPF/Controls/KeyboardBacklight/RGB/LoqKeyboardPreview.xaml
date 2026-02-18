@@ -5,42 +5,11 @@
     SnapsToDevicePixels="True"
     UseLayoutRounding="True">
 
-    <!-- LOQ 4-zone keyboard silhouette preview -->
-    <Grid Width="520" Height="160">
-        <Border CornerRadius="12" Background="#FF111111" Padding="6" BorderBrush="#FF333333" BorderThickness="1.5">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <Rectangle x:Name="Zone0" Grid.Column="0" RadiusX="6" RadiusY="6" Margin="2"
-                           Fill="Black" Opacity="0.85" />
-                <Rectangle x:Name="Zone1" Grid.Column="1" RadiusX="6" RadiusY="6" Margin="2"
-                           Fill="Black" Opacity="0.85" />
-                <Rectangle x:Name="Zone2" Grid.Column="2" RadiusX="6" RadiusY="6" Margin="2"
-                           Fill="Black" Opacity="0.85" />
-                <Rectangle x:Name="Zone3" Grid.Column="3" RadiusX="6" RadiusY="6" Margin="2"
-                           Fill="Black" Opacity="0.85" />
-
-                <!-- Subtle key grid overlay for keyboard look -->
-                <Grid Grid.Column="0" Grid.ColumnSpan="4" IsHitTestVisible="False" Opacity="0.08">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Rectangle Grid.Row="0" Stroke="White" StrokeThickness="0.5" Margin="3,2" RadiusX="2" RadiusY="2" />
-                    <Rectangle Grid.Row="1" Stroke="White" StrokeThickness="0.5" Margin="3,2" RadiusX="2" RadiusY="2" />
-                    <Rectangle Grid.Row="2" Stroke="White" StrokeThickness="0.5" Margin="3,2" RadiusX="2" RadiusY="2" />
-                    <Rectangle Grid.Row="3" Stroke="White" StrokeThickness="0.5" Margin="3,2" RadiusX="2" RadiusY="2" />
-                    <Rectangle Grid.Row="4" Stroke="White" StrokeThickness="0.5" Margin="3,2" RadiusX="2" RadiusY="2" />
-                </Grid>
-            </Grid>
-        </Border>
-    </Grid>
+    <!-- Per-key LOQ keyboard preview rendered via RenderTargetBitmap -->
+    <Image x:Name="KeyboardPreviewSurface"
+           Width="760" Height="280"
+           Stretch="Uniform"
+           HorizontalAlignment="Center"
+           VerticalAlignment="Center"
+           RenderOptions.BitmapScalingMode="HighQuality" />
 </UserControl>
