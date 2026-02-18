@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -12,35 +11,49 @@ namespace LenovoLegionToolkit.WPF.Controls.KeyboardBacklight.RGB;
 /// <summary>
 /// Per-key LOQ 15IRX9 keyboard preview.
 ///
-/// Uses a fixed-coordinate Canvas with individual Border elements for every key.
-/// Colors are applied directly to each key's SolidColorBrush background — no bitmaps,
-/// no simulation, no timers.  Updates propagate immediately on <see cref="UpdateZones"/>.
+/// Builds a fixed Canvas of Border elements (one per physical key) on first load.
+/// All keys in the same zone share a single <see cref="SolidColorBrush"/> and
+/// <see cref="DropShadowEffect"/> instance, so recoloring an entire zone is O(1).
+///
+/// No bitmap rendering, no DispatcherTimer, no simulation.
+/// Colors propagate instantly when <see cref="UpdateZones"/> is called.
 /// </summary>
 public partial class LoqKeyboardPreview : UserControl
 {
-    // Per-zone list of (brush, glowEffect) for O(n) bulk-update
-    private readonly SolidColorBrush[]    _zoneBrushes = new SolidColorBrush[4];
-    private readonly DropShadowEffect[]   _dummy = [];   // kept only for documentation
+    // Shared per-zone: one brush + one glow effect, referenced by all keys in that zone.
+    // Changing brush.Color or glow.Color instantly updates every key in the zone.
+    private readonly SolidColorBrush[]  _zoneBrushes = new SolidColorBrush[4];
+    private readonly DropShadowEffect[] _zoneGlows   = new DropShadowEffect[4];
 
-    // All key borders grouped by zone index
-    private readonly List<Border>[] _zoneKeys = [new(), new(), new(), new()];
+    // Cached current colors for redundant-update elimination
+    private readonly Color[] _currentColors = [Colors.Black, Colors.Black, Colors.Black, Colors.Black];
 
-    // Current zone colors (ARGB cached to skip redundant updates)
-    private Color[]  _currentColors = [Colors.Black, Colors.Black, Colors.Black, Colors.Black];
+    private bool _keysBuilt;
 
     public LoqKeyboardPreview()
     {
         InitializeComponent();
 
-        // Pre-create one shared SolidColorBrush per zone (frozen later per update)
         for (var i = 0; i < 4; i++)
+        {
             _zoneBrushes[i] = new SolidColorBrush(Colors.Black);
+            _zoneGlows[i] = new DropShadowEffect
+            {
+                Color       = Colors.Black,
+                ShadowDepth = 0,
+                BlurRadius  = 8,
+                Opacity     = 0,
+            };
+        }
 
         Loaded += OnLoaded;
     }
 
     // ── Public API ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Real-time zone color update (called from FrameRendered or any thread).
+    /// </summary>
     public void UpdateZones(ZoneColors colors)
     {
         var c0 = ToColor(colors.Zone1);
@@ -50,19 +63,24 @@ public partial class LoqKeyboardPreview : UserControl
         ApplyColors(c0, c1, c2, c3);
     }
 
+    /// <summary>
+    /// Set static zone colors (firmware presets).
+    /// </summary>
     public void SetStaticZones(RGBColor z1, RGBColor z2, RGBColor z3, RGBColor z4)
         => ApplyColors(ToColor(z1), ToColor(z2), ToColor(z3), ToColor(z4));
 
+    /// <summary>
+    /// All keys off — solid black.
+    /// </summary>
     public void SetOff()
         => ApplyColors(Colors.Black, Colors.Black, Colors.Black, Colors.Black);
 
-    // ── Internal ─────────────────────────────────────────────────────────
+    // ── Key construction ─────────────────────────────────────────────────
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (KeyCanvas.Children.Count > 0)
-            return;   // already built (style trigger may fire Loaded twice)
-
+        if (_keysBuilt) return;
+        _keysBuilt = true;
         BuildKeys();
     }
 
@@ -72,58 +90,42 @@ public partial class LoqKeyboardPreview : UserControl
 
         foreach (var def in keys)
         {
-            var brush  = _zoneBrushes[def.Zone];
-            var glow   = MakeGlow(brush.Color);
-            var border = MakeKey(def, brush, glow);
+            var zone   = def.Zone;
+            var brush  = _zoneBrushes[zone];
+            var glow   = _zoneGlows[zone];
+
+            var border = new Border
+            {
+                Width               = def.W,
+                Height              = def.H,
+                Background          = brush,
+                CornerRadius        = new CornerRadius(6),
+                Effect              = glow,
+                SnapsToDevicePixels = true,
+            };
+
+            if (!string.IsNullOrEmpty(def.Label))
+            {
+                border.Child = new TextBlock
+                {
+                    Text                = def.Label,
+                    FontSize            = 9,
+                    FontWeight          = FontWeights.SemiBold,
+                    Foreground          = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment   = VerticalAlignment.Center,
+                    TextAlignment       = TextAlignment.Center,
+                    IsHitTestVisible    = false,
+                };
+            }
 
             Canvas.SetLeft(border, def.X);
-            Canvas.SetTop(border,  def.Y);
+            Canvas.SetTop(border, def.Y);
             KeyCanvas.Children.Add(border);
-            _zoneKeys[def.Zone].Add(border);
         }
     }
 
-    private static Border MakeKey(KeyDef def, SolidColorBrush brush, DropShadowEffect glow)
-    {
-        var border = new Border
-        {
-            Width         = def.W,
-            Height        = def.H,
-            Background    = brush,
-            CornerRadius  = new CornerRadius(4),
-            Effect        = glow,
-            SnapsToDevicePixels = true,
-        };
-
-        // key label — only shown on keys wider than 30 px  
-        if (!string.IsNullOrEmpty(def.Label))
-        {
-            var tb = new TextBlock
-            {
-                Text                = def.Label,
-                FontSize            = def.W > 55 ? 9 : 8,
-                FontWeight          = FontWeights.SemiBold,
-                Foreground          = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment   = VerticalAlignment.Center,
-                TextAlignment       = TextAlignment.Center,
-                IsHitTestVisible    = false,
-                TextWrapping        = TextWrapping.NoWrap,
-            };
-            border.Child = tb;
-        }
-
-        return border;
-    }
-
-    private static DropShadowEffect MakeGlow(Color color)
-        => new()
-        {
-            Color       = color,
-            ShadowDepth = 0,
-            BlurRadius  = 8,
-            Opacity     = color == Colors.Black ? 0 : 0.85,
-        };
+    // ── Color application ────────────────────────────────────────────────
 
     private void ApplyColors(Color c0, Color c1, Color c2, Color c3)
     {
@@ -133,31 +135,19 @@ public partial class LoqKeyboardPreview : UserControl
             return;
         }
 
-        ReadOnlySpan<Color> newColors = [c0, c1, c2, c3];
+        Span<Color> nc = [c0, c1, c2, c3];
 
-        for (var zone = 0; zone < 4; zone++)
+        for (var z = 0; z < 4; z++)
         {
-            var nc = newColors[zone];
-            if (nc == _currentColors[zone])
-                continue;
+            if (nc[z] == _currentColors[z]) continue;
 
-            _currentColors[zone] = nc;
-            _zoneBrushes[zone].Color = nc;
-
-            // update glow on every key in this zone
-            var glowOpacity = nc == Colors.Black ? 0.0 : 0.85;
-            foreach (var border in _zoneKeys[zone])
-            {
-                if (border.Effect is DropShadowEffect dse)
-                {
-                    dse.Color   = nc;
-                    dse.Opacity = glowOpacity;
-                }
-            }
+            _currentColors[z] = nc[z];
+            _zoneBrushes[z].Color = nc[z];
+            _zoneGlows[z].Color   = nc[z];
+            _zoneGlows[z].Opacity = nc[z] == Colors.Black ? 0 : 0.55;
         }
     }
 
-    private static Color ToColor(RGBColor c)
-        => Color.FromRgb(c.R, c.G, c.B);
+    private static Color ToColor(RGBColor c) => Color.FromRgb(c.R, c.G, c.B);
 }
 

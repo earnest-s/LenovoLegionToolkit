@@ -7,24 +7,18 @@
 
     <!--
         Per-key LOQ 15IRX9 keyboard preview.
-        A fixed-size Canvas (1090×292) is scaled via ViewBox to fill available space.
-        All key Border elements are created programmatically in code-behind.
+        ViewBox wraps a fixed-size Canvas (1172×292) to scale to any container size.
+        Each key is a Border element positioned on the Canvas at compile-time coordinates.
     -->
     <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <!-- chassis background: dark rounded rectangle behind every key -->
-        <Border
-            Width="1108"
-            Height="308"
-            Background="#1A1A1F"
-            CornerRadius="10"
-            Padding="9 8 9 8">
-
-            <!-- fixed-coordinate canvas — key Borders are added here in code-behind -->
-            <Canvas
-                x:Name="KeyCanvas"
-                Width="1090"
-                Height="292"
-                ClipToBounds="True" />
+        <!-- Dark chassis panel behind keys -->
+        <Border Width="1196" Height="316"
+                Background="#1A1A1F"
+                CornerRadius="10"
+                Padding="12">
+            <Canvas x:Name="KeyCanvas"
+                    Width="1172" Height="292"
+                    ClipToBounds="True" />
         </Border>
     </Viewbox>
 </UserControl>
