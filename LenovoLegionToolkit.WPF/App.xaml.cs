@@ -75,6 +75,10 @@ public partial class App
 
         EnsureSingleInstance();
 
+        // Prevent Windows EcoQoS throttling, improve timer resolution,
+        // and set stable AboveNormal process priority.
+        PowerOptimization.Apply();
+
         await LocalizationHelper.SetLanguageAsync(true);
 
         if (!flags.SkipCompatibilityCheck)
