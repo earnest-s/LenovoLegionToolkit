@@ -21,19 +21,14 @@ namespace LenovoLegionToolkit.WPF.Controls.KeyboardBacklight.RGB;
 /// </summary>
 public partial class LoqKeyboardPreview : UserControl
 {
-    private static readonly Brush LabelBrush = new SolidColorBrush(Colors.White);
-    private static readonly Brush SecondaryBrush = new SolidColorBrush(Color.FromArgb(170, 255, 255, 255));
+    // Per-zone label brushes — auto-invert to contrast with zone background
+    private readonly SolidColorBrush[]  _zoneLabelBrushes     = new SolidColorBrush[4];
+    private readonly SolidColorBrush[]  _zoneSecondaryBrushes = new SolidColorBrush[4];
 
     private readonly SolidColorBrush[]  _zoneBrushes = new SolidColorBrush[4];
     private readonly DropShadowEffect[] _zoneGlows   = new DropShadowEffect[4];
     private readonly Color[]            _currentColors = [Colors.Black, Colors.Black, Colors.Black, Colors.Black];
     private bool _keysBuilt;
-
-    static LoqKeyboardPreview()
-    {
-        LabelBrush.Freeze();
-        SecondaryBrush.Freeze();
-    }
 
     public LoqKeyboardPreview()
     {
@@ -42,6 +37,8 @@ public partial class LoqKeyboardPreview : UserControl
         for (var i = 0; i < 4; i++)
         {
             _zoneBrushes[i] = new SolidColorBrush(Colors.Black);
+            _zoneLabelBrushes[i] = new SolidColorBrush(Colors.White);
+            _zoneSecondaryBrushes[i] = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255));
             _zoneGlows[i] = new DropShadowEffect
             {
                 Color       = Colors.Black,
@@ -111,7 +108,7 @@ public partial class LoqKeyboardPreview : UserControl
             {
                 Text                = def.Secondary,
                 FontSize            = isShortKey ? 5.5 : 7,
-                Foreground          = SecondaryBrush,
+                Foreground          = _zoneSecondaryBrushes[def.Zone],
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment   = VerticalAlignment.Top,
                 TextAlignment       = TextAlignment.Center,
@@ -126,7 +123,7 @@ public partial class LoqKeyboardPreview : UserControl
                     Text                = def.Primary,
                     FontSize            = isShortKey ? 7 : 10,
                     FontWeight          = FontWeights.SemiBold,
-                    Foreground          = LabelBrush,
+                    Foreground          = _zoneLabelBrushes[def.Zone],
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment   = VerticalAlignment.Bottom,
                     TextAlignment       = TextAlignment.Center,
@@ -145,7 +142,7 @@ public partial class LoqKeyboardPreview : UserControl
                 Text                = def.Primary,
                 FontSize            = isShortKey ? 8 : 10,
                 FontWeight          = FontWeights.SemiBold,
-                Foreground          = LabelBrush,
+                Foreground          = _zoneLabelBrushes[def.Zone],
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment   = VerticalAlignment.Center,
                 TextAlignment       = TextAlignment.Center,
@@ -176,7 +173,22 @@ public partial class LoqKeyboardPreview : UserControl
             _zoneBrushes[z].Color     = nc[z];
             _zoneGlows[z].Color       = nc[z];
             _zoneGlows[z].Opacity     = nc[z] == Colors.Black ? 0.0 : 0.55;
+
+            // Invert label color based on perceived luminance of zone background
+            var label = ContrastColor(nc[z]);
+            _zoneLabelBrushes[z].Color     = label;
+            _zoneSecondaryBrushes[z].Color = Color.FromArgb(180, label.R, label.G, label.B);
         }
+    }
+
+    /// <summary>
+    /// Returns white or black depending on perceived luminance of <paramref name="bg"/>.
+    /// Uses ITU-R BT.601 luma:  L = 0.299R + 0.587G + 0.114B
+    /// </summary>
+    private static Color ContrastColor(Color bg)
+    {
+        var luma = 0.299 * bg.R + 0.587 * bg.G + 0.114 * bg.B;
+        return luma > 140 ? Colors.Black : Colors.White;
     }
 
     private static Color ToColor(RGBColor c) => Color.FromRgb(c.R, c.G, c.B);
