@@ -9,26 +9,31 @@ using LenovoLegionToolkit.Lib.Controllers.CustomRGBEffects;
 namespace LenovoLegionToolkit.WPF.Controls.KeyboardBacklight.RGB;
 
 /// <summary>
-/// Per-key LOQ 15IRX9 keyboard preview.
+/// Per-key LOQ 15IRX9 keyboard preview with dual-legend key labels.
 ///
-/// Builds a fixed Canvas of Border elements (one per physical key) on first load.
-/// All keys in the same zone share a single <see cref="SolidColorBrush"/> and
-/// <see cref="DropShadowEffect"/> instance, so recoloring an entire zone is O(1).
-///
-/// No bitmap rendering, no DispatcherTimer, no simulation.
-/// Colors propagate instantly when <see cref="UpdateZones"/> is called.
+/// Architecture:
+///   - Fixed Canvas (1172×292) scaled via ViewBox
+///   - One Border per physical key, positioned with Canvas.SetLeft/Top
+///   - 4 shared SolidColorBrush + 4 shared DropShadowEffect (one per zone)
+///   - Recoloring is O(1): set brush.Color → all keys in zone update instantly
+///   - Dual labels: secondary (top, small, dim) + primary (center/bottom, bold)
+///   - No bitmaps, no timers, no simulation
 /// </summary>
 public partial class LoqKeyboardPreview : UserControl
 {
-    // Shared per-zone: one brush + one glow effect, referenced by all keys in that zone.
-    // Changing brush.Color or glow.Color instantly updates every key in the zone.
+    private static readonly Brush LabelBrush = new SolidColorBrush(Colors.White);
+    private static readonly Brush SecondaryBrush = new SolidColorBrush(Color.FromArgb(170, 255, 255, 255));
+
     private readonly SolidColorBrush[]  _zoneBrushes = new SolidColorBrush[4];
     private readonly DropShadowEffect[] _zoneGlows   = new DropShadowEffect[4];
-
-    // Cached current colors for redundant-update elimination
-    private readonly Color[] _currentColors = [Colors.Black, Colors.Black, Colors.Black, Colors.Black];
-
+    private readonly Color[]            _currentColors = [Colors.Black, Colors.Black, Colors.Black, Colors.Black];
     private bool _keysBuilt;
+
+    static LoqKeyboardPreview()
+    {
+        LabelBrush.Freeze();
+        SecondaryBrush.Freeze();
+    }
 
     public LoqKeyboardPreview()
     {
@@ -46,83 +51,109 @@ public partial class LoqKeyboardPreview : UserControl
             };
         }
 
-        Loaded += OnLoaded;
+        Loaded += (_, _) => BuildKeysOnce();
     }
 
     // ── Public API ───────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Real-time zone color update (called from FrameRendered or any thread).
-    /// </summary>
     public void UpdateZones(ZoneColors colors)
-    {
-        var c0 = ToColor(colors.Zone1);
-        var c1 = ToColor(colors.Zone2);
-        var c2 = ToColor(colors.Zone3);
-        var c3 = ToColor(colors.Zone4);
-        ApplyColors(c0, c1, c2, c3);
-    }
+        => ApplyColors(ToColor(colors.Zone1), ToColor(colors.Zone2),
+                        ToColor(colors.Zone3), ToColor(colors.Zone4));
 
-    /// <summary>
-    /// Set static zone colors (firmware presets).
-    /// </summary>
     public void SetStaticZones(RGBColor z1, RGBColor z2, RGBColor z3, RGBColor z4)
         => ApplyColors(ToColor(z1), ToColor(z2), ToColor(z3), ToColor(z4));
 
-    /// <summary>
-    /// All keys off — solid black.
-    /// </summary>
     public void SetOff()
         => ApplyColors(Colors.Black, Colors.Black, Colors.Black, Colors.Black);
 
     // ── Key construction ─────────────────────────────────────────────────
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private void BuildKeysOnce()
     {
         if (_keysBuilt) return;
         _keysBuilt = true;
-        BuildKeys();
-    }
 
-    private void BuildKeys()
-    {
-        var keys = LoqKeyboardLayout.CreateKeys();
-
-        foreach (var def in keys)
+        foreach (var def in LoqKeyboardLayout.CreateKeys())
         {
-            var zone   = def.Zone;
-            var brush  = _zoneBrushes[zone];
-            var glow   = _zoneGlows[zone];
-
-            var border = new Border
-            {
-                Width               = def.W,
-                Height              = def.H,
-                Background          = brush,
-                CornerRadius        = new CornerRadius(6),
-                Effect              = glow,
-                SnapsToDevicePixels = true,
-            };
-
-            if (!string.IsNullOrEmpty(def.Label))
-            {
-                border.Child = new TextBlock
-                {
-                    Text                = def.Label,
-                    FontSize            = 9,
-                    FontWeight          = FontWeights.SemiBold,
-                    Foreground          = Brushes.White,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment   = VerticalAlignment.Center,
-                    TextAlignment       = TextAlignment.Center,
-                    IsHitTestVisible    = false,
-                };
-            }
-
+            var border = CreateKey(def);
             Canvas.SetLeft(border, def.X);
             Canvas.SetTop(border, def.Y);
             KeyCanvas.Children.Add(border);
         }
+    }
+
+    private Border CreateKey(KeyDef def)
+    {
+        var border = new Border
+        {
+            Width               = def.W,
+            Height              = def.H,
+            Background          = _zoneBrushes[def.Zone],
+            CornerRadius        = new CornerRadius(6),
+            Effect              = _zoneGlows[def.Zone],
+            SnapsToDevicePixels = true,
+        };
+
+        bool hasPrimary   = !string.IsNullOrEmpty(def.Primary);
+        bool hasSecondary = !string.IsNullOrEmpty(def.Secondary);
+
+        if (!hasPrimary && !hasSecondary)
+            return border;  // spacebar — no label
+
+        bool isShortKey = def.H < 40;  // F-row keys are shorter
+
+        if (hasSecondary)
+        {
+            // Dual legend: secondary at top, primary at bottom/center
+            var grid = new Grid();
+
+            grid.Children.Add(new TextBlock
+            {
+                Text                = def.Secondary,
+                FontSize            = isShortKey ? 5.5 : 7,
+                Foreground          = SecondaryBrush,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment   = VerticalAlignment.Top,
+                TextAlignment       = TextAlignment.Center,
+                Margin              = new Thickness(1, isShortKey ? 1 : 3, 1, 0),
+                IsHitTestVisible    = false,
+            });
+
+            if (hasPrimary)
+            {
+                grid.Children.Add(new TextBlock
+                {
+                    Text                = def.Primary,
+                    FontSize            = isShortKey ? 7 : 10,
+                    FontWeight          = FontWeights.SemiBold,
+                    Foreground          = LabelBrush,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment   = VerticalAlignment.Bottom,
+                    TextAlignment       = TextAlignment.Center,
+                    Margin              = new Thickness(1, 0, 1, isShortKey ? 1 : 3),
+                    IsHitTestVisible    = false,
+                });
+            }
+
+            border.Child = grid;
+        }
+        else
+        {
+            // Single legend: centered
+            border.Child = new TextBlock
+            {
+                Text                = def.Primary,
+                FontSize            = isShortKey ? 8 : 10,
+                FontWeight          = FontWeights.SemiBold,
+                Foreground          = LabelBrush,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment   = VerticalAlignment.Center,
+                TextAlignment       = TextAlignment.Center,
+                IsHitTestVisible    = false,
+            };
+        }
+
+        return border;
     }
 
     // ── Color application ────────────────────────────────────────────────
@@ -141,10 +172,10 @@ public partial class LoqKeyboardPreview : UserControl
         {
             if (nc[z] == _currentColors[z]) continue;
 
-            _currentColors[z] = nc[z];
-            _zoneBrushes[z].Color = nc[z];
-            _zoneGlows[z].Color   = nc[z];
-            _zoneGlows[z].Opacity = nc[z] == Colors.Black ? 0 : 0.55;
+            _currentColors[z]         = nc[z];
+            _zoneBrushes[z].Color     = nc[z];
+            _zoneGlows[z].Color       = nc[z];
+            _zoneGlows[z].Opacity     = nc[z] == Colors.Black ? 0.0 : 0.55;
         }
     }
 
