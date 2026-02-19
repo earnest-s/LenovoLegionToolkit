@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>USB zawsze włączone</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Zastosuj</value>
@@ -173,7 +173,7 @@
     <value>Zastosuj i zamknij</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Akcje będą działać, tylko gdy Lenovo Legion Toolkit jest uruchomiony.</value>
+    <value>Akcje będą działać, tylko gdy LOQ Nova jest uruchomiony.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Włącz</value>
@@ -531,7 +531,7 @@ UWAGA: Ta akcja nie zadziała właściwie, jeśli wbudowany ekran jest wyłączo
     <value>Przekaż darowiznę używając</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Tworzenie i utrzymywanie Lenovo Legion Toolkit zajmuje bardzo dużo czasu. Jeżeli lubisz używać tego programu, możesz wesprzeć jego rozwój przekazują darowiznę.
+    <value>Tworzenie i utrzymywanie LOQ Nova zajmuje bardzo dużo czasu. Jeżeli lubisz używać tego programu, możesz wesprzeć jego rozwój przekazują darowiznę.
 
 Kliknij logo poniżej lub zeskanuj kod QR, żeby przekazać darowiznę poprzez PayPal.
 
@@ -547,7 +547,7 @@ Z góry dziękuję!</value>
     <value>Odznaczone częstotliwości odświeżania nie będą mogły być zmieniane skrótem klawiszowym Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Upewnij się, że ekran laptopa jest włączony. Lenovo Legion Toolkit nie może załadować częstotliwości odświeżania dla ekranu, który jest wyłączony.</value>
+    <value>Upewnij się, że ekran laptopa jest włączony. LOQ Nova nie może załadować częstotliwości odświeżania dla ekranu, który jest wyłączony.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Nie znaleziono żadnych częstotliwości odświeżania</value>
@@ -734,7 +734,7 @@ UWAGA: Ta akcja nie zadziała właściwie, jeśli wbudowany ekran jest wyłączo
     <value>Import</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>To urządzenie nie jest kompatybilne z Lenovo Legion Toolkit.</value>
+    <value>To urządzenie nie jest kompatybilne z LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nie znaleziono kompatybilnych klawiatur</value>
@@ -1380,7 +1380,7 @@ Jeśli zdecydujesz się kontynuować, logowanie zostanie włączone automatyczni
     <value>Typ maszyny</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit nie został sprawdzony dla tego urządzenia.</value>
+    <value>LOQ Nova nie został sprawdzony dla tego urządzenia.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>
@@ -2094,7 +2094,7 @@ Obsługiwane formaty obrazka: {1}.</value>
     <value>Nie powtarzaj</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Aby makra działały, Lenovo Legion Toolkit musi być włączony w tle.</value>
+    <value>Aby makra działały, LOQ Nova musi być włączony w tle.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Włącz</value>

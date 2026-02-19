@@ -9,7 +9,7 @@ namespace LenovoLegionToolkit.Lib.System;
 
 public static class Autorun
 {
-    private const string TASK_NAME = "LenovoLegionToolkit_Autorun_6efcc882-924c-4cbc-8fec-f45c25696f98";
+    private const string TASK_NAME = "LOQNova_Autorun_6efcc882-924c-4cbc-8fec-f45c25696f98";
 
     public static AutorunState State
     {

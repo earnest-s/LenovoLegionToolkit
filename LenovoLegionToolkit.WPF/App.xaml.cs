@@ -41,8 +41,8 @@ namespace LenovoLegionToolkit.WPF;
 
 public partial class App
 {
-    private const string MUTEX_NAME = "LenovoLegionToolkit_Mutex_6efcc882-924c-4cbc-8fec-f45c25696f98";
-    private const string EVENT_NAME = "LenovoLegionToolkit_Event_6efcc882-924c-4cbc-8fec-f45c25696f98";
+    private const string MUTEX_NAME = "LOQNova_Mutex_6efcc882-924c-4cbc-8fec-f45c25696f98";
+    private const string EVENT_NAME = "LOQNova_Event_6efcc882-924c-4cbc-8fec-f45c25696f98";
 
     private Mutex? _singleInstanceMutex;
     private EventWaitHandle? _singleInstanceWaitHandle;

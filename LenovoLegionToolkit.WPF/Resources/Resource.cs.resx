@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -161,7 +161,7 @@
     <value>Vždy napájené USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Použít</value>
@@ -170,7 +170,7 @@
     <value>Použít a zavřít</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit musí být zapnut, aby fungovaly automatické akce.</value>
+    <value>LOQ Nova musí být zapnut, aby fungovaly automatické akce.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Povolit</value>
@@ -529,7 +529,7 @@ VAROVÁNÍ: Tato akce neproběhne správně, pokud je displej notebooku vypnutý
     <value>Přispět pomocí</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Vývoj a údržba Lenovo Legion Toolkit zabere spoustu času. Pokud rád používáš tento software, můžeš podpořit jeho budoucnost darováním částky dle vlastního výběru.
+    <value>Vývoj a údržba LOQ Nova zabere spoustu času. Pokud rád používáš tento software, můžeš podpořit jeho budoucnost darováním částky dle vlastního výběru.
 
 Klikněte na logo PayPal níže nebo naskenujte QR kód a přispějte přes PayPal.
 
@@ -545,7 +545,7 @@ Díky předem!</value>
     <value>Zaškrtni obnovovací frekvence, které chceš používat při použití zkratky Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Ujisti se, že je zapnutý displej notebooku. Lenovo Legion Toolkit nemůže načíst obnovovací frekvence pro displej, který není zapnutý.</value>
+    <value>Ujisti se, že je zapnutý displej notebooku. LOQ Nova nemůže načíst obnovovací frekvence pro displej, který není zapnutý.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Nebyly nalezeny žádné obnovovací frekvence</value>
@@ -711,7 +711,7 @@ VAROVÁNÍ: Tato akce neproběhne správně, pokud je interní displej vypnutý.
     <value>Importovat</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Toto zařízení není kompatibilní s Lenovo Legion Toolkit.</value>
+    <value>Toto zařízení není kompatibilní s LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nebyly nalezeny žádné kompatibilní klávesnice</value>
@@ -1319,7 +1319,7 @@ Pokud se rozhodneš pokračovat, protokolování bude automaticky povoleno.</val
     <value>Typ zařízení</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit nebyl testován na vašem zařízení.</value>
+    <value>LOQ Nova nebyl testován na vašem zařízení.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>

@@ -13,7 +13,7 @@ public class HWiNFOIntegration(SensorsController sensorController, IntegrationsS
 {
     private const string CUSTOM_SENSOR_HIVE = "HKEY_CURRENT_USER";
     private const string CUSTOM_SENSOR_PATH = @"Software\HWiNFO64\Sensors\Custom";
-    private const string CUSTOM_SENSOR_GROUP_NAME = "Lenovo Legion Toolkit";
+    private const string CUSTOM_SENSOR_GROUP_NAME = "LOQ Nova";
     private const string SENSOR_TYPE_FAN = "Fan";
     private const string SENSOR_TYPE_TEMP = "Temp";
     private const string CPU_FAN_SENSOR_NAME = "CPU Fan";

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>USBの常時給電</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>適用</value>
@@ -173,7 +173,7 @@
     <value>適用して閉じる</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>自動アクションが機能するには、Lenovo Legion Toolkit が実行されている必要があります。</value>
+    <value>自動アクションが機能するには、LOQ Nova が実行されている必要があります。</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>有効化</value>
@@ -528,7 +528,7 @@
     <value>寄付はこちら</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit の開発とメンテナンスには多くの時間がかかります。このソフトウェアが良いと思った場合は寄付をお願いします。寄付をすることで長期的にメンテナンスされます。
+    <value>LOQ Nova の開発とメンテナンスには多くの時間がかかります。このソフトウェアが良いと思った場合は寄付をお願いします。寄付をすることで長期的にメンテナンスされます。
 
 PayPal で寄付するには、下の PayPal ロゴをクリックするかQR コードをスキャンしてください。</value>
   </data>
@@ -542,7 +542,7 @@ PayPal で寄付するには、下の PayPal ロゴをクリックするかQR �
     <value>Fn+R ショートカットを使用するときに、使用しないリフレッシュレートのチェックを外します。</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>デバイスのディスプレイがオンになっていることを確認します。Lenovo Legion Toolkitは、電源が入っていないディスプレイのリフレッシュレートをロードできません。</value>
+    <value>デバイスのディスプレイがオンになっていることを確認します。LOQ Novaは、電源が入っていないディスプレイのリフレッシュレートをロードできません。</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>リフレッシュレートが見つかりません</value>
@@ -728,7 +728,7 @@ PayPal で寄付するには、下の PayPal ロゴをクリックするかQR �
     <value>インポート</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>このデバイスは Lenovo Legion Toolkit と互換性がありません。</value>
+    <value>このデバイスは LOQ Nova と互換性がありません。</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>互換性のあるキーボードが見つかりません</value>
@@ -1343,7 +1343,7 @@ PayPal で寄付するには、下の PayPal ロゴをクリックするかQR �
     <value>デバイスの種類</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit はお使いのデバイスでテストされていません。</value>
+    <value>LOQ Nova はお使いのデバイスでテストされていません。</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>モデル</value>
@@ -1909,7 +1909,7 @@ PayPal で寄付するには、下の PayPal ロゴをクリックするかQR �
     <value>繰り返さない</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>マクロが機能するには、Lenovo Legion Toolkit が実行されている必要があります。</value>
+    <value>マクロが機能するには、LOQ Nova が実行されている必要があります。</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>有効化</value>

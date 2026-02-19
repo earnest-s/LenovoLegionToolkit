@@ -1,10 +1,10 @@
 #include "InnoDependencies\install_dotnet.iss"
 
-#define MyAppName "Lenovo Legion Toolkit"
-#define MyAppNameCompact "LenovoLegionToolkit"
-#define MyAppPublisher "Bartosz Cichecki"
-#define MyAppURL "https://github.com/BartoszCichecki/LenovoLegionToolkit"
-#define MyAppExeName "Lenovo Legion Toolkit.exe"
+#define MyAppName "LOQ Nova"
+#define MyAppNameCompact "LOQNova"
+#define MyAppPublisher "Earnest S"
+#define MyAppURL "https://github.com/earnest-s/LenovoLegionToolkit"
+#define MyAppExeName "LOQ Nova.exe"
 
 #ifndef MyAppVersion
   #define MyAppVersion "0.0.1"
@@ -23,7 +23,7 @@ DefaultDirName={userpf}\{#MyAppNameCompact}
 DisableProgramGroupPage=yes
 LicenseFile=LICENSE
 PrivilegesRequired=admin
-OutputBaseFilename=LenovoLegionToolkitSetup
+OutputBaseFilename=LOQNovaSetup
 Compression=lzma2/ultra64  
 SolidCompression=yes
 WizardStyle=modern
@@ -85,4 +85,4 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 Type: filesandordirs; Name: "{localappdata}\{#MyAppNameCompact}"
 
 [UninstallRun]
-RunOnceId: "DelAutorun"; Filename: "schtasks"; Parameters: "/Delete /TN ""LenovoLegionToolkit_Autorun_6efcc882-924c-4cbc-8fec-f45c25696f98"" /F"; Flags: runhidden 
+RunOnceId: "DelAutorun"; Filename: "schtasks"; Parameters: "/Delete /TN ""LOQNova_Autorun_6efcc882-924c-4cbc-8fec-f45c25696f98"" /F"; Flags: runhidden 

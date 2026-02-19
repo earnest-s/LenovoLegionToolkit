@@ -5,12 +5,13 @@
 		<Platforms>x64</Platforms>
 		<OutputType>WinExe</OutputType>
 		<ApplicationIcon>Assets/icon.ico</ApplicationIcon>
-		<AssemblyName>Lenovo Legion Toolkit</AssemblyName>
+		<AssemblyName>LOQ Nova</AssemblyName>
+		<Product>LOQ Nova</Product>
 		<Copyright>© 2026 Earnest S</Copyright>
-		<Version>2.3.1</Version>
-		<AssemblyVersion>2.3.1.$([System.DateTime]::UtcNow.ToString("MMdd"))</AssemblyVersion>
-		<FileVersion>2.3.1.$([System.DateTime]::UtcNow.ToString("HHmm"))</FileVersion>
-		<InformationalVersion>2.3.1+$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</InformationalVersion>
+		<Version>3.0.0</Version>
+		<AssemblyVersion>3.0.0.$([System.DateTime]::UtcNow.ToString("MMdd"))</AssemblyVersion>
+		<FileVersion>3.0.0.$([System.DateTime]::UtcNow.ToString("HHmm"))</FileVersion>
+		<InformationalVersion>3.0.0+$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</InformationalVersion>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>

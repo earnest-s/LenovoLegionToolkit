@@ -11,10 +11,19 @@ public static class Folders
     {
         get
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var folderPath = Path.Combine(appData, "LenovoLegionToolkit");
-            Directory.CreateDirectory(folderPath);
-            return folderPath;
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var newFolderPath = Path.Combine(localAppData, "LOQNova");
+            var oldFolderPath = Path.Combine(localAppData, "LenovoLegionToolkit");
+
+            // One-time migration: move existing settings from old folder to new folder.
+            if (!Directory.Exists(newFolderPath) && Directory.Exists(oldFolderPath))
+            {
+                try { Directory.Move(oldFolderPath, newFolderPath); }
+                catch { /* migration is best-effort; fall through to create */ }
+            }
+
+            Directory.CreateDirectory(newFolderPath);
+            return newFolderPath;
         }
     }
 
@@ -23,7 +32,7 @@ public static class Folders
         get
         {
             var appData = Path.GetTempPath();
-            var folderPath = Path.Combine(appData, "LenovoLegionToolkit");
+            var folderPath = Path.Combine(appData, "LOQNova");
             Directory.CreateDirectory(folderPath);
             return folderPath;
         }

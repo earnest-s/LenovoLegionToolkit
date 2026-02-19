@@ -31,7 +31,7 @@ public class ProcessAutoListener(
         "CompPkgSrv",
         "conhost",
         "dllhost",
-        "Lenovo Legion Toolkit",
+        "LOQ Nova",
         "msedge",
         "msedgewebview2",
         "NvOAWrapperCache",

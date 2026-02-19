@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Verzija</value>
@@ -149,7 +149,7 @@
     <value>Dodaj novu</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Primijeni</value>
@@ -158,7 +158,7 @@
     <value>Primijeni i zatvori</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit mora biti pokrenut da bi automatske akcije radile.</value>
+    <value>LOQ Nova mora biti pokrenut da bi automatske akcije radile.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Omogući</value>
@@ -462,7 +462,7 @@ Ovo vrijeme možda neće biti tačno ako je laptop bio napunjen dok je spavao il
     <value>Ventilatori</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Ovaj uređaj nije kompatibilan sa Lenovo Legion Toolkit.</value>
+    <value>Ovaj uređaj nije kompatibilan sa LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nije pronađena kompatibilna tastatura</value>
@@ -779,7 +779,7 @@ Logiranje će biti automatski omogućeno, ukoliko izaberete da nastavite.</value
     <value>Tip uređaja</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit nije bio testiran sa vašim uređajem.</value>
+    <value>LOQ Nova nije bio testiran sa vašim uređajem.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>

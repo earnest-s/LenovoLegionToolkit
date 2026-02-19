@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Yapı</value>
@@ -164,7 +164,7 @@
     <value>Her zaman açık USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Uygula</value>
@@ -173,7 +173,7 @@
     <value>Uygula &amp; Kapat</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Otomatik eylemlerin çalışması için Lenovo Legion Toolkit çalışıyor olmalıdır.</value>
+    <value>Otomatik eylemlerin çalışması için LOQ Nova çalışıyor olmalıdır.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Etkinleştir</value>
@@ -532,7 +532,7 @@ UYARI: Dahili ekran kapalıysa bu eylem düzgün çalışmayacaktır.</value>
     <value>Bağış yapın</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit'in geliştirilmesi ve bakımı çok zaman alıyor. Bu yazılımı kullanmayı seviyorsanız, istediğiniz miktarda bağış yaparak geleceğine destek olabilirsiniz.
+    <value>LOQ Nova'in geliştirilmesi ve bakımı çok zaman alıyor. Bu yazılımı kullanmayı seviyorsanız, istediğiniz miktarda bağış yaparak geleceğine destek olabilirsiniz.
 
 PayPal ile bağış yapmak için aşağıdaki PayPal logosuna tıklayın veya QR kodunu tarayın.
 
@@ -548,7 +548,7 @@ PayPal ile bağış yapmak için aşağıdaki PayPal logosuna tıklayın veya QR
     <value>Fn+R kısayolu kullanıldığında kullanmak istemediğiniz yenileme hızlarını kaldırın.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Dizüstü bilgisayar ekranının açık olduğundan emin olun. Lenovo Legion Toolkit, açık olmayan bir ekran için yenileme hızlarını yükleyemez.</value>
+    <value>Dizüstü bilgisayar ekranının açık olduğundan emin olun. LOQ Nova, açık olmayan bir ekran için yenileme hızlarını yükleyemez.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Yenileme Hızı bulunamadı</value>
@@ -734,7 +734,7 @@ UYARI: Dahili ekran kapalıysa bu işlem doğru çalışmaz.</value>
     <value>İçe Aktar</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Bu cihaz, Lenovo Legion Toolkit ile uyumlu değildir.</value>
+    <value>Bu cihaz, LOQ Nova ile uyumlu değildir.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Uyumlu klavye bulunmadı</value>
@@ -1384,7 +1384,7 @@ Devam etmeyi seçerseniz, kayıt etme otomatik olarak etkinleştirilecektir.</va
     <value>Cihaz Tipi</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit, cihazınızla test edilmemiştir.</value>
+    <value>LOQ Nova, cihazınızla test edilmemiştir.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>
@@ -2098,7 +2098,7 @@ Desteklenen biçimler: {1}.</value>
     <value>Tekrar etme</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Otomatik makroların çalışması için Lenovo Legion Toolkit çalışıyor olmalıdır.</value>
+    <value>Otomatik makroların çalışması için LOQ Nova çalışıyor olmalıdır.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Etkinleştir</value>

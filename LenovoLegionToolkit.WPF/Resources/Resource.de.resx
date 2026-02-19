@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>Always on USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Anwenden</value>
@@ -173,7 +173,7 @@
     <value>Anwenden &amp; Schließen</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit muss ausgeführt werden, damit die automatischen Aktionen funktionieren.</value>
+    <value>LOQ Nova muss ausgeführt werden, damit die automatischen Aktionen funktionieren.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Einschalten</value>
@@ -531,7 +531,7 @@ WARNUNG: Diese Aktion wird nicht korrekt ausgeführt, wenn der interne Bildschir
     <value>Spenden mit</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Die Entwicklung und Pflege des Lenovo Legion Toolkits ist sehr zeitaufwändig. Wenn Sie diese Software gerne nutzen, können Sie ihre Zukunft unterstützen, indem Sie einen Betrag Ihrer Wahl spenden.
+    <value>Die Entwicklung und Pflege des LOQ Novas ist sehr zeitaufwändig. Wenn Sie diese Software gerne nutzen, können Sie ihre Zukunft unterstützen, indem Sie einen Betrag Ihrer Wahl spenden.
 
 Klicken Sie auf das PayPal-Logo unten oder scannen Sie den QR-Code, um mit PayPal zu spenden.
 
@@ -547,7 +547,7 @@ Vielen Dank im Voraus!</value>
     <value>Deaktivieren Sie die Aktualisierungsraten, die Sie nicht verwenden möchten, wenn die Tastenkombination Fn+R verwendet wird.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Stellen Sie sicher, dass der Laptop-Bildschirm eingeschaltet ist. Das Lenovo Legion Toolkit kann keine Bildwiederholraten für ein nicht eingeschaltetes Display laden.</value>
+    <value>Stellen Sie sicher, dass der Laptop-Bildschirm eingeschaltet ist. Das LOQ Nova kann keine Bildwiederholraten für ein nicht eingeschaltetes Display laden.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Keine Bildwiederholraten gefunden</value>
@@ -733,7 +733,7 @@ WARNUNG: Diese Aktion wird nicht korrekt ausgeführt, wenn der interne Bildschir
     <value>Importieren</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Dieses Gerät ist nicht mit dem Lenovo Legion Toolkit kompatibel.</value>
+    <value>Dieses Gerät ist nicht mit dem LOQ Nova kompatibel.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Keine kompatible Tastatur gefunden</value>
@@ -1383,7 +1383,7 @@ Die Protokollierung wird automatisch aktiviert, wenn Sie fortfahren möchten.</v
     <value>Gerätetyp</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit wurde nicht mit Ihrem Gerät getestet.</value>
+    <value>LOQ Nova wurde nicht mit Ihrem Gerät getestet.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modell</value>
@@ -2097,7 +2097,7 @@ Unterstützte Formate sind: {1}.</value>
     <value>Nicht wiederholen</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Lenovo Legion Toolkit muss ausgeführt werden, damit Makros funktionieren.</value>
+    <value>LOQ Nova muss ausgeführt werden, damit Makros funktionieren.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Aktivieren</value>

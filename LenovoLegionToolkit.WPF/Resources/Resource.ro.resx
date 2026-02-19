@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Compilare</value>
@@ -161,7 +161,7 @@
     <value>USB mereu activ</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Aplicare</value>
@@ -170,7 +170,7 @@
     <value>Aplicare &amp; închidere</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit trebuie să ruleze pentru ca acțiunile automate să funcționeze.</value>
+    <value>LOQ Nova trebuie să ruleze pentru ca acțiunile automate să funcționeze.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Activare</value>
@@ -529,7 +529,7 @@ ATENȚIE: Această acțiune nu va rula corect dacă afișajul intern este oprit.
     <value>Donați cu</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Dezvoltarea și întreținerea Lenovo Legion Toolkit necesită mult timp. Dacă vă place acest software, îi puteți sprijini viitorul donând o sumă la alegere.
+    <value>Dezvoltarea și întreținerea LOQ Nova necesită mult timp. Dacă vă place acest software, îi puteți sprijini viitorul donând o sumă la alegere.
 
 Faceți clic pe sigla PayPal de mai jos sau scanați codul QR pentru a dona cu PayPal.
 
@@ -545,7 +545,7 @@ Mulțumesc anticipat!</value>
     <value>Debifați ratele de reîmprospătare pe care nu doriți să le utilizați pentru comanda rapidă Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Asigurați-vă că afișajul laptopului este pornit. Lenovo Legion Toolkit nu poate încărca rate de reîmprospătare pentru un afișaj care nu este pornit.</value>
+    <value>Asigurați-vă că afișajul laptopului este pornit. LOQ Nova nu poate încărca rate de reîmprospătare pentru un afișaj care nu este pornit.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Nicio rată de reîmprospătare găsită</value>
@@ -711,7 +711,7 @@ ATENȚIE: Această acțiune nu va rula corect dacă afișajul incorporat este op
     <value>Importare</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Acest dispozitiv nu este compatibil cu Lenovo Legion Toolkit.</value>
+    <value>Acest dispozitiv nu este compatibil cu LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nicio tastatură compatibilă găsită</value>
@@ -1320,7 +1320,7 @@ Salvarea logurilor va fi activată automat dacă alegeți să continuați.</valu
     <value>Tip sistem</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit nu a fost testat cu dispozitivul dvs.</value>
+    <value>LOQ Nova nu a fost testat cu dispozitivul dvs.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>Always on USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>
@@ -173,7 +173,7 @@
     <value>Apply &amp; Close</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit must be running for automatic actions to work.</value>
+    <value>LOQ Nova must be running for automatic actions to work.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Enable</value>
@@ -549,7 +549,7 @@ WARNING: This action will not run correctly, if internal display is off.</value>
     <value>Donate with</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Development and maintenance of Lenovo Legion Toolkit takes a lot of time. If you like using this software you can support its future by donating an amount of your choice.
+    <value>Development and maintenance of LOQ Nova takes a lot of time. If you like using this software you can support its future by donating an amount of your choice.
 
 Click the PayPal logo below or scan the QR code to donate with PayPal.
 
@@ -565,7 +565,7 @@ Thanks in advance!</value>
     <value>Uncheck refresh rates that you do not want to use when Fn+R shortcut is used.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Make sure that laptop display is on. Lenovo Legion Toolkit can't load refresh rates for a display that is not on.</value>
+    <value>Make sure that laptop display is on. LOQ Nova can't load refresh rates for a display that is not on.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>No Refresh Rates found</value>
@@ -751,7 +751,7 @@ WARNING: This action will not run correctly if the internal display is off.</val
     <value>Import</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>This device is not compatible with Lenovo Legion Toolkit.</value>
+    <value>This device is not compatible with LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>No compatible keyboards found</value>
@@ -1401,7 +1401,7 @@ Logging will be enabled automatically, if you choose to continue.</value>
     <value>Machine Type</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit has not been tested with your device.</value>
+    <value>LOQ Nova has not been tested with your device.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>
@@ -2121,7 +2121,7 @@ Supported formats are: {1}.</value>
     <value>Don't repeat</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Lenovo Legion Toolkit must be running for macros to work.</value>
+    <value>LOQ Nova must be running for macros to work.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Enable</value>

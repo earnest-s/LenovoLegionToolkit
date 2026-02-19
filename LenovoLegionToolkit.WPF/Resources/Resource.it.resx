@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -161,7 +161,7 @@
     <value>USB sempre attive</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Salva</value>
@@ -170,7 +170,7 @@
     <value>Salva ed esci</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit deve rimanere in esecuzione per far funzionare le azioni automatizzate.</value>
+    <value>LOQ Nova deve rimanere in esecuzione per far funzionare le azioni automatizzate.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Abilita</value>
@@ -528,7 +528,7 @@ ATTENZIONE: questa azione non verrà eseguita correttamente se il display intern
     <value>Dona con</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Lo sviluppo e il mantenimento di Lenovo Legion Toolkit richiede parecchio tempo. Se ti piace usare questo software puoi supportarlo donando una cifra a tua scelta.
+    <value>Lo sviluppo e il mantenimento di LOQ Nova richiede parecchio tempo. Se ti piace usare questo software puoi supportarlo donando una cifra a tua scelta.
 
 Clicca il logo PayPal qui sotto oppure scansiona il QR code per donare con PayPal.</value>
   </data>
@@ -542,7 +542,7 @@ Clicca il logo PayPal qui sotto oppure scansiona il QR code per donare con PayPa
     <value>Deseleziona le frequenze di aggiornamento che non desideri utilizzare quando viene utilizzata la scorciatoia Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Assicurati che il display del laptop sia acceso. Lenovo Legion Toolkit non può caricare le frequenze di aggiornamento per un display non acceso.</value>
+    <value>Assicurati che il display del laptop sia acceso. LOQ Nova non può caricare le frequenze di aggiornamento per un display non acceso.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Nessun refresh rate trovato</value>
@@ -709,7 +709,7 @@ ATTENZIONE: questa azione non verrà eseguita correttamente se il display intern
     <value>Importa</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Questo dispositivo non è compatibile con Lenovo Legion Toolkit.</value>
+    <value>Questo dispositivo non è compatibile con LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nessuna tastiera compatibile trovata</value>
@@ -1324,7 +1324,7 @@ Il logging verrà abilitato automaticamente, se scegli di continuare.</value>
     <value>Codice modello</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit non è stato testato per il tuo dispositivo.</value>
+    <value>LOQ Nova non è stato testato per il tuo dispositivo.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modello</value>

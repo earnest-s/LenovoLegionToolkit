@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>拯救者工具箱 Lenovo Legion Toolkit</value>
+    <value>拯救者工具箱 LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -166,7 +166,7 @@
     <value>保持 USB 供电</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>拯救者工具箱 Lenovo Legion Toolkit</value>
+    <value>拯救者工具箱 LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>应用</value>
@@ -1391,7 +1391,7 @@
     <value>设备类型</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit 尚未在您的设备上经过测试。</value>
+    <value>LOQ Nova 尚未在您的设备上经过测试。</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>设备型号</value>
