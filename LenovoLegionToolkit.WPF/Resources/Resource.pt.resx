@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>USB sempre ligado</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Aplicar</value>
@@ -173,7 +173,7 @@
     <value>Aplicar e fechar</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>O Lenovo Legion Toolkit tem que estar a rodar para as ações automáticas funcionarem.</value>
+    <value>O LOQ Nova tem que estar a rodar para as ações automáticas funcionarem.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Ativar</value>
@@ -534,7 +534,7 @@ ATENÇÃO: Está ação não irá funcionar corretamente se o ecrã interno esti
     <value>Doar através de</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>O desenvolvimento e manutenção do Lenovo Legion Toolkit demora bastante tempo. Se gostas deste software podes suportar o seu futuro ao doar uma quantia da tua escolha.
+    <value>O desenvolvimento e manutenção do LOQ Nova demora bastante tempo. Se gostas deste software podes suportar o seu futuro ao doar uma quantia da tua escolha.
 
 Clica no logo do PayPal abaixo ou faz scan do QR code para doar através do PayPal.
 
@@ -550,7 +550,7 @@ Obrigado desde já!</value>
     <value>Desmarca as taxas de atualização que não quiseres usar quando o atalho Fn+R é usado.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Certifica-te de que o ecrã do portátil está ligado. O Lenovo Legion Toolkit não consegue carregar taxas de atualização de um ecrã que não está ligado.</value>
+    <value>Certifica-te de que o ecrã do portátil está ligado. O LOQ Nova não consegue carregar taxas de atualização de um ecrã que não está ligado.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Não foram encontradas taxas de atualização</value>
@@ -736,7 +736,7 @@ ATENÇÃO: Está ação não irá executar corretamente se o ecrã interno estiv
     <value>Importar</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Este dispositivo não é compatível com o Lenovo Legion Toolkit.</value>
+    <value>Este dispositivo não é compatível com o LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Não foram encontrados teclados compatíveis</value>
@@ -1376,7 +1376,7 @@ Logs serão guardados automaticamente, se escolheres continuar.</value>
     <value>Tipo de Dispositivo</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>O Lenovo Legion Toolkit não foi testado no teu dispositivo.</value>
+    <value>O LOQ Nova não foi testado no teu dispositivo.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modelo</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Κατασκευή</value>
@@ -164,7 +164,7 @@
     <value>Πάντα ενεργά USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Εφαρμογή</value>
@@ -173,7 +173,7 @@
     <value>Εφαρμογή και κλείσιμο</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Το Lenovo Legion Toolkit πρέπει να εκτελείται για να λειτουργήσουν οι αυτόματες δράσεις.</value>
+    <value>Το LOQ Nova πρέπει να εκτελείται για να λειτουργήσουν οι αυτόματες δράσεις.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Ενεργοποιημένες</value>
@@ -531,7 +531,7 @@
     <value>Δωρεά με</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Η ανάπτυξη και η συντήρηση του Lenovo Legion Toolkit απαιτεί πολύ χρόνο. Εάν σας αρέσει να χρησιμοποιείτε αυτό το λογισμικό, μπορείτε να υποστηρίξετε το μέλλον του, δωρίζοντας ένα ποσό της επιλογής σας.
+    <value>Η ανάπτυξη και η συντήρηση του LOQ Nova απαιτεί πολύ χρόνο. Εάν σας αρέσει να χρησιμοποιείτε αυτό το λογισμικό, μπορείτε να υποστηρίξετε το μέλλον του, δωρίζοντας ένα ποσό της επιλογής σας.
 
 Κάντε κλικ στο λογότυπο του PayPal παρακάτω ή σαρώστε τον κωδικό QR για να κάνετε δωρεά με το PayPal.
 
@@ -547,7 +547,7 @@
     <value>Καταργήστε επιλογές ρυθμού ανανέωσης που δε θέλετε να χρησιμοποιήσετε μέσω της συντόμευσης Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Βεβαιωθείτε ότι η οθόνη του υπολογιστή είναι ενεργοποιημένη. Το Lenovo Legion Toolkit δεν μπορεί να φορτώσει ρυθμούς ανανέωσης σε απενεργοποιημένη οθόνη.</value>
+    <value>Βεβαιωθείτε ότι η οθόνη του υπολογιστή είναι ενεργοποιημένη. Το LOQ Nova δεν μπορεί να φορτώσει ρυθμούς ανανέωσης σε απενεργοποιημένη οθόνη.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Δεν βρέθηκαν ρυθμοί ανανέωσης</value>
@@ -733,7 +733,7 @@
     <value>Εισαγωγή</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Αυτή η συσκευή δεν είναι συμβατή με το Lenovo Legion Toolkit.</value>
+    <value>Αυτή η συσκευή δεν είναι συμβατή με το LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Δε βρέθηκαν συμβατά πληκτρολόγια</value>
@@ -1383,7 +1383,7 @@
     <value>Τύπος Μηχανήματος</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Το Lenovo Legion Toolkit δεν έχει δοκιμαστεί με τη συσκευή σας.</value>
+    <value>Το LOQ Nova δεν έχει δοκιμαστεί με τη συσκευή σας.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Μοντέλο</value>
@@ -2098,7 +2098,7 @@
     <value>Χωρίς επανάληψη</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Το Lenovo Legion Toolkit πρέπει να εκτελείται για να λειτουργήσουν οι μακροεντολές.</value>
+    <value>Το LOQ Nova πρέπει να εκτελείται για να λειτουργήσουν οι μακροεντολές.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Ενεργοποίηση</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>نسخة</value>
@@ -161,7 +161,7 @@
     <value>ال USB يعمل دائما</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>تطبيق</value>
@@ -526,7 +526,7 @@
     <value>تبرع لِ</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>العمل على Lenovo Legion Toolkit يحتاج الكثير من الوقت و المجهود. لو اعجبك البرنامج يمكن انت تدعمه من خلال التبرع بمبلغ من اختيارك.
+    <value>العمل على LOQ Nova يحتاج الكثير من الوقت و المجهود. لو اعجبك البرنامج يمكن انت تدعمه من خلال التبرع بمبلغ من اختيارك.
 
 اضغط على رمز الباي بال فى الأسفل او امسح كود ال QR للتبرع بالباي بال. 
 

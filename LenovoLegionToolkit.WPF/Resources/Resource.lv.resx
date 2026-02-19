@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Izlaidums</value>
@@ -164,7 +164,7 @@
     <value>Vienmēr ieslēgts USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Apstiprināt</value>
@@ -173,7 +173,7 @@
     <value>Apstiprināt un Aizvērt</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lai automātiskās darbības darbotos, ir jābūt ieslēgtam Lenovo Legion Toolkit.</value>
+    <value>Lai automātiskās darbības darbotos, ir jābūt ieslēgtam LOQ Nova.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Iespējot</value>
@@ -532,7 +532,7 @@ BRĪDINĀJUMS. Ja iebūvētais ekrāns ir izslēgts, šī darbība nedarbosies p
     <value>Ziedot ar</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit izstrāde un uzturēšana prasa daudz laika. Ja jums patīk izmantot šo programmatūru, varat atbalstīt tās nākotni, ziedojot noteiktu summu.
+    <value>LOQ Nova izstrāde un uzturēšana prasa daudz laika. Ja jums patīk izmantot šo programmatūru, varat atbalstīt tās nākotni, ziedojot noteiktu summu.
 
 Noklikšķiniet uz zemāk redzamā PayPal logotipa vai skenējiet QR kodu, lai ziedotu ar PayPal.
 
@@ -548,7 +548,7 @@ Paldies jau iepriekš!</value>
     <value>Noņemiet atzīmi no atsvaidzināšanas ātruma, ko nevēlaties izmantot, izmantojot fn + R saīsni.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Pārliecinieties, vai ir ieslēgts klēpjdatora ekrāns. Lenovo Legion Toolkit nevar ielādēt atsvaidzināšanas ātrumu ekrānam, kas nav ieslēgts.</value>
+    <value>Pārliecinieties, vai ir ieslēgts klēpjdatora ekrāns. LOQ Nova nevar ielādēt atsvaidzināšanas ātrumu ekrānam, kas nav ieslēgts.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Atsvaidzināšanas Ātrumi netika atrasti</value>
@@ -731,7 +731,7 @@ BRĪDINĀJUMS. Ja iebūvētais ekrāns ir izslēgts, šī darbība nedarbosies p
     <value>Importēt</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Šī ierīce nesader ar Lenovo Legion Toolkit.</value>
+    <value>Šī ierīce nesader ar LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Netika atrastas saderīgas tastatūras</value>
@@ -1137,7 +1137,7 @@ Pēc šīs opcijas maiņas ieteicams restartēt datoru.</value>
   </data>
   <data name="SettingsPage_DisableLenovoHotkeys_Message" xml:space="preserve">
     <value>Atspējojiet Lenovo Hotkeys un to pakalpojumus, neatinstalējot tos.
-Ja šī programma ir atspējota, Lenovo Legion Toolkit apstrādās Fn saīsnes.
+Ja šī programma ir atspējota, LOQ Nova apstrādās Fn saīsnes.
 Pēc šīs opcijas maiņas ieteicams restartēt datoru.</value>
   </data>
   <data name="SettingsPage_DisableLenovoHotkeys_Title" xml:space="preserve">
@@ -1367,7 +1367,7 @@ Ja izvēlaties turpināt, reģistrēšana tiks iespējota automātiski.</value>
     <value>Iekārtas Tips</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit nav pārbaudīts ar jūsu ierīci.</value>
+    <value>LOQ Nova nav pārbaudīts ar jūsu ierīci.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modelis</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>USB Altijd Aan</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Toepassen</value>
@@ -173,7 +173,7 @@
     <value>Opslaan &amp; sluiten</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit moet actief zijn om automatische acties te laten werken.</value>
+    <value>LOQ Nova moet actief zijn om automatische acties te laten werken.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Inschakelen</value>
@@ -532,7 +532,7 @@ WAARSCHUWING: Deze actie wordt niet correct uitgevoerd als het interne display i
     <value>Doneren met</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>De ontwikkeling en het onderhoud van Lenovo Legion Toolkit kost veel tijd. Als u deze software graag gebruikt, kunt u de toekomst ervan steunen door een bedrag naar keuze te doneren.
+    <value>De ontwikkeling en het onderhoud van LOQ Nova kost veel tijd. Als u deze software graag gebruikt, kunt u de toekomst ervan steunen door een bedrag naar keuze te doneren.
 
 Klik op het PayPal-logo hieronder of scan de QR-code om te doneren met PayPal.
 
@@ -548,7 +548,7 @@ Bij voorbaat bedankt!</value>
     <value>Vink vernieuwingsfrequenties uit die u niet wilt gebruiken wanneer de snelkoppeling Fn+R wordt gebruikt.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Zorg ervoor dat het beeldscherm van de laptop is ingeschakeld. Lenovo Legion Toolkit kan geen verversingsfrequenties laden voor een beeldscherm dat niet is ingeschakeld.</value>
+    <value>Zorg ervoor dat het beeldscherm van de laptop is ingeschakeld. LOQ Nova kan geen verversingsfrequenties laden voor een beeldscherm dat niet is ingeschakeld.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Geen verversingsnelheiden gevonden</value>
@@ -734,7 +734,7 @@ WAARSCHUWING: Deze actie wordt niet correct uitgevoerd als het interne display i
     <value>Importeer</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Dit apparaat is niet compatibel met Lenovo Legion Toolkit.</value>
+    <value>Dit apparaat is niet compatibel met LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Geen compatibele toetsenborden gevonden</value>
@@ -1385,7 +1385,7 @@ Logboekregistratie wordt automatisch ingeschakeld als u ervoor kiest om door te 
     <value>Machine Type</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit is niet getest met uw apparaat.</value>
+    <value>LOQ Nova is niet getest met uw apparaat.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Model</value>
@@ -2098,7 +2098,7 @@ Ondersteunde formaten zijn: {1}.</value>
     <value>Niet herhalen</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Lenovo Legion Toolkit moet actief zijn om macro's uit te voeren.</value>
+    <value>LOQ Nova moet actief zijn om macro's uit te voeren.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Schakel in</value>

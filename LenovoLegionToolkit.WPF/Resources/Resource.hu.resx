@@ -531,7 +531,7 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
     <value>Támogatás ezzel</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>A Lenovo Legion Toolkit fejlesztése és karbantartása sok időt vesz igénybe. Ha szívesen használja ezt a szoftvert, akkor támogathatja a jövőjét az Ön által választott összeg felajánlásával.
+    <value>A LOQ Nova fejlesztése és karbantartása sok időt vesz igénybe. Ha szívesen használja ezt a szoftvert, akkor támogathatja a jövőjét az Ön által választott összeg felajánlásával.
 
 Kattintson az alábbi PayPal-logóra, vagy szkennelje be a QR-kódot a PayPal segítségével történő adományozáshoz.
 
@@ -547,7 +547,7 @@ Előre is köszönjük!</value>
     <value>Törölje a jelölőnégyzetből azokat a frissítési sebességeket, amelyeket nem szeretne használni az Fn+R gyorsbillentyű használatakor.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Győződjön meg róla, hogy a laptop kijelzője be van kapcsolva. A Lenovo Legion Toolkit nem tudja betölteni a frissítési frekvenciákat egy nem bekapcsolt kijelzőhöz.</value>
+    <value>Győződjön meg róla, hogy a laptop kijelzője be van kapcsolva. A LOQ Nova nem tudja betölteni a frissítési frekvenciákat egy nem bekapcsolt kijelzőhöz.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Nem található frissítési arányok</value>
@@ -733,7 +733,7 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
     <value>Importálás</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Ez a készülék nem kompatibilis a Lenovo Legion Toolkit-tel.</value>
+    <value>Ez a készülék nem kompatibilis a LOQ Nova-tel.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nem találtunk kompatibilis billentyűzeteket</value>
@@ -1382,7 +1382,7 @@ A naplózás automatikusan engedélyezésre kerül, ha a folytatást választja.
     <value>Számítógép típusa</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>A Lenovo Legion Toolkitet nem tesztelték az Ön készülékével.</value>
+    <value>A LOQ Novaet nem tesztelték az Ön készülékével.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modell</value>
@@ -2096,7 +2096,7 @@ A támogatott formátumok a következők: {1}.</value>
     <value>Nincs ismétlés</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>A makrók működéséhez a Lenovo Legion Toolkit-nek futnia kell.</value>
+    <value>A makrók működéséhez a LOQ Nova-nek futnia kell.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Engedélyezés</value>

@@ -31,6 +31,13 @@ public class NotificationsManager
     /// </summary>
     private NotificationType? _lastPowerModeNotification;
 
+    // 250ms per-type debounce guard — prevents flicker and duplicate OSD windows
+    // when the same notification fires in rapid succession (e.g., hardware WMI
+    // confirmation arriving within ms of the immediate UI-path notification).
+    private NotificationType? _lastDebounceType;
+    private DateTime _lastDebounceTime = DateTime.MinValue;
+    private static readonly TimeSpan NotificationDebounceWindow = TimeSpan.FromMilliseconds(250);
+
     private List<INotificationWindow?> _windows = [];
 
     public NotificationsManager(ApplicationSettings settings)
@@ -112,6 +119,20 @@ public class NotificationsManager
 
                 return;
             }
+
+            // 250ms per-type debounce guard.
+            // Ignores repeated events of the same type within the guard window.
+            // Different notification types always pass through immediately.
+            var nowUtc = DateTime.UtcNow;
+            if (_lastDebounceType == notification.Type &&
+                (nowUtc - _lastDebounceTime) < NotificationDebounceWindow)
+            {
+                if (Log.Instance.IsTraceEnabled)
+                    Log.Instance.Trace($"Notification SUPPRESSED (250ms debounce): {notification.Type}");
+                return;
+            }
+            _lastDebounceType = notification.Type;
+            _lastDebounceTime = nowUtc;
 
             // Mode-identity gate for PowerMode notifications.
             // The immediate UI path publishes the OSD first; the later

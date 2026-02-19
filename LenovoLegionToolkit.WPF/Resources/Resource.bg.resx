@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Издание</value>
@@ -161,7 +161,7 @@
     <value>Винаги включен USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Приложи</value>
@@ -170,7 +170,7 @@
     <value>Приложи и затвори</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit трябва да работи, за да може автоматичните действия да бъдат изпълнени.</value>
+    <value>LOQ Nova трябва да работи, за да може автоматичните действия да бъдат изпълнени.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Активирай</value>
@@ -528,7 +528,7 @@
     <value>Дарете с</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Разработката и поддръжката на Lenovo Legion Toolkit изисква много време. Ако харесвате този софтуер може да подкрепите бъдещото му развитие като дарите сума по ваша лична преценка.
+    <value>Разработката и поддръжката на LOQ Nova изисква много време. Ако харесвате този софтуер може да подкрепите бъдещото му развитие като дарите сума по ваша лична преценка.
 
 Натиснете логото на PayPal по-долу или сканирайте QR-кода, за да дарите с PayPal.
 
@@ -544,7 +544,7 @@
     <value>Премахнете отметките на честотите на обновяване, които не бихте искали да използвате при смяна на честотата с клавишната комбинация Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Уверете се, че вграденият дисплей е включен. Lenovo Legion Toolkit не може да зареди честотата на опресняване на дисплей, който не е включен.</value>
+    <value>Уверете се, че вграденият дисплей е включен. LOQ Nova не може да зареди честотата на опресняване на дисплей, който не е включен.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Не бяха открити честоти на опресняване</value>
@@ -727,7 +727,7 @@
     <value>Импортиране</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Това устройтво не е съвместимо с Lenovo Legion Toolkit.</value>
+    <value>Това устройтво не е съвместимо с LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Не са намерени съвместими клавиатури</value>
@@ -1363,7 +1363,7 @@
     <value>Вид на машината</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit все още не е тестван на вашето устройство.</value>
+    <value>LOQ Nova все още не е тестван на вашето устройство.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Модел</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Bản dựng</value>
@@ -164,7 +164,7 @@
     <value>Luôn bật cổng USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Áp dụng</value>
@@ -173,7 +173,7 @@
     <value>Áp dụng và đóng</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit phải chạy trong nền để các Hành động làm việc.</value>
+    <value>LOQ Nova phải chạy trong nền để các Hành động làm việc.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Kích hoạt</value>
@@ -550,7 +550,7 @@ CẢNH BÁO: Hành động có thể chạy không đúng nếu màn hình lapto
     <value>Ủng hộ qua</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Phát triển và duy trì Lenovo Legion Toolkit tốn rất nhiều thời gian. Nếu bạn thích phần mềm này, bạn có thể tuỳ tâm hỗ trợ chút tiền cho việc hỗ trợ nó sau này.
+    <value>Phát triển và duy trì LOQ Nova tốn rất nhiều thời gian. Nếu bạn thích phần mềm này, bạn có thể tuỳ tâm hỗ trợ chút tiền cho việc hỗ trợ nó sau này.
 
 Bấm vào logo PayPal bên dưới hoặc quét mã QR để ủng hộ qua PayPal.
 
@@ -566,7 +566,7 @@ Xin chân thành cảm ơn!</value>
     <value>Bỏ tích những tần số quét mà bạn không muốn dùng khi dùng tổ hợp phím Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Hãy đảm bảo màn hình laptop bật. Lenovo Legion Toolkit không thể đổi tần số quét nếu màn hình laptop không bật.</value>
+    <value>Hãy đảm bảo màn hình laptop bật. LOQ Nova không thể đổi tần số quét nếu màn hình laptop không bật.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Không có tần số quét nào được tìm thấy</value>
@@ -752,7 +752,7 @@ CẢNH BÁO: Hành động này sẽ không chạy nếu màn hình laptop tắt
     <value>Nhập vào</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Thiết bị này không tương thích với Lenovo Legion Toolkit.</value>
+    <value>Thiết bị này không tương thích với LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Không tìm thấy bàn phím tương thích</value>
@@ -1401,7 +1401,7 @@ Logging sẽ được tự động bật, nếu bạn chọn tiếp tục.</valu
     <value>Mã máy</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit chưa được kiểm thử trên thiết bị của bạn.</value>
+    <value>LOQ Nova chưa được kiểm thử trên thiết bị của bạn.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Mẫu máy</value>
@@ -2121,7 +2121,7 @@ Các định dạng hỗ trợ: {1}.</value>
     <value>Không lặp lại</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Lenovo Legion Toolkit phải chạy trong nền để Macros làm việc.</value>
+    <value>LOQ Nova phải chạy trong nền để Macros làm việc.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Kích hoạt</value>

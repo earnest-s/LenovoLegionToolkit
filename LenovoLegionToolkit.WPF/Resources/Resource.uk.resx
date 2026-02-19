@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Збірка</value>
@@ -164,7 +164,7 @@
     <value>Завжди увімкнені USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Застосувати</value>
@@ -173,7 +173,7 @@
     <value>Застосувати та закрити</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit повинен бути запущений, щоб автоматичні дії працювали.</value>
+    <value>LOQ Nova повинен бути запущений, щоб автоматичні дії працювали.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Увімкнути</value>
@@ -529,7 +529,7 @@
     <value>Пожертвувати за допомогою</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Розробка та обслуговування Lenovo Legion Toolkit займає багато часу. Якщо вам подобається використовувати цю програму ви можете підтримати її майбутнє пожертвою будь-якої бажаної суми.
+    <value>Розробка та обслуговування LOQ Nova займає багато часу. Якщо вам подобається використовувати цю програму ви можете підтримати її майбутнє пожертвою будь-якої бажаної суми.
 
 Натисніть на лого PayPal нижче чи скануйте QR код, щоб пожертвувати через PayPal.
 
@@ -545,7 +545,7 @@
     <value>Зніміть позначку з частот оновлення, які ви не хочете використовувати при натисканні Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Переконайтеся, що дисплей ноутбука увімкнено. Lenovo Legion Toolkit не може завантажити частоту оновлення дисплея, якщо він вимкнений.</value>
+    <value>Переконайтеся, що дисплей ноутбука увімкнено. LOQ Nova не може завантажити частоту оновлення дисплея, якщо він вимкнений.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Частоту оновлення не визначено</value>
@@ -731,7 +731,7 @@
     <value>Імпорт</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Цей пристрій не сумісний з Lenovo Legion Toolkit.</value>
+    <value>Цей пристрій не сумісний з LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Не знайдено сумісних клавіатур</value>
@@ -2094,7 +2094,7 @@
     <value>Не повторювати</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Lenovo Legion Toolkit повинен бути запущений, щоб макроси працювали.</value>
+    <value>LOQ Nova повинен бути запущений, щоб макроси працювали.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Увімкнути</value>

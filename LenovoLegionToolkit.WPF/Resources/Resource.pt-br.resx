@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Compilação</value>
@@ -164,7 +164,7 @@
     <value>USB Sempre ativa</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Aplicar</value>
@@ -173,7 +173,7 @@
     <value>Aplicar e Fechar</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>O Lenovo Legion Toolkit deve estar sendo executado para rodar tarefas automatizadas.</value>
+    <value>O LOQ Nova deve estar sendo executado para rodar tarefas automatizadas.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Habilitar</value>
@@ -531,7 +531,7 @@ AVISO: Esta ação não será executada corretamente se a tela integrada estiver
     <value>Doar com</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>O desenvolvimento e a manutenção do Lenovo Legion Toolkit leva muito tempo. Se você gosta de usar este software pode apoiar seu futuro doando uma quantia de sua escolha.
+    <value>O desenvolvimento e a manutenção do LOQ Nova leva muito tempo. Se você gosta de usar este software pode apoiar seu futuro doando uma quantia de sua escolha.
 
 Clique no logotipo do PayPal abaixo ou digitalize o QR code para doar com o PayPal.
 
@@ -547,7 +547,7 @@ Desde já, obrigado!</value>
     <value>Desmarque as atualizações de tela que você não deseja utilizar ao pressionar o atalho Fn+R.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Verifique se a tela do notebook está ligada. O Lenovo Legion Toolkit não pode carregar taxas de atualização para uma tela que não está ligada.</value>
+    <value>Verifique se a tela do notebook está ligada. O LOQ Nova não pode carregar taxas de atualização para uma tela que não está ligada.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Taxas de atualizações não encontradas</value>
@@ -733,7 +733,7 @@ AVISO: Esta ação não será executada corretamente se o display interno estive
     <value>Importar</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Este equipamento não é compatível com o Lenovo Legion Toolkit.</value>
+    <value>Este equipamento não é compatível com o LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Nenhum teclado compatível encontrado</value>
@@ -1383,7 +1383,7 @@ O registro será ativado automaticamente, se você optar por continuar.</value>
     <value>Tipo de máquina</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>O Lenovo Legion Toolkit não foi testado com seu dispositivo.</value>
+    <value>O LOQ Nova não foi testado com seu dispositivo.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modelo</value>
@@ -2096,7 +2096,7 @@ Requer reinicialização.</value>
     <value>Não repetir</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>O Lenovo Legion Toolkit deve estar sendo executado para rodar tarefas automatizadas.</value>
+    <value>O LOQ Nova deve estar sendo executado para rodar tarefas automatizadas.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Habilitar</value>

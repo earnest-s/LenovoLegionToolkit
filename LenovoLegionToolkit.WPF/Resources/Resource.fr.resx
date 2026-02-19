@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutPage_AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="AboutPage_Build" xml:space="preserve">
     <value>Build</value>
@@ -164,7 +164,7 @@
     <value>Always on USB</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Lenovo Legion Toolkit</value>
+    <value>LOQ Nova</value>
   </data>
   <data name="Apply" xml:space="preserve">
     <value>Appliquer</value>
@@ -173,7 +173,7 @@
     <value>Appliquer et fermer</value>
   </data>
   <data name="AutomationPage_ActionsEnable_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit doit être en cours d'exécution pour que les actions automatiques fonctionnent.</value>
+    <value>LOQ Nova doit être en cours d'exécution pour que les actions automatiques fonctionnent.</value>
   </data>
   <data name="AutomationPage_ActionsEnabled_Title" xml:space="preserve">
     <value>Activer</value>
@@ -533,7 +533,7 @@ ATTENTION : Cette action ne fonctionnera pas si l'écran intégré est éteint.
     <value>Faire un don avec</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>Développer et maintenir Lenovo Legion Toolkit demande du temps. Si vous appréciez ce programme, vous pouvez soutenir son développement en faisant don du montant de votre choix.
+    <value>Développer et maintenir LOQ Nova demande du temps. Si vous appréciez ce programme, vous pouvez soutenir son développement en faisant don du montant de votre choix.
 
 Cliquez sur le logo PayPal ci-dessous ou scannez le QR code pour donner via PayPal.
 
@@ -549,7 +549,7 @@ Merci par avance !</value>
     <value>Décochez les taux de rafraîchissement que vous ne souhaitez pas utiliser lorsque le raccourci Fn+R est utilisé.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Message" xml:space="preserve">
-    <value>Assurez-vous que l'écran intégré est allumé. Lenovo Legion Toolkit ne peut afficher les taux de rafraîchissement d'un écran éteint.</value>
+    <value>Assurez-vous que l'écran intégré est allumé. LOQ Nova ne peut afficher les taux de rafraîchissement d'un écran éteint.</value>
   </data>
   <data name="ExcludeRefreshRatesWindow_NoRefreshRatesFound_Title" xml:space="preserve">
     <value>Aucun taux de rafraîchissement trouvé</value>
@@ -735,7 +735,7 @@ AVERTISSEMENT : Cette action ne fonctionnera pas correctement si l'affichage int
     <value>Importer</value>
   </data>
   <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Cet appareil n'est pas compatible avec Lenovo Legion Toolkit.</value>
+    <value>Cet appareil n'est pas compatible avec LOQ Nova.</value>
   </data>
   <data name="KeyboardBacklightPage_NoCompatibleKeyboardsFound" xml:space="preserve">
     <value>Aucun clavier compatible trouvé</value>
@@ -1381,7 +1381,7 @@ La journalisation sera activée automatiquement si vous choisissez de continuer.
     <value>Type de Machine</value>
   </data>
   <data name="UnsupportedWindow_Message" xml:space="preserve">
-    <value>Lenovo Legion Toolkit n'a pas été testé avec votre appareil.</value>
+    <value>LOQ Nova n'a pas été testé avec votre appareil.</value>
   </data>
   <data name="UnsupportedWindow_Model" xml:space="preserve">
     <value>Modèle</value>
@@ -2093,7 +2093,7 @@ Nécessite un redémarrage.</value>
     <value>Ne pas répéter</value>
   </data>
   <data name="MacroPage_Enable_Subtitle" xml:space="preserve">
-    <value>Lenovo Legion Toolkit doit être en cours d'exécution pour que les macros fonctionnent.</value>
+    <value>LOQ Nova doit être en cours d'exécution pour que les macros fonctionnent.</value>
   </data>
   <data name="MacroPage_Enable_Title" xml:space="preserve">
     <value>Activer</value>
