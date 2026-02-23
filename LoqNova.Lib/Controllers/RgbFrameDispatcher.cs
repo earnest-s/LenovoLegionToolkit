@@ -1,0 +1,250 @@
+﻿// #define MOCK_RGB
+
+// ============================================================================
+// RgbFrameDispatcher.cs
+//
+// Single central renderer for ALL RGB keyboard output.
+// Every HID write goes through this class, and every frame fires
+// FrameRendered so the UI preview stays in perfect sync.
+//
+// Three render paths:
+//   RenderAsync()         — normal (custom effects). Gated by IsOverrideActive.
+//   ForceRenderAsync()    — override path (strobe, resume). Always writes.
+//   RenderPreviewOnly()   — preview only (firmware effect simulators). No HID.
+//
+// One raw path:
+//   SendFirmwareCommandAsync() — raw LENOVO_RGB_KEYBOARD_STATE (presets, off).
+// ============================================================================
+
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using LoqNova.Lib.Controllers.CustomRGBEffects;
+using LoqNova.Lib.Extensions;
+using LoqNova.Lib.System;
+using LoqNova.Lib.Utils;
+using Microsoft.Win32.SafeHandles;
+using NeoSmart.AsyncLock;
+using Windows.Win32;
+
+namespace LoqNova.Lib.Controllers;
+
+/// <summary>
+/// Single central renderer for all RGB keyboard output.
+/// Every HID write goes through this class, and every frame fires
+/// <see cref="FrameRendered"/> so the UI preview stays in sync.
+/// </summary>
+public class RgbFrameDispatcher
+{
+    private static readonly AsyncLock HidLock = new();
+
+    private SafeFileHandle? _deviceHandle;
+
+    // ────── Events ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Raised after every frame that should be visible in the UI preview.
+    /// Fires on <see cref="RenderAsync"/>, <see cref="ForceRenderAsync"/>,
+    /// and <see cref="RenderPreviewOnly"/>.
+    /// </summary>
+    public event Action<ZoneColors>? FrameRendered;
+
+    // ────── State ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// When true, the HID device is not opened even if present.
+    /// </summary>
+    public bool ForceDisable { get; set; }
+
+    /// <summary>
+    /// When true, <see cref="RenderAsync"/> silently drops frames
+    /// (no HID write, no preview event).  Used during the performance-mode
+    /// strobe so the running custom effect doesn't fight the animation.
+    /// <see cref="ForceRenderAsync"/> ignores this flag.
+    /// </summary>
+    public bool IsOverrideActive { get; set; }
+
+    /// <summary>
+    /// Brightness byte written into every zone-color HID packet.
+    /// 1 = Low, 2 = High.  Set by the controller before an effect starts.
+    /// </summary>
+    public byte CurrentBrightness { get; set; } = 2;
+
+    // ────── Device handle ───────────────────────────────────────────
+
+    private SafeFileHandle? DeviceHandle
+    {
+        get
+        {
+            if (ForceDisable) return null;
+            _deviceHandle ??= Devices.GetRGBKeyboard();
+            return _deviceHandle;
+        }
+    }
+
+    /// <summary>
+    /// Whether the RGB keyboard hardware is present and accessible.
+    /// </summary>
+    public bool IsSupported
+    {
+        get
+        {
+#if MOCK_RGB
+            return true;
+#else
+            return DeviceHandle is not null;
+#endif
+        }
+    }
+
+    // ────── Render methods ──────────────────────────────────────────
+
+    /// <summary>
+    /// Normal render: writes zone colors to HID and fires <see cref="FrameRendered"/>.
+    /// When <see cref="IsOverrideActive"/> is true, the frame is silently dropped
+    /// so that the strobe/transition owns both the keyboard and the preview.
+    /// Used by custom effects via <c>CustomRGBEffectController.SetColorsAsync</c>.
+    /// </summary>
+    public async Task RenderAsync(ZoneColors zones, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        if (IsOverrideActive)
+            return;
+
+#if !MOCK_RGB
+        using (await HidLock.LockAsync(ct).ConfigureAwait(false))
+        {
+            var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
+            await WriteZoneColors(handle, zones).ConfigureAwait(false);
+        }
+#endif
+
+        FrameRendered?.Invoke(zones);
+    }
+
+    /// <summary>
+    /// Force render: always writes to HID and fires <see cref="FrameRendered"/>,
+    /// regardless of <see cref="IsOverrideActive"/>.
+    /// Used by the performance-mode strobe and override resume.
+    /// </summary>
+    public async Task ForceRenderAsync(ZoneColors zones, CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+
+#if !MOCK_RGB
+        using (await HidLock.LockAsync(ct).ConfigureAwait(false))
+        {
+            var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
+            await WriteZoneColors(handle, zones).ConfigureAwait(false);
+        }
+#endif
+
+        FrameRendered?.Invoke(zones);
+    }
+
+    /// <summary>
+    /// Preview only: fires <see cref="FrameRendered"/> without writing to HID.
+    /// Used by firmware effect preview simulators and static preset snapshots.
+    /// </summary>
+    public void RenderPreviewOnly(ZoneColors zones) => FrameRendered?.Invoke(zones);
+
+    /// <summary>
+    /// Sends a raw firmware command (preset mode change, off state, etc.)
+    /// without firing <see cref="FrameRendered"/>.
+    /// The firmware handles the actual LED animation internally.
+    /// </summary>
+    internal async Task SendFirmwareCommandAsync(LENOVO_RGB_KEYBOARD_STATE state)
+    {
+#if !MOCK_RGB
+        using (await HidLock.LockAsync().ConfigureAwait(false))
+        {
+            var handle = DeviceHandle ?? throw new InvalidOperationException("RGB Keyboard unsupported");
+            await WriteRawState(handle, state).ConfigureAwait(false);
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Puts the keyboard into Static mode for manual zone-color control.
+    /// Called once before a custom effect starts rendering frames.
+    /// Uses <see cref="CurrentBrightness"/> for the brightness byte.
+    /// </summary>
+    public async Task SetStaticModeAsync()
+    {
+        var state = new LENOVO_RGB_KEYBOARD_STATE
+        {
+            Header = [0xCC, 0x16],
+            Effect = 1,          // Static
+            Speed = 1,
+            Brightness = CurrentBrightness,
+            Zone1Rgb = [0xFF, 0xFF, 0xFF],
+            Zone2Rgb = [0xFF, 0xFF, 0xFF],
+            Zone3Rgb = [0xFF, 0xFF, 0xFF],
+            Zone4Rgb = [0xFF, 0xFF, 0xFF],
+            Padding = 0,
+            WaveLTR = 0,
+            WaveRTL = 0,
+            Unused = new byte[13]
+        };
+
+        await SendFirmwareCommandAsync(state).ConfigureAwait(false);
+    }
+
+    // ────── Centralized color mapping ───────────────────────────────
+
+    /// <summary>
+    /// Returns the canonical RGB color for a performance / power mode.
+    /// Centralized so graph bars, strobe, OSD, and preview all agree.
+    /// </summary>
+    public static RGBColor GetPerformanceModeColor(PowerModeState mode) => mode switch
+    {
+        PowerModeState.Quiet => new RGBColor(0, 120, 255),       // Blue
+        PowerModeState.Balance => new RGBColor(255, 255, 255),   // White
+        PowerModeState.Performance => new RGBColor(255, 0, 0),   // Red
+        PowerModeState.GodMode => new RGBColor(180, 0, 255),     // Purple
+        _ => new RGBColor(255, 255, 255)
+    };
+
+    // ────── Private HID write helpers ───────────────────────────────
+
+    private Task WriteZoneColors(SafeFileHandle handle, ZoneColors zones)
+    {
+        var state = new LENOVO_RGB_KEYBOARD_STATE
+        {
+            Header = [0xCC, 0x16],
+            Effect = 1,          // Static mode for manual zone control
+            Speed = 1,
+            Brightness = CurrentBrightness,
+            Zone1Rgb = [zones.Zone1.R, zones.Zone1.G, zones.Zone1.B],
+            Zone2Rgb = [zones.Zone2.R, zones.Zone2.G, zones.Zone2.B],
+            Zone3Rgb = [zones.Zone3.R, zones.Zone3.G, zones.Zone3.B],
+            Zone4Rgb = [zones.Zone4.R, zones.Zone4.G, zones.Zone4.B],
+            Padding = 0,
+            WaveLTR = 0,
+            WaveRTL = 0,
+            Unused = new byte[13]
+        };
+
+        return WriteRawState(handle, state);
+    }
+
+    private static unsafe Task WriteRawState(SafeFileHandle handle, LENOVO_RGB_KEYBOARD_STATE state) => Task.Run(() =>
+    {
+        var ptr = IntPtr.Zero;
+        try
+        {
+            var size = Marshal.SizeOf<LENOVO_RGB_KEYBOARD_STATE>();
+            ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(state, ptr, false);
+
+            if (!PInvoke.HidD_SetFeature(handle, ptr.ToPointer(), (uint)size))
+                PInvokeExtensions.ThrowIfWin32Error("HidD_SetFeature");
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+    });
+}

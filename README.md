@@ -1,4 +1,4 @@
-> [!IMPORTANT]
+﻿> [!IMPORTANT]
 > _Archived by Bartosz on July 24, 2025, Forked by Earnest This project will be actively maintained._
 > 
 > Thank you to everyone who supported, used, contributed to, and shared this project. It's been an amazing journey watching it grow among Legion users.
@@ -12,10 +12,10 @@
 > – Earnest. S
 
 
-# Lenovo Legion Toolkit
+# LoqNova
 
-[![Build](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml)
-[![Crowdin](https://badges.crowdin.net/llt/localized.svg)](https://crowdin.com/project/llt)
+[![Build](https://github.com/earnest-s/LoqNova/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/earnest-s/LoqNova/actions/workflows/build.yml)
+[![Crowdin](https://badges.crowdin.net/loqnova/localized.svg)](https://crowdin.com/project/loqnova)
 [![Join Discord](https://img.shields.io/discord/761178912230473768?label=Legion%20Series%20Discord)](https://discord.com/invite/legionseries)
 <a href="https://hellogithub.com/repository/dd55be3ac0c146208259f17b29d2162f" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=dd55be3ac0c146208259f17b29d2162f&claim_uid=LBbuUlZqTIm1JAP&theme=small" alt="Featured｜HelloGitHub" /></a>
 
@@ -23,7 +23,7 @@
 
 <br />
 
-Lenovo Legion Toolkit (LLT) is a utility created for Lenovo Legion (and similar) series laptops, that allows changing a couple of features that are only available in Lenovo Vantage or Legion Zone.
+LoqNova is a utility created for Lenovo Legion (and similar) series laptops, that allows changing a couple of features that are only available in Lenovo Vantage or Legion Zone.
 
 It runs no background services, uses less memory, uses virtually no CPU, and contains no telemetry. Just like Lenovo Vantage, this application is Windows only.
 
@@ -55,11 +55,11 @@ Please be patient and read through this readme carefully - it contains important
 
 You can download the program by the following ways:
 
-- Manually from the [Releases page](https://github.com/BartoszCichecki/LenovoLegionToolkit/releases/latest)
+- Manually from the [Releases page](https://github.com/BartoszCichecki/LoqNova/releases/latest)
 - Using [winget](https://github.com/microsoft/winget-cli):
 
   ```sh
-  winget install BartoszCichecki.LenovoLegionToolkit
+  winget install BartoszCichecki.LoqNova
   ```
 
 - Using [Scoop](https://scoop.sh):
@@ -73,7 +73,7 @@ You can download the program by the following ways:
   ```
   
   ```sh
-  scoop install extras/lenovolegiontoolkit
+  scoop install extras/loqnova
   ```
   
 > [!TIP]
@@ -81,27 +81,27 @@ You can download the program by the following ways:
 
 #### Next steps
 
-LLT works best when it's running in the background, so go to Settings and enable _Autorun_ and _Minimize on close_. Next thing is to either disable Vantage and Hotkeys or just uninstall them. After that LLT will always run on startup and will take over all functions that were handled by Vantage and Hotkeys.
+LoqNova works best when it's running in the background, so go to Settings and enable _Autorun_ and _Minimize on close_. Next thing is to either disable Vantage and Hotkeys or just uninstall them. After that LoqNova will always run on startup and will take over all functions that were handled by Vantage and Hotkeys.
 
 > [!WARNING]
-> If you close LLT completely some functions will not work, like synchronizing Windows Power Modes or Windows Power Plans with current Power Mode, Macros or Actions. This is due to the fact that LLT does not run any background services and won't be able to respond to changes.
+> If you close LoqNova completely some functions will not work, like synchronizing Windows Power Modes or Windows Power Plans with current Power Mode, Macros or Actions. This is due to the fact that LoqNova does not run any background services and won't be able to respond to changes.
 
 #### Required drivers
 
-If you installed LLT on a clean Windows install, make sure to have necessary drivers installed. If drivers are missing, some options might not be available. Especially make sure that these two are installed on your system:
+If you installed LoqNova on a clean Windows install, make sure to have necessary drivers installed. If drivers are missing, some options might not be available. Especially make sure that these two are installed on your system:
 1. Lenovo Energy Management
 2. Lenovo Vantage Gaming Feature Driver
 
 #### Problems with .NET?
 
-If for whatever reason LLT installer did not setup .NET properly:
+If for whatever reason LoqNova installer did not setup .NET properly:
 1. Go to https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 2. Find section ".NET Desktop Runtime"
 3. Download x64 Windows installer
 4. Run the installer
 
 > [!NOTE]
-> If you installed LLT from Scoop, .NET 8 should have been installed automatically as a dependency. If anything fails, use `scoop update` to update all packages and try to reinstall LLT with `--force` argument.
+> If you installed LoqNova from Scoop, .NET 8 should have been installed automatically as a dependency. If anything fails, use `scoop update` to update all packages and try to reinstall LoqNova with `--force` argument.
 
 After following these steps, you can open Terminal and type: `dotnet --info`. In the output look for section `.NET runtimes installed`, in this section you should see something like:
 
@@ -111,7 +111,7 @@ and
 
 `Microsoft.WindowsDesktop.App 8.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]`
 
-The exact version number can be different, but as long as it is `8.x.x` it should be fine. If after these steps LLT still shows an error on startup that .NET couldn't be found or similar, the problem is on your machine and not with LLT.
+The exact version number can be different, but as long as it is `8.x.x` it should be fine. If after these steps LoqNova still shows an error on startup that .NET couldn't be found or similar, the problem is on your machine and not with LoqNova.
 
 #### Want to help with testing?
 
@@ -119,7 +119,7 @@ Join the [Legion Series Discord](https://discord.com/invite/legionseries) and he
 
 ## Compatibility
 
-Lenovo Legion Toolkit is made for Lenovo Legion laptops, and other similar laptops like Ideapad Gaming, LOQ and their Chinese variants.
+LoqNova is made for Lenovo Legion laptops, and other similar laptops like Ideapad Gaming, LOQ and their Chinese variants.
 
 Generations 6 (MY2021), 7 (MY2022), 8 (MY2023) and 9 (MY2024) are supported, although some features also work on the 5th generation (MY2020). Issues related to devices older than Gen 6 or that are not Legions are out of scope of this project.
 
@@ -129,14 +129,14 @@ If you are getting an incompatible message on startup, you can check the *Contri
 
 ### Lenovo's software
 
-Overall the recommendation is to disable or uninstall Vantage, Hotkeys and Legion Zone while using LLT. There are some functions that cause conflicts or may not work properly when LLT is working along side other Lenovo apps.
+Overall the recommendation is to disable or uninstall Vantage, Hotkeys and Legion Zone while using LoqNova. There are some functions that cause conflicts or may not work properly when LoqNova is working along side other Lenovo apps.
 
 > [!TIP]
-> Using the disable option in LLT is often the easiest option.
+> Using the disable option in LoqNova is often the easiest option.
 
 ### Other remarks
 
-LLT currently does not support installation for multiple users, so if you need to have multiple users on you laptop you might encounter issues. Same goes for accounts without Administrator rights - LLT needs an account with Administrator rights. If you install LLT on an account without such rights, LLT will not work properly.
+LoqNova currently does not support installation for multiple users, so if you need to have multiple users on you laptop you might encounter issues. Same goes for accounts without Administrator rights - LoqNova needs an account with Administrator rights. If you install LoqNova on an account without such rights, LoqNova will not work properly.
 
 ## Features
 
@@ -168,14 +168,14 @@ Make sure to update it to at least minimum version mentioned above for Custom Mo
 
 ### RGB and lighting
 
-Both Spectrum per-key RGB and 4-zone RGB backlight is supported. Vantage and it's services need to be disabled to avoid conflicts when communicating with hardware. If you use other RGB apps that might conflict with LLT, check [FAQ](#faq) for solutions.
+Both Spectrum per-key RGB and 4-zone RGB backlight is supported. Vantage and it's services need to be disabled to avoid conflicts when communicating with hardware. If you use other RGB apps that might conflict with LoqNova, check [FAQ](#faq) for solutions.
 
 Other lighting features like both 1 and 3 level white keyboard backlight, panel logo and rear ports backlight are also supported, however there are some constraints:
 
 * GKCN54WW and lower - some lighting features are disabled due to a bug in these BIOS versions causing BSOD
 * some (mostly Gen 6) laptops models might not show all options or show options that aren't there - this is due misconfigured BIOS that doesn't report availability of these features
 
-Lighting that required Corsair iCue is not supported by LLT.
+Lighting that required Corsair iCue is not supported by LoqNova.
 
 > [!IMPORTANT]
 > Riot Vanguard DRM (used in Valorant for example) is known to cause issues with RGB controls. If you don't see RGB settings and have it installed, make sure it doesn't run on startup or uninstall it._
@@ -199,7 +199,7 @@ On Gen 7 and 8 laptops, there are additional 2 settings for Hybrid mode:
 
 Discrete GPU may not disconnect, and in most cases will not disconnect, when it is used. That includes apps using dGPU, external monitor connected and probably some other cases that aren't specified by Lenovo. If you use the "Deactivate GPU" option in LLT, make sure that it reports dGPU Powered Off and no external screens are connected, before switching between Hybrid Modes in case you encounter problems.
 
-All above settings are using built in functions of the EC and how well they work relies on Lenovo's firmware implementation. From my observations, they are reliable, unless you start switching them frequently. Be patient, because changes to this methods are not instantanous. LLT also attempts to mitigate these issues, by disallowing frequent Hybrid Mode switching and additional attempts to wake dGPU if EC failed to do so. It may take up to 10 seconds for dGPU to reappear when switching to Hybrid Mode, in case EC failed to wake it.
+All above settings are using built in functions of the EC and how well they work relies on Lenovo's firmware implementation. From my observations, they are reliable, unless you start switching them frequently. Be patient, because changes to this methods are not instantanous. LoqNova also attempts to mitigate these issues, by disallowing frequent Hybrid Mode switching and additional attempts to wake dGPU if EC failed to do so. It may take up to 10 seconds for dGPU to reappear when switching to Hybrid Mode, in case EC failed to wake it.
 
 If you encounter issues, you might try to try alternative, experimental method of handling GPU Working Mode - see [Arguments](#arguments) section for more details.
 
@@ -230,7 +230,7 @@ The overclock option is intended for simple overclocking, similar to the one ava
 
 ### Windows Power Plans & Windows Power Mode
 
-First of all, the Power Mode you see in LLT (or toggle with Fn+Q) **is not** the same as Power Plans (that you access from Control Panel) or Power Mode (that you can change from Settings app).
+First of all, the Power Mode you see in LoqNova (or toggle with Fn+Q) **is not** the same as Power Plans (that you access from Control Panel) or Power Mode (that you can change from Settings app).
 
 The modern (and recommended) approach is to use Windows Power Modes and only one, default, "Balanced (recommended)" power plan. You should have 3 Power Modes to choose from in Windows Settings app:
 
@@ -238,15 +238,15 @@ The modern (and recommended) approach is to use Windows Power Modes and only one
 * Balanced
 * Best performance
 
-You can assign these in LLT settings to each of Legion Power Modes: Quiet, Balance, Performance and Custom. If you choose to do so, respective Windows Power Mode will be automatically set when you change Legion Power Modes.
+You can assign these in LoqNova settings to each of Legion Power Modes: Quiet, Balance, Performance and Custom. If you choose to do so, respective Windows Power Mode will be automatically set when you change Legion Power Modes.
 
-The legacy approach is to use multiple Power Plans, that some devices had installed from factory. If you decide to use them, or configure your own plans, leave the settings in Windows Settings app on the default "Balanced" setting. You can configure LLT to switch Power Plans automatically whenever you change the "Legion" Power Mode in LLT settings.
+The legacy approach is to use multiple Power Plans, that some devices had installed from factory. If you decide to use them, or configure your own plans, leave the settings in Windows Settings app on the default "Balanced" setting. You can configure LoqNova to switch Power Plans automatically whenever you change the "Legion" Power Mode in LoqNova settings.
 
 If you encounter issues with power mode or plan synchronization, especially when switching between the two approaches, you can reset Windows power settings to default using `powercfg -restoredefaultschemes; shutdown /r /t ` command. This command will reset all power plans to default and reboot your device. All plans except for the default "Balanced (recommended)" will be deleted, so make sure to make a copy, if you plan on using them again.
 
 ### Boot Logo
 
-On some laptops, it is possible to change the boot logo (the default "Legion" image you see at boot). Boot logo is *not* stored in UEFI - it is stored on the UEFI partition on boot drive. When setting custom boot logo, LLT conducts basic checks, like resolution, image format and calculates a checksum to ensure compatibility. However, the real verification happens on the next boot. UEFI will attempt to load the image from UEFI partition and show it. If that fails for whatever reason, default image will be used. Exact criteria, except for resolution and image format, are not known and some images might not be shown. In this case, try another image, edited with different image editor.
+On some laptops, it is possible to change the boot logo (the default "Legion" image you see at boot). Boot logo is *not* stored in UEFI - it is stored on the UEFI partition on boot drive. When setting custom boot logo, LoqNova conducts basic checks, like resolution, image format and calculates a checksum to ensure compatibility. However, the real verification happens on the next boot. UEFI will attempt to load the image from UEFI partition and show it. If that fails for whatever reason, default image will be used. Exact criteria, except for resolution and image format, are not known and some images might not be shown. In this case, try another image, edited with different image editor.
 
 ### Running programs or scripts from actions
 
@@ -279,7 +279,7 @@ _Python script_
 
 #### Environment
 
-LLT automatically adds some variables to the process environment that can be accessed, from within the script. They are useful for more advanced scripts, where context is needed. Depending on what was the trigger, different variables are added.
+LoqNova automatically adds some variables to the process environment that can be accessed, from within the script. They are useful for more advanced scripts, where context is needed. Depending on what was the trigger, different variables are added.
 
 <details>
 <summary>Environment variables</summary>
@@ -345,9 +345,9 @@ If "Wait for exit" is checked, LLT will capture the output from standard output 
 
 ### CLI
 
-It is possible to control some features of LLT directly from the command line. The CLI executable is called `llt.exe` and can be found in the install directory.
+It is possible to control some features of LoqNova directly from the command line. The CLI executable is called `llt.exe` and can be found in the install directory.
 
-For CLI to work properly, LLT needs to run in the background and CLI option needs to be enabled in LLT settings. You can also chose to add `llt.exe` to your PATH variable for easier access.
+For CLI to work properly, LoqNova needs to run in the background and CLI option needs to be enabled in LoqNova settings. You can also chose to add `llt.exe` to your PATH variable for easier access.
 
 CLI does not need to be ran as Administrator.
 
@@ -526,7 +526,7 @@ There are very good tools like [Intel XTU](https://www.intel.com/content/www/us/
 If you end up in a situation where your GPU is not stable and you can't boot into Windows, there are two things you can do:
 
 1. Go into BIOS and try to find and option similar to "Enabled GPU Overclocking" and disable it, start Windows, and toggle the BIOS option again to Enabled.
-2. Start Windows in Safe Mode, and delete `gpu_oc.json` file under LLT settings, which are located in `"%LOCALAPPDATA%\LenovoLegionToolkit`.
+2. Start Windows in Safe Mode, and delete `gpu_oc.json` file under LLT settings, which are located in `"%LOCALAPPDATA%\LoqNova`.
 
 #### Why is my Boot Logo not applied?
 
@@ -548,7 +548,7 @@ Check the model number. Example model numbers are `16ACH6H` or `16IAX7`. The las
 
 Some, less frequently needed, features or options can be enabled by using additional arguments. These arguments can either be passed as parameters or added to `args.txt` file.
 
-* `--trace` - enables logging to `%LOCALAPPDATA%\LenovoLegionToolkit\log`
+* `--trace` - enables logging to `%LOCALAPPDATA%\LoqNova\log`
 * `--minimized` - starts LLT minimized to tray
 * `--skip-compat-check` - disables compatibility check on startup _(No support is provided when this argument is used)_
 * `--disable-tray-tooltip` - disables tray tooltip that is shown when you hover the cursors over tray icon
@@ -566,7 +566,7 @@ Some, less frequently needed, features or options can be enabled by using additi
 * `--disable-conflicting-software-warning` - disables warning banners when conflicting software is running
 
 If you decide to use the arguments with `args.txt` file:
-1. Go to `%LOCALAPPDATA%\LenovoLegionToolkit`
+1. Go to `%LOCALAPPDATA%\LoqNova`
 2. Create or edit `args.txt` file in there
 3. Paste **one** argument per line
 4. Start LLT
@@ -575,16 +575,16 @@ Arguments not listed above are no longer needed or available.
 
 ## How to collect logs?
 
-In all troubleshooting situations, logs provide important information. **Always** attach logs to your issues. Critical error logs are saved automatically and saved under `"%LOCALAPPDATA%\LenovoLegionToolkit\log"`.
+In all troubleshooting situations, logs provide important information. **Always** attach logs to your issues. Critical error logs are saved automatically and saved under `"%LOCALAPPDATA%\LoqNova\log"`.
 
 To collect logs:
 
 1. Make sure that Lenovo Legion Toolkit is not running (also gone from tray area).
-2. Open `Run` (Win+R) and type there: `"%LOCALAPPDATA%\Programs\LenovoLegionToolkit\Lenovo Legion Toolkit.exe" --trace` and hit OK
+2. Open `Run` (Win+R) and type there: `"%LOCALAPPDATA%\Programs\LoqNova\Lenovo Legion Toolkit.exe" --trace` and hit OK
 3. LLT will start and in the title bar you should see: `[LOGGING ENABLED]`
 4. Reproduce the issue you have (i.e. try to use the option that causes issues)
 5. Close LLT (also make sure it's gone from tray area)
-6. Again, in `Run` (Win+R) type `"%LOCALAPPDATA%\LenovoLegionToolkit\log"`
+6. Again, in `Run` (Win+R) type `"%LOCALAPPDATA%\LoqNova\log"`
 7. You should see at least one file. Theses are the logs you should attach to the issue.
 
 ## Contribution
@@ -612,7 +612,7 @@ Make sure to include the following information in your issue:
 3. List of features that seem to not work.
 4. List of features that crash the app.
 
-The more info you add, the better the app will get over time. If anything seems off, write down precisely what was wrong and attach logs (`%LOCALAPPDATA%\LenovoLegionToolkit\log`). 
+The more info you add, the better the app will get over time. If anything seems off, write down precisely what was wrong and attach logs (`%LOCALAPPDATA%\LoqNova\log`). 
 
 
 
