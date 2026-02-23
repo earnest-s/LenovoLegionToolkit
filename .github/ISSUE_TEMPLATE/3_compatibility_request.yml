@@ -1,4 +1,4 @@
-name: Compatibility Request
+﻿name: Compatibility Request
 description: Request support for a device that is not supported
 labels: ["compatibility"]
 body:
@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         > [!IMPORTANT]
-        > Before you start, read [the rules](https://github.com/BartoszCichecki/LenovoLegionToolkit/blob/master/CONTRIBUTING.md) for contributing.
+        > Before you start, read [the rules](https://github.com/BartoszCichecki/LoqNova/blob/master/CONTRIBUTING.md) for contributing.
   
   - type: input
     id: version

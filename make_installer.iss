@@ -1,9 +1,9 @@
-#include "InnoDependencies\install_dotnet.iss"
+﻿#include "InnoDependencies\install_dotnet.iss"
 
 #define MyAppName "LOQ Nova"
 #define MyAppNameCompact "LOQNova"
 #define MyAppPublisher "Earnest S"
-#define MyAppURL "https://github.com/earnest-s/LenovoLegionToolkit"
+#define MyAppURL "https://github.com/earnest-s/LoqNova"
 #define MyAppExeName "LOQ Nova.exe"
 
 #ifndef MyAppVersion

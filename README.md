@@ -1,4 +1,4 @@
-> [!IMPORTANT]
+﻿> [!IMPORTANT]
 > _Archived by Bartosz on July 24, 2025, Forked by Earnest This project will be actively maintained._
 > 
 > Thank you to everyone who supported, used, contributed to, and shared this project. It's been an amazing journey watching it grow among Legion users.
@@ -14,7 +14,7 @@
 
 # Lenovo Legion Toolkit
 
-[![Build](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml)
+[![Build](https://github.com/BartoszCichecki/LoqNova/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BartoszCichecki/LoqNova/actions/workflows/build.yml)
 [![Crowdin](https://badges.crowdin.net/llt/localized.svg)](https://crowdin.com/project/llt)
 [![Join Discord](https://img.shields.io/discord/761178912230473768?label=Legion%20Series%20Discord)](https://discord.com/invite/legionseries)
 <a href="https://hellogithub.com/repository/dd55be3ac0c146208259f17b29d2162f" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=dd55be3ac0c146208259f17b29d2162f&claim_uid=LBbuUlZqTIm1JAP&theme=small" alt="Featured｜HelloGitHub" /></a>
@@ -55,11 +55,11 @@ Please be patient and read through this readme carefully - it contains important
 
 You can download the program by the following ways:
 
-- Manually from the [Releases page](https://github.com/BartoszCichecki/LenovoLegionToolkit/releases/latest)
+- Manually from the [Releases page](https://github.com/BartoszCichecki/LoqNova/releases/latest)
 - Using [winget](https://github.com/microsoft/winget-cli):
 
   ```sh
-  winget install BartoszCichecki.LenovoLegionToolkit
+  winget install BartoszCichecki.LoqNova
   ```
 
 - Using [Scoop](https://scoop.sh):
@@ -73,7 +73,7 @@ You can download the program by the following ways:
   ```
   
   ```sh
-  scoop install extras/lenovolegiontoolkit
+  scoop install extras/loqnova
   ```
   
 > [!TIP]
@@ -526,7 +526,7 @@ There are very good tools like [Intel XTU](https://www.intel.com/content/www/us/
 If you end up in a situation where your GPU is not stable and you can't boot into Windows, there are two things you can do:
 
 1. Go into BIOS and try to find and option similar to "Enabled GPU Overclocking" and disable it, start Windows, and toggle the BIOS option again to Enabled.
-2. Start Windows in Safe Mode, and delete `gpu_oc.json` file under LLT settings, which are located in `"%LOCALAPPDATA%\LenovoLegionToolkit`.
+2. Start Windows in Safe Mode, and delete `gpu_oc.json` file under LLT settings, which are located in `"%LOCALAPPDATA%\LoqNova`.
 
 #### Why is my Boot Logo not applied?
 
@@ -548,7 +548,7 @@ Check the model number. Example model numbers are `16ACH6H` or `16IAX7`. The las
 
 Some, less frequently needed, features or options can be enabled by using additional arguments. These arguments can either be passed as parameters or added to `args.txt` file.
 
-* `--trace` - enables logging to `%LOCALAPPDATA%\LenovoLegionToolkit\log`
+* `--trace` - enables logging to `%LOCALAPPDATA%\LoqNova\log`
 * `--minimized` - starts LLT minimized to tray
 * `--skip-compat-check` - disables compatibility check on startup _(No support is provided when this argument is used)_
 * `--disable-tray-tooltip` - disables tray tooltip that is shown when you hover the cursors over tray icon
@@ -566,7 +566,7 @@ Some, less frequently needed, features or options can be enabled by using additi
 * `--disable-conflicting-software-warning` - disables warning banners when conflicting software is running
 
 If you decide to use the arguments with `args.txt` file:
-1. Go to `%LOCALAPPDATA%\LenovoLegionToolkit`
+1. Go to `%LOCALAPPDATA%\LoqNova`
 2. Create or edit `args.txt` file in there
 3. Paste **one** argument per line
 4. Start LLT
@@ -575,16 +575,16 @@ Arguments not listed above are no longer needed or available.
 
 ## How to collect logs?
 
-In all troubleshooting situations, logs provide important information. **Always** attach logs to your issues. Critical error logs are saved automatically and saved under `"%LOCALAPPDATA%\LenovoLegionToolkit\log"`.
+In all troubleshooting situations, logs provide important information. **Always** attach logs to your issues. Critical error logs are saved automatically and saved under `"%LOCALAPPDATA%\LoqNova\log"`.
 
 To collect logs:
 
 1. Make sure that Lenovo Legion Toolkit is not running (also gone from tray area).
-2. Open `Run` (Win+R) and type there: `"%LOCALAPPDATA%\Programs\LenovoLegionToolkit\Lenovo Legion Toolkit.exe" --trace` and hit OK
+2. Open `Run` (Win+R) and type there: `"%LOCALAPPDATA%\Programs\LoqNova\Lenovo Legion Toolkit.exe" --trace` and hit OK
 3. LLT will start and in the title bar you should see: `[LOGGING ENABLED]`
 4. Reproduce the issue you have (i.e. try to use the option that causes issues)
 5. Close LLT (also make sure it's gone from tray area)
-6. Again, in `Run` (Win+R) type `"%LOCALAPPDATA%\LenovoLegionToolkit\log"`
+6. Again, in `Run` (Win+R) type `"%LOCALAPPDATA%\LoqNova\log"`
 7. You should see at least one file. Theses are the logs you should attach to the issue.
 
 ## Contribution
@@ -612,7 +612,7 @@ Make sure to include the following information in your issue:
 3. List of features that seem to not work.
 4. List of features that crash the app.
 
-The more info you add, the better the app will get over time. If anything seems off, write down precisely what was wrong and attach logs (`%LOCALAPPDATA%\LenovoLegionToolkit\log`). 
+The more info you add, the better the app will get over time. If anything seems off, write down precisely what was wrong and attach logs (`%LOCALAPPDATA%\LoqNova\log`). 
 
 
 

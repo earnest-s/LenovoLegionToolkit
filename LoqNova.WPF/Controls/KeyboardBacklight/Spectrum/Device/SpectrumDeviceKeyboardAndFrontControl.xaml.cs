@@ -1,0 +1,16 @@
+﻿using LoqNova.Lib;
+
+namespace LoqNova.WPF.Controls.KeyboardBacklight.Spectrum.Device;
+
+public partial class SpectrumDeviceKeyboardAndFrontControl
+{
+    public SpectrumDeviceKeyboardAndFrontControl()
+    {
+        InitializeComponent();
+    }
+
+    public void SetLayout(KeyboardLayout keyboardLayout)
+    {
+        _keyboard.SetLayout(keyboardLayout);
+    }
+}
