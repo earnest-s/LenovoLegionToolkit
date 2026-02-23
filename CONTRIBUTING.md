@@ -1,6 +1,6 @@
-﻿## Welcome to Lenvo Legion Toolkit contributing guide!
+﻿## Welcome to LoqNova contributing guide!
 
-Thanks for investing your time in contributing to this project! Giving the growing popularity of LLT, here are a few rules to follow to ensure that your contribution goes smoothly.
+Thanks for investing your time in contributing to this project! Giving the growing popularity of LoqNova, here are a few rules to follow to ensure that your contribution goes smoothly.
 
 <br/>
 
@@ -10,11 +10,11 @@ _Due to large number of issues created, those that do not meet the criteria will
 
 **1. Before reporting an issue make yourself familiar with the README**
 
-[README](https://github.com/BartoszCichecki/LoqNova/blob/master/README.md) is regularly updated to include answers to frequently asked questions as well as information about most common issues. Take your time to go through what is there before creating an issue or starting a discussion.
+[README](https://github.com/earnest-s/LoqNova/blob/master/README.md) is regularly updated to include answers to frequently asked questions as well as information about most common issues. Take your time to go through what is there before creating an issue or starting a discussion.
 
 **2. Check already reported issues**
 
-Go through [issues](https://github.com/BartoszCichecki/LoqNova/issues?q=is%3Aissue) that were already reported, as well as [discussions](https://github.com/BartoszCichecki/LoqNova/discussions?discussions_q=). Do not create duplicate issues or discussions. Even if the issue is marked as closed, you can still leave a comment there.
+Go through [issues](https://github.com/earnest-s/LoqNova/issues?q=is%3Aissue) that were already reported, as well as [discussions](https://github.com/earnest-s/LoqNova/discussions?discussions_q=). Do not create duplicate issues or discussions. Even if the issue is marked as closed, you can still leave a comment there.
 
 **3. Use English**
 
@@ -26,7 +26,7 @@ This is not meant to be a do-it-all type of application. The vision for the proj
 
 **5. Verify your problem before creating an issue**
 
-Make sure that a bug is really a bug in LLT - this isn't a free system troubleshooting forum. If you use modified version of Windows or your Windows is acting funny, that's on you.
+Make sure that a bug is really a bug in LoqNova - this isn't a free system troubleshooting forum. If you use modified version of Windows or your Windows is acting funny, that's on you.
 
 **6. Describe your problem as best as you can**
 
