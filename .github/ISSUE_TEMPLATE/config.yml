@@ -1,5 +1,5 @@
-﻿blank_issues_enabled: false
+blank_issues_enabled: false
 contact_links:
-  - name: General questions
-    url: https://github.com/BartoszCichecki/LoqNova/discussions/new?category=q-a
-    about: Please ask questions here.
+  - name: Discussions
+    url: https://github.com/earnest-s/LoqNova/discussions
+    about: Use Discussions for questions or general talk.
