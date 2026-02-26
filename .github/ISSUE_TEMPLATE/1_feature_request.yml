@@ -6,14 +6,14 @@ body:
     attributes:
       value: |
         > [!IMPORTANT]
-        > Before you start, read [the rules](https://github.com/BartoszCichecki/LenovoLegionToolkit/blob/master/CONTRIBUTING.md) for contributing.
+        > Before you start, read [the rules](https://github.com/earnest-s/loqnova/blob/master/CONTRIBUTING.md) for contributing.
   
   - type: input
     id: version
     attributes:
       label: Version
       description: Which Lenovo Legion Toolkit version do you use?
-      placeholder: e.g. 2.14.0
+      placeholder: e.g. 2.3.0
     validations:
       required: true
   - type: input
@@ -21,7 +21,7 @@ body:
     attributes:
       label: OS
       description: Which operating system do you use?
-      placeholder: e.g. Windows 11 21H2 build 22000
+      placeholder: e.g. Windows 11 25H2 build 26300
     validations:
       required: true
   - type: input
@@ -29,7 +29,7 @@ body:
     attributes:
       label: Device
       description: Which laptop do you use?
-      placeholder: e.g. Legion 5 Pro 16ACH6
+      placeholder: e.g. Loq 15IRX9
     validations:
       required: true
   - type: textarea
