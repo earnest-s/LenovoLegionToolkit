@@ -1,91 +1,72 @@
-﻿name: Bug Report
-description: Something isn't working correctly
+name: Bug Report
+description: Report a reproducible bug in LOQ Nova
+title: "[Bug] "
 labels: ["bug"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        > [!IMPORTANT]
-        > Before you start, read [the rules](https://github.com/BartoszCichecki/LoqNova/blob/master/CONTRIBUTING.md) for contributing.
-  
   - type: input
     id: version
     attributes:
       label: Version
-      description: Which Lenovo Legion Toolkit version do you use?
-      placeholder: e.g. 2.14.0
+      description: What version of LOQ Nova are you using?
+      placeholder: 3.0.0 (Build XXXXX)
     validations:
       required: true
+
   - type: input
-    id: os
+    id: windows
     attributes:
-      label: OS
-      description: Which operating system do you use?
-      placeholder: e.g. Windows 11 21H2 build 22000
+      label: Windows Version
+      placeholder: Windows 11 23H2
     validations:
       required: true
+
   - type: input
-    id: device
+    id: model
     attributes:
-      label: Device
-      description: Which laptop do you use?
-      placeholder: e.g. Legion 5 Pro 16ACH6
+      label: Laptop Model
+      placeholder: LOQ 15IRX9
     validations:
       required: true
-  - type: input
-    id: bios
-    attributes:
-      label: BIOS version
-      description: Which BIOS version do you have?
-      placeholder: e.g. GKCN57WW
-    validations:
-      required: true
-  - type: textarea
-    id: troubleshoot
-    attributes:
-      label: What is wrong?
-      description: Provide detailed description of what is wrong or does not work as expected.
-      placeholder: Provide detailed description of what is wrong or does not work as expected.
-    validations:
-      required: true
+
   - type: textarea
     id: description
     attributes:
-      label: What did you try already?
-      description: Provide detailed description of how did you troubleshoot the issue and what have you tried already.
-      placeholder: Provide detailed description of how did you troubleshoot the issue and what have you tried already.
+      label: Bug Description
+      description: Describe what is happening.
     validations:
       required: true
+
   - type: textarea
-    id: reproduce
+    id: steps
     attributes:
-      label: How to reproduce the bug?
-      description: Describe how to reproduce the behavior. Be as specific as possible and provide as many details as possible.
+      label: Steps to Reproduce
+      description: Step-by-step instructions to reproduce the issue.
       placeholder: |
-        1. Go to '...'
-        2. Click on '....'
-        3. Scroll down to '....'
-        4. See error
+        1. Open app
+        2. Change performance mode
+        3. Observe lag
     validations:
       required: true
+
   - type: textarea
-    id: expected-behaviour
+    id: expected
     attributes:
-      label: What is the behavior that you expected?
-      description: Describe what did you expect would happen.
-      placeholder: Describe what did you expect would happen.
+      label: Expected Behavior
     validations:
       required: true
+
   - type: textarea
     id: logs
     attributes:
-      label: Logs
-      placeholder: Please drag and drop log files here. You can check README for instructions on how to collect logs.
-      description: Please drag and drop log files here. You can check README for instructions on how to collect logs.
-    validations:
-      required: true
-  - type: textarea
-    id: additional
+      label: Logs (if available)
+      description: Attach logs from AppData if possible.
+
+  - type: checkboxes
+    id: checklist
     attributes:
-      label: Additional information
-      description: If applicable, add screenshots or other relevant information to help explain your problem.
+      label: Checklist
+      options:
+        - label: I am using the latest release.
+          required: true
+        - label: I have checked existing issues.
+          required: true
